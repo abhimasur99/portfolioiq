@@ -125,7 +125,7 @@ Completed:
 - tests/test_performance.py: 23 tests, all passing.
 - Full suite: 54 passed, 37 skipped.
 
-[Checkpoint — Session 3 complete]: All 54 tests passing. FP lesson: use < 1e-10 threshold for zero-guards, not == 0.0. Git commit pending.
+[Checkpoint — Session 3 complete]: All 54 tests passing. FP lesson: use < 1e-10 threshold for zero-guards, not == 0.0. Git commit 862b3e0 made: "feat: Session 3 — returns and performance analytics".
 
 Next session: Session 4 — risk_factors.py (correlation, covariance, HHI, diversification ratio, drawdown, Calmar, Ulcer Index) + test_risk_factors.py.
 
