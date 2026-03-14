@@ -184,9 +184,15 @@ Next session: Session 14 — guide.py (5-section methodology reference).
 
 Next session: Session 15 — settings.py (all configurable params, Save and Recompute).
 
-[Checkpoint — Session 15 complete]: pages/settings.py (Settings screen — 5 sections: Portfolio/benchmark+period, Risk/VaR-confidence+method+GARCH-refit, Monte Carlo/horizon+paths, Weight Bounds/min+max sliders, Rebalancing/drift-threshold; Save and Recompute button with change detection: benchmark/period → redirect to Input, risk_outlook params → _recompute_risk_outlook(), weight bounds → _recompute_optimization(), drift threshold → display-only; Restore Defaults button; current-values summary expander when portfolio loaded; all SK_ constants). Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 15 complete]: pages/settings.py (Settings screen — 5 sections: Portfolio/benchmark+period, Risk/VaR-confidence+method+GARCH-refit, Monte Carlo/horizon+paths, Weight Bounds/min+max sliders, Rebalancing/drift-threshold; Save and Recompute button with change detection: benchmark/period → redirect to Input, risk_outlook params → _recompute_risk_outlook(), weight bounds → _recompute_optimization(), drift threshold → display-only; Restore Defaults button; current-values summary expander when portfolio loaded; all SK_ constants). Full suite: 151 passed. Git commit beacb69 made: "feat: Session 15 — settings screen with granular recompute".
 
 Next session: Session 16 — full integration, 3-persona manual testing, README, polish.
+
+[Checkpoint — Session 16 IN PROGRESS — interrupted]: Audit begun. Three bugs identified in pages/dashboard.py — NOT YET FIXED:
+  1. _health_indicators() line ~203: perf.get("max_drawdown") → wrong dict; max_drawdown lives in risk_factors
+  2. _build_q1() line ~277: perf.get("max_drawdown") → same wrong-dict bug; Max DD tile shows n/a on dashboard
+  3. _build_q2() line ~302: rf.get("correlation_matrix") → wrong key; correct key is "corr_matrix"; heatmap always renders as empty fallback
+No code fixed yet. No README written. No CHANGELOG [0.16.0] entry. No final commit. Resume from: fix the three bugs in dashboard.py.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
