@@ -160,9 +160,13 @@ Next session: Session 8 — charts.py (all Plotly figure builders using config.p
 
 Next session: Session 9 — input.py (ticker validation, dollar-to-weight, 7-step loading pipeline with st.progress).
 
-[Checkpoint — Session 9 complete]: pages/input.py implemented — st.data_editor holdings table (2–10 dynamic rows), live weight preview column with bound-violation indicators, benchmark + period selectors, disclaimer accordion + checkbox gate, 7-step _run_pipeline (validate tickers → fetch prices + rf rate → log returns → performance → risk factors → risk outlook → optimization + signals), st.progress + per-step st.empty status text, full session state population on success, st.rerun() to dashboard. Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 9 complete]: pages/input.py implemented — st.data_editor holdings table (2–10 dynamic rows), live weight preview column with bound-violation indicators, benchmark + period selectors, disclaimer accordion + checkbox gate, 7-step _run_pipeline (validate tickers → fetch prices + rf rate → log returns → performance → risk factors → risk outlook → optimization + signals), st.progress + per-step st.empty status text, full session state population on success, st.rerun() to dashboard. Full suite: 151 passed. Git commit 31f2ad7 made: "feat: Session 9 — portfolio input screen".
 
 Next session: Session 10 — dashboard.py (4-quadrant layout, health bar, holdings strip, ticker tape, Explain Numbers overlay).
+
+[Checkpoint — Session 10 complete]: components/dashboard_quad.py (render_quadrant — header+flag badge, 260px chart, KPI tiles, Explain Numbers toggle + inline explain panel, More Details routing). components/explain_panel.py (render_explain_panel — Q1-Q4 contextual explanations with live values, limitation disclosure). pages/dashboard.py (full dashboard — guard redirect, CSS ticker tape, holdings strip, 6-indicator health bar, 2×2 quadrant grid via render_quadrant, _dashboard_details routing to details pages). CHANGELOG [0.10.0] added. Full suite: 151 passed, 0 failed. Git commit pending.
+
+Next session: Session 11 — details_q1.py (Q1 Performance Deep Dive) + details_q2.py (Q2 Risk Factors Deep Dive).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

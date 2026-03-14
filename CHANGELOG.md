@@ -5,6 +5,15 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.10.0] — 2026-03-13
+
+### Added
+- `components/dashboard_quad.py` (Session 10): `render_quadrant()` — quadrant header with flag badge, compact 260px Plotly chart, 3–4 st.metric KPI tiles, Explain Numbers toggle button + inline explain panel, More Details routing button.
+- `components/explain_panel.py` (Session 10): `render_explain_panel()` — contextual plain-language metric explanations per quadrant (Q1 performance, Q2 risk factors, Q3 risk outlook, Q4 optimization), populated from live analytics values, limitation disclosure + Guide link at bottom.
+- `pages/dashboard.py` (Session 10): full Dashboard screen — guard redirect if portfolio not loaded; CSS ticker tape (latest prices + 1-day change); holdings strip (ticker, weight, latest price per asset); 6-indicator health bar (return quality, volatility, diversification, drawdown, market stress, portfolio efficiency); 2×2 quadrant grid calling render_quadrant for Q1–Q4 with pre-built charts, KPIs, and flags from session state analytics; More Details routing via `_dashboard_details` session key.
+
+---
+
 ## [0.9.0] — 2026-03-13
 
 ### Added
