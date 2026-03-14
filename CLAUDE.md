@@ -156,9 +156,13 @@ Next session: Session 7 — optimization.py (efficient frontier 50 targets, max 
 
 Next session: Session 8 — charts.py (all Plotly figure builders using config.py dark template).
 
-[Checkpoint — Session 8 complete]: components/charts.py implemented — all 13 Plotly figure builders: cumulative_return_chart, return_distribution_chart, rolling_sharpe_chart, rolling_beta_chart, correlation_heatmap, rolling_correlation_chart, drawdown_chart, sector_weights_chart, garch_volatility_chart, monte_carlo_fan_chart, stress_test_chart, efficient_frontier_chart, current_vs_optimal_chart. All colors from config.py constants (no hardcoded hex). All 13 smoke-tested (produce go.Figure without error). Full test suite: 151 passed, 0 failed. No separate test file (charts tested visually in integration). Git commit pending.
+[Checkpoint — Session 8 complete]: components/charts.py implemented — all 13 Plotly figure builders: cumulative_return_chart, return_distribution_chart, rolling_sharpe_chart, rolling_beta_chart, correlation_heatmap, rolling_correlation_chart, drawdown_chart, sector_weights_chart, garch_volatility_chart, monte_carlo_fan_chart, stress_test_chart, efficient_frontier_chart, current_vs_optimal_chart. All colors from config.py constants (no hardcoded hex). All 13 smoke-tested (produce go.Figure without error). Full test suite: 151 passed, 0 failed. No separate test file (charts tested visually in integration). Git commit a1df9fd made: "feat: Session 8 — all Plotly chart figure builders".
 
 Next session: Session 9 — input.py (ticker validation, dollar-to-weight, 7-step loading pipeline with st.progress).
+
+[Checkpoint — Session 9 complete]: pages/input.py implemented — st.data_editor holdings table (2–10 dynamic rows), live weight preview column with bound-violation indicators, benchmark + period selectors, disclaimer accordion + checkbox gate, 7-step _run_pipeline (validate tickers → fetch prices + rf rate → log returns → performance → risk factors → risk outlook → optimization + signals), st.progress + per-step st.empty status text, full session state population on success, st.rerun() to dashboard. Full suite: 151 passed. Git commit pending.
+
+Next session: Session 10 — dashboard.py (4-quadrant layout, health bar, holdings strip, ticker tape, Explain Numbers overlay).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

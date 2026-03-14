@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.9.0] — 2026-03-13
+
+### Added
+- `pages/input.py` (Session 9): full Portfolio Input screen — `st.data_editor` ticker/amount table (2–10 rows, dynamic), live weight preview with bound-violation highlighting, benchmark + period selectors, disclaimer accordion + checkbox gate, 7-step analytics pipeline (`_run_pipeline`) with `st.progress` bar and per-step status text. On success: all session state keys populated (SK_TICKERS, SK_WEIGHTS, SK_PRICE_DATA, SK_RETURNS_DF, SK_PORT_RETURNS, SK_BENCH_RETURNS, SK_RISK_FREE_RATE, SK_ANALYTICS dict with performance/risk_factors/risk_outlook/optimization/market_signals), SK_PORTFOLIO_LOADED = True, `st.rerun()` to dashboard.
+
+---
+
 ## [0.8.0] — 2026-03-13
 
 ### Added
