@@ -136,7 +136,19 @@ Completed:
 
 [Checkpoint — Session 4 complete]: All 84 tests passing. Git commit 7506041 made: "feat: Session 4 — risk factors analytics".
 
-Next session: Session 5 — risk_outlook.py (GARCH(1,1), EWMA, VaR/CVaR 95%+99%, historical vol, skewness/kurtosis, stationarity check) + test_risk_outlook.py.
+**Session 5 — COMPLETE (2026-03-13)**
+
+Completed:
+- arch 6.3.0 installed (works cleanly on Python 3.12 — no conflicts; known issue resolved).
+- analytics/risk_outlook.py (Session 5 portion): compute_historical_vol (std*sqrt(252)), compute_ewma_vol (λ=0.94 RiskMetrics, initializes from full-period variance), fit_garch (GARCH(1,1) on pct returns, alpha+beta<1 stationarity check, EWMA fallback if <252 obs or non-stationary or fit failure; returns (result, daily_vol, is_fallback)), compute_var_cvar_historical (sign convention: negative = loss), compute_garch_var (normal VaR), compute_var_monthly (×sqrt(21)), compute_skewness_kurtosis (Fisher excess kurtosis). GARCH-MC and stress tests remain NotImplementedError for Session 6. compute_all_risk_outlook also NotImplementedError until Session 6.
+- tests/test_risk_outlook.py: 25 passed, 3 skipped (MC/stress tests). First-run clean.
+- Full suite: 109 passed, 21 skipped.
+
+Key note: arch 6.3.0 installed successfully with Python 3.12 (statsmodels 0.14.6, patsy 1.0.2 added as dependencies). No version conflicts.
+
+[Checkpoint — Session 5 complete]: All 109 tests passing. Git commit pending.
+
+Next session: Session 6 — risk_outlook.py pt2 (GARCH-MC vectorized, stress tests) + market_signals.py (11 live signals) + complete compute_all_risk_outlook.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

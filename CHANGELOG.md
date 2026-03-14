@@ -5,6 +5,14 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.5.0] — 2026-03-13
+
+### Added
+- `analytics/risk_outlook.py` (Session 5 functions): `compute_historical_vol`, `compute_ewma_vol` (λ=0.94 RiskMetrics), `fit_garch` (GARCH(1,1) via arch 6.3.0, stationarity check α+β<1, EWMA fallback if <252 obs or non-stationary), `compute_var_cvar_historical` (5th/1st percentile, tail mean), `compute_garch_var` (normal distribution VaR), `compute_var_monthly` (×√21 i.i.d. scaling), `compute_skewness_kurtosis`.
+- `tests/test_risk_outlook.py` (Session 5 tests): 9 tests covering historical VaR at 95th/99th percentile, CVaR < VaR, GARCH stationarity (α+β<1), EWMA fallback trigger, EWMA vol positive. Session 6 tests (MC, stress) remain skipped.
+
+---
+
 ## [0.4.0] — 2026-03-13
 
 ### Added
