@@ -5,6 +5,15 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.2.0] — 2026-03-13
+
+### Added
+- `tests/conftest.py`: complete mock data fixtures — 800 trading days, 4 tickers (AAPL/MSFT/GOOGL/SPY), correlated log-normal prices with stress period (2× vol, days 200–299), drawdown (days 300–379), and recovery (days 380–449). Seed 42. All fixtures implemented.
+- `analytics/data_fetcher.py`: full yfinance data layer — batched multi-ticker download, explicit MultiIndex column handling, Adj Close extraction, NaN dropping, ticker validation, exponential backoff (1s/2s/4s) on rate limit, `^IRX` fetch with /100/252 conversion and fallback, 1-hour Streamlit cache on price data, fresh fetch for market signals.
+- `tests/test_data_fetcher.py`: unit tests for data fetcher — MultiIndex handling, NaN dropping, invalid ticker error, `^IRX` conversion, fallback rate, and mock fixture structure.
+
+---
+
 ## [0.1.0] — 2026-03-13
 
 ### Added

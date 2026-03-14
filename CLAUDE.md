@@ -81,6 +81,7 @@ methodology applied in code, targeting model risk and market risk analyst roles 
 - **Yield curve ticker discrepancy:** spec uses ^TNX - ^TYX for yield curve spread, but ^TYX is the 30-year Treasury, not the 2-year. Implementing per spec. Documented in DECISIONS.md D-10. Revisit in v2.
 - **^MOVE availability:** ^MOVE may not always be available from yfinance. Graceful fallback required in market_signals.py.
 - **VIX3M availability:** use VXMT as fallback if ^VIX3M is unavailable.
+- **Python 3.11 not installed:** only Python 3.12 available on this machine. Running on 3.12 with .venv. arch library installs and works on 3.12 for this setup — verify when arch is added in Session 5. If issues arise, install Python 3.11 via brew.
 
 ---
 
@@ -105,7 +106,17 @@ Completed:
 - CHANGELOG.md: initialized with [0.1.0] entry.
 - Git repo initialized and first commit made: "feat: Session 1 — project scaffolding".
 
-Next session: Session 2 — data_fetcher.py (yfinance layer) + complete conftest.py with mock data.
+**Session 2 — COMPLETE (2026-03-13)**
+
+Completed:
+- tests/conftest.py: full mock data — 800 trading days, 4 tickers (AAPL/MSFT/GOOGL/SPY), Cholesky-correlated log-normal prices, stress period (2x vol days 200-299), drawdown (days 300-379), recovery (days 380-449), seed 42. All 6 fixtures implemented. mock_yfinance_download and mock_irx_download fixtures for patching yfinance in tests.
+- analytics/data_fetcher.py: _download_with_backoff (exponential backoff 1s/2s/4s), _extract_adj_close (MultiIndex + flat column handling, NaN drop, invalid ticker ValueError), _fetch_price_data_impl, _fetch_risk_free_rate_impl (^IRX /100/252, fallback 0.04/252), validate_tickers, public cached fetch_price_data (@st.cache_data ttl=3600), fetch_risk_free_rate, fetch_market_signals stub.
+- tests/test_data_fetcher.py: 21 tests, all passing. Covers MultiIndex extraction, NaN dropping, invalid ticker error, flat column handling, ^IRX conversion, NaN handling, fetch failure fallback, empty result fallback, validate_tickers.
+- .venv: created with Python 3.12 (3.11 not installed — see Known Issues).
+
+[Checkpoint — Session 2 complete]: All tests passing (21/21). Git commit pending.
+
+Next session: Session 3 — returns.py + performance.py (log returns, CAGR, Sharpe, Sortino, Treynor, Info ratio, alpha, beta, R², rolling metrics) + implement test_returns.py and test_performance.py.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
