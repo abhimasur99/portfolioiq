@@ -24,12 +24,13 @@ Dependencies: pandas, numpy.
 Assumptions:
 - Input price DataFrame has no NaN values (caller's responsibility to dropna first).
 - Weights sum to 1.0 within floating-point tolerance.
-
-Implemented in: Session 3.
 """
 
+import numpy as np
+import pandas as pd
 
-def compute_log_returns(prices: "pd.DataFrame") -> "pd.DataFrame":
+
+def compute_log_returns(prices: pd.DataFrame) -> pd.DataFrame:
     """Compute log returns from adjusted close price DataFrame.
 
     Args:
@@ -41,18 +42,19 @@ def compute_log_returns(prices: "pd.DataFrame") -> "pd.DataFrame":
 
     Formula: rt = ln(Pt / Pt-1)
     """
-    raise NotImplementedError("Implemented in Session 3.")
+    return np.log(prices / prices.shift(1)).dropna()
 
 
 def compute_portfolio_returns(
-    returns_df: "pd.DataFrame",
-    weights: "pd.Series",
-) -> "pd.Series":
+    returns_df: pd.DataFrame,
+    weights: pd.Series,
+) -> pd.Series:
     """Compute weighted portfolio log returns.
 
     Args:
         returns_df: pd.DataFrame of per-ticker log returns.
         weights: pd.Series indexed by ticker, summing to 1.0.
+                 Only the tickers in weights.index are used.
 
     Returns:
         pd.Series of portfolio log returns, same date index as returns_df.
@@ -60,4 +62,10 @@ def compute_portfolio_returns(
     Raises:
         ValueError: If weights do not sum to 1 within 1e-6 tolerance.
     """
-    raise NotImplementedError("Implemented in Session 3.")
+    weight_sum = weights.sum()
+    if abs(weight_sum - 1.0) > 1e-6:
+        raise ValueError(
+            f"Weights must sum to 1.0 (got {weight_sum:.8f}). "
+            "Normalize weights before calling compute_portfolio_returns."
+        )
+    return returns_df[weights.index].dot(weights)

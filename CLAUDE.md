@@ -116,7 +116,18 @@ Completed:
 
 [Checkpoint — Session 2 complete]: All tests passing (21/21). Git commit 45e5537 made: "feat: Session 2 — data layer (data_fetcher.py, conftest.py, 21 tests)".
 
-Next session: Session 3 — returns.py + performance.py (log returns, CAGR, Sharpe, Sortino, Treynor, Info ratio, alpha, beta, R², rolling metrics) + implement test_returns.py and test_performance.py.
+**Session 3 — COMPLETE (2026-03-13)**
+
+Completed:
+- analytics/returns.py: compute_log_returns (rt=ln(Pt/Pt-1)), compute_portfolio_returns (dot product, weight-sum validation with 1e-6 tolerance).
+- analytics/performance.py: compute_cagr (exp(mean*252)-1), compute_sharpe, compute_sortino (negative-returns-only downside std), compute_treynor, compute_info_ratio, compute_alpha_beta (Jensen's alpha, beta via Cov/Var, R²=corr²), compute_rolling_sharpe (252-day), compute_rolling_beta (rolling Cov/Var), compute_best_worst_periods (resample ME/YE), compute_all_performance. All zero-denominator guards use 1e-10 tolerance (not == 0.0, which fails for FP-constant series).
+- tests/test_returns.py: 10 tests, all passing.
+- tests/test_performance.py: 23 tests, all passing.
+- Full suite: 54 passed, 37 skipped.
+
+[Checkpoint — Session 3 complete]: All 54 tests passing. FP lesson: use < 1e-10 threshold for zero-guards, not == 0.0. Git commit pending.
+
+Next session: Session 4 — risk_factors.py (correlation, covariance, HHI, diversification ratio, drawdown, Calmar, Ulcer Index) + test_risk_factors.py.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

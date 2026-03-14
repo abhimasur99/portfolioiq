@@ -5,6 +5,19 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.3.0] — 2026-03-13
+
+### Added
+- `analytics/returns.py`: `compute_log_returns` (rt = ln(Pt/Pt-1)), `compute_portfolio_returns` (dot product with weight-sum validation).
+- `analytics/performance.py`: `compute_cagr`, `compute_sharpe`, `compute_sortino`, `compute_treynor`, `compute_info_ratio`, `compute_alpha_beta` (Jensen's alpha, beta, R²), `compute_rolling_sharpe`, `compute_rolling_beta`, `compute_best_worst_periods`, `compute_all_performance`. All zero-denominator protected.
+- `tests/test_returns.py`: 7 unit tests covering log return formula, shape, NaN-free output, portfolio weighting, weight normalization error, and single-asset edge case.
+- `tests/test_performance.py`: 10 unit tests covering CAGR manual verification, Sharpe, Sortino (downside-only), Treynor, beta vs OLS, R² vs correlation, all three zero-denominator guards, and rolling metric lengths.
+
+### Changed
+- `CLAUDE.md`: added Reading Protocol section (3 situations), fixed stale "Git commit pending" checkpoint from Session 2.
+
+---
+
 ## [0.2.0] — 2026-03-13
 
 ### Added
