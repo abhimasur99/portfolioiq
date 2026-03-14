@@ -134,7 +134,7 @@ Completed:
 - tests/test_risk_factors.py: 30 tests, all passing.
 - Full suite: 84 passed, 27 skipped.
 
-[Checkpoint — Session 4 complete]: All 84 tests passing. Git commit pending.
+[Checkpoint — Session 4 complete]: All 84 tests passing. Git commit 7506041 made: "feat: Session 4 — risk factors analytics".
 
 Next session: Session 5 — risk_outlook.py (GARCH(1,1), EWMA, VaR/CVaR 95%+99%, historical vol, skewness/kurtosis, stationarity check) + test_risk_outlook.py.
 
