@@ -164,9 +164,13 @@ Next session: Session 9 — input.py (ticker validation, dollar-to-weight, 7-ste
 
 Next session: Session 10 — dashboard.py (4-quadrant layout, health bar, holdings strip, ticker tape, Explain Numbers overlay).
 
-[Checkpoint — Session 10 complete]: components/dashboard_quad.py (render_quadrant — header+flag badge, 260px chart, KPI tiles, Explain Numbers toggle + inline explain panel, More Details routing). components/explain_panel.py (render_explain_panel — Q1-Q4 contextual explanations with live values, limitation disclosure). pages/dashboard.py (full dashboard — guard redirect, CSS ticker tape, holdings strip, 6-indicator health bar, 2×2 quadrant grid via render_quadrant, _dashboard_details routing to details pages). CHANGELOG [0.10.0] added. Full suite: 151 passed, 0 failed. Git commit pending.
+[Checkpoint — Session 10 complete]: components/dashboard_quad.py (render_quadrant — header+flag badge, 260px chart, KPI tiles, Explain Numbers toggle + inline explain panel, More Details routing). components/explain_panel.py (render_explain_panel — Q1-Q4 contextual explanations with live values, limitation disclosure). pages/dashboard.py (full dashboard — guard redirect, CSS ticker tape, holdings strip, 6-indicator health bar, 2×2 quadrant grid via render_quadrant, _dashboard_details routing to details pages). CHANGELOG [0.10.0] added. Full suite: 151 passed, 0 failed. Git commit e92fc61 made: "feat: Session 10 — dashboard, quadrant component, explain panel".
 
 Next session: Session 11 — details_q1.py (Q1 Performance Deep Dive) + details_q2.py (Q2 Risk Factors Deep Dive).
+
+[Checkpoint — Session 11 complete]: pages/details_q1.py (Q1 Performance Deep Dive — back button via st.session_state.pop("_dashboard_details"), insight block, 15-row metrics table with descriptions, 4 charts: cumulative return / return distribution / rolling Sharpe / rolling Beta, Explain Numbers toggle). pages/details_q2.py (Q2 Risk Factors Deep Dive — same structure, 9-row metrics table, 4 charts: correlation heatmap / rolling corr / drawdown / sector weights). Both pages use correct _dashboard_details routing key (pop + rerun). Full suite: 151 passed. Git commit pending.
+
+Next session: Session 12 — details_q3.py (Q3 Risk Outlook Deep Dive) + Risk Preparedness Panel (11 market signals).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

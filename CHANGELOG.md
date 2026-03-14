@@ -5,6 +5,15 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.11.0] — 2026-03-13
+
+### Added
+- `pages/details_q1.py` (Session 11): Q1 Performance Deep Dive — back button (clears `_dashboard_details` routing key), plain-language insight block, full 12-metric table (CAGR, Sharpe, Sortino, Treynor, Info Ratio, Alpha, Beta, R², Vol, Best/Worst Month, Best/Worst Year, Max DD, Calmar), four charts (cumulative return, return distribution with VaR/CVaR lines, rolling Sharpe, rolling Beta), inline Explain Numbers panel.
+- `pages/details_q2.py` (Session 11): Q2 Risk Factors Deep Dive — back button, insight block, full metrics table (HHI, Effective N, Diversification Ratio, Max Drawdown, Calmar, Recovery Days, Ulcer Index, Beta), four charts (correlation heatmap, rolling 60-day correlation, drawdown chart, sector weights), inline Explain Numbers panel.
+
+
+---
+
 ## [0.10.0] — 2026-03-13
 
 ### Added
