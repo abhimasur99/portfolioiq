@@ -146,7 +146,7 @@ Completed:
 
 Key note: arch 6.3.0 installed successfully with Python 3.12 (statsmodels 0.14.6, patsy 1.0.2 added as dependencies). No version conflicts.
 
-[Checkpoint — Session 5 complete]: All 109 tests passing. Git commit pending.
+[Checkpoint — Session 5 complete]: All 109 tests passing. Git commit a893c87 made: "feat: Session 5 — risk outlook pt1".
 
 Next session: Session 6 — risk_outlook.py pt2 (GARCH-MC vectorized, stress tests) + market_signals.py (11 live signals) + complete compute_all_risk_outlook.
 
