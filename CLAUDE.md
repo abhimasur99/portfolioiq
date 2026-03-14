@@ -152,9 +152,13 @@ Key note: arch 6.3.0 installed successfully with Python 3.12 (statsmodels 0.14.6
 
 Next session: Session 7 — optimization.py (efficient frontier 50 targets, max Sharpe, min variance, risk parity, CML, weight delta table).
 
-[Checkpoint — Session 7 complete]: analytics/optimization.py implemented (_optimize_min_variance, _optimize_max_sharpe, _optimize_risk_parity equal-RC via unnormalized squared-difference objective, _compute_frontier 50 points with feasible-max upper bound + warm-start, compute_all_optimization master aggregator with weight_delta_table). tests/test_optimization.py: 25 tests all passing, 0 skipped. Full suite: 151 passed, 0 skipped. Key note: max_sharpe_ratio test uses isfinite check (not >= 0) because mock data's drawdown period produces negative overall expected returns. Git commit pending.
+[Checkpoint — Session 7 complete]: analytics/optimization.py implemented (_optimize_min_variance, _optimize_max_sharpe, _optimize_risk_parity equal-RC via unnormalized squared-difference objective, _compute_frontier 50 points with feasible-max upper bound + warm-start, compute_all_optimization master aggregator with weight_delta_table). tests/test_optimization.py: 25 tests all passing, 0 skipped. Full suite: 151 passed, 0 skipped. Key note: max_sharpe_ratio test uses isfinite check (not >= 0) because mock data's drawdown period produces negative overall expected returns. Git commit 85b4648 made: "feat: Session 7 — portfolio optimization".
 
 Next session: Session 8 — charts.py (all Plotly figure builders using config.py dark template).
+
+[Checkpoint — Session 8 complete]: components/charts.py implemented — all 13 Plotly figure builders: cumulative_return_chart, return_distribution_chart, rolling_sharpe_chart, rolling_beta_chart, correlation_heatmap, rolling_correlation_chart, drawdown_chart, sector_weights_chart, garch_volatility_chart, monte_carlo_fan_chart, stress_test_chart, efficient_frontier_chart, current_vs_optimal_chart. All colors from config.py constants (no hardcoded hex). All 13 smoke-tested (produce go.Figure without error). Full test suite: 151 passed, 0 failed. No separate test file (charts tested visually in integration). Git commit pending.
+
+Next session: Session 9 — input.py (ticker validation, dollar-to-weight, 7-step loading pipeline with st.progress).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

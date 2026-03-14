@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.8.0] — 2026-03-13
+
+### Added
+- `components/charts.py` (Session 8): all 13 Plotly figure builders — `cumulative_return_chart`, `return_distribution_chart`, `rolling_sharpe_chart`, `rolling_beta_chart`, `correlation_heatmap`, `rolling_correlation_chart`, `drawdown_chart`, `sector_weights_chart`, `garch_volatility_chart`, `monte_carlo_fan_chart`, `stress_test_chart`, `efficient_frontier_chart`, `current_vs_optimal_chart`. All use PLOTLY_TEMPLATE_NAME; all colors from config.py constants. No hardcoded color strings.
+
+---
+
 ## [0.7.0] — 2026-03-13
 
 ### Added
