@@ -168,9 +168,13 @@ Next session: Session 10 — dashboard.py (4-quadrant layout, health bar, holdin
 
 Next session: Session 11 — details_q1.py (Q1 Performance Deep Dive) + details_q2.py (Q2 Risk Factors Deep Dive).
 
-[Checkpoint — Session 11 complete]: pages/details_q1.py (Q1 Performance Deep Dive — back button via st.session_state.pop("_dashboard_details"), insight block, 15-row metrics table with descriptions, 4 charts: cumulative return / return distribution / rolling Sharpe / rolling Beta, Explain Numbers toggle). pages/details_q2.py (Q2 Risk Factors Deep Dive — same structure, 9-row metrics table, 4 charts: correlation heatmap / rolling corr / drawdown / sector weights). Both pages use correct _dashboard_details routing key (pop + rerun). Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 11 complete]: pages/details_q1.py (Q1 Performance Deep Dive — back button via st.session_state.pop("_dashboard_details"), insight block, 15-row metrics table with descriptions, 4 charts: cumulative return / return distribution / rolling Sharpe / rolling Beta, Explain Numbers toggle). pages/details_q2.py (Q2 Risk Factors Deep Dive — same structure, 9-row metrics table, 4 charts: correlation heatmap / rolling corr / drawdown / sector weights). Both pages use correct _dashboard_details routing key (pop + rerun). Full suite: 151 passed. Git commit 8a808dd made: "feat: Session 11 — Q1 and Q2 More Details screens".
 
 Next session: Session 12 — details_q3.py (Q3 Risk Outlook Deep Dive) + Risk Preparedness Panel (11 market signals).
+
+[Checkpoint — Session 12 complete]: pages/details_q3.py (Q3 Risk Outlook Deep Dive — insight block with vol tier / GARCH vs hist comparison / tail shape language, Risk Preparedness Panel with all 11 signals in 3-col badge grid, 3 charts: GARCH vol / MC fan / stress test, 11-row metrics table with EWMA/GARCH/hist vol + VaR/CVaR at 95/99 + monthly VaR + skewness/kurtosis). Full suite: 151 passed. Git commit pending.
+
+Next session: Session 13 — details_q4.py (Q4 Optimization Deep Dive with estimation error warning).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

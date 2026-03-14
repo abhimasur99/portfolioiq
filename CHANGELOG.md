@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.12.0] — 2026-03-13
+
+### Added
+- `pages/details_q3.py` (Session 12): Q3 Risk Outlook Deep Dive — back button, plain-language insight block (VaR/vol tier language), Risk Preparedness Panel (all 11 live signals in a 3-column badge grid with status colour, value, and one-line interpretation; "unavailable" signals shown greyed out; signal disclaimer), three charts (GARCH volatility, Monte Carlo fan, stress test bar), full 11-row metrics table (hist/EWMA/GARCH vol, VaR 95/99, CVaR 95/99, monthly VaR, skewness, excess kurtosis, GARCH fallback flag), inline Explain Numbers panel.
+
+---
+
 ## [0.11.0] — 2026-03-13
 
 ### Added
