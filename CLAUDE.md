@@ -127,7 +127,16 @@ Completed:
 
 [Checkpoint — Session 3 complete]: All 54 tests passing. FP lesson: use < 1e-10 threshold for zero-guards, not == 0.0. Git commit 862b3e0 made: "feat: Session 3 — returns and performance analytics".
 
-Next session: Session 4 — risk_factors.py (correlation, covariance, HHI, diversification ratio, drawdown, Calmar, Ulcer Index) + test_risk_factors.py.
+**Session 4 — COMPLETE (2026-03-13)**
+
+Completed:
+- analytics/risk_factors.py: compute_correlation_matrix (Pearson), compute_rolling_correlation (60-day MultiIndex), compute_covariance_matrix (annualized *252, PD-check with 1e-6 diagonal regularization when cond>1e10), compute_hhi (sum w²), compute_effective_n (1/HHI), compute_diversification_ratio (weighted avg vol / portfolio vol from ann cov), compute_drawdown_series (exp(cumsum) price index), compute_max_drawdown, compute_calmar (CAGR/|max_dd|, 1e-10 guard), compute_recovery_time (trading days trough→recovery, None if unreachable), compute_ulcer_index (sqrt(mean(DD²))), fetch_sector_weights (live yfinance best-effort, grouped by GICS sector), compute_all_risk_factors.
+- tests/test_risk_factors.py: 30 tests, all passing.
+- Full suite: 84 passed, 27 skipped.
+
+[Checkpoint — Session 4 complete]: All 84 tests passing. Git commit pending.
+
+Next session: Session 5 — risk_outlook.py (GARCH(1,1), EWMA, VaR/CVaR 95%+99%, historical vol, skewness/kurtosis, stationarity check) + test_risk_outlook.py.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

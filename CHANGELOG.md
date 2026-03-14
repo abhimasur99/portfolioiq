@@ -5,6 +5,14 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.4.0] — 2026-03-13
+
+### Added
+- `analytics/risk_factors.py`: `compute_correlation_matrix`, `compute_rolling_correlation` (60-day), `compute_covariance_matrix` (annualized, PD-checked with 1e-6 regularization), `compute_hhi`, `compute_effective_n`, `compute_diversification_ratio`, `compute_drawdown_series`, `compute_max_drawdown`, `compute_calmar`, `compute_recovery_time`, `compute_ulcer_index`, `fetch_sector_weights` (live yfinance, best-effort), `compute_all_risk_factors`.
+- `tests/test_risk_factors.py`: 14 unit tests covering Pearson correlation identity and range, HHI/Effective N for equal weights, diversification ratio (single asset = 1.0), drawdown non-positivity, max drawdown on known path, Calmar zero-guard, Ulcer Index on flat series, and covariance positive-definiteness.
+
+---
+
 ## [0.3.0] — 2026-03-13
 
 ### Added
