@@ -188,7 +188,7 @@ Next session: Session 15 — settings.py (all configurable params, Save and Reco
 
 Next session: Session 16 — full integration, 3-persona manual testing, README, polish.
 
-[Checkpoint — Session 16 COMPLETE]: Fixed 4 bugs (dashboard.py _health_indicators/max_drawdown wrong dict, _build_q1/max_drawdown wrong dict, _build_q2/corr_matrix wrong key, explain_panel.py Q1/max_drawdown wrong dict). Full cross-page key audit passed. README.md written (quickstart, structure, methodology, tests, config, disclaimer, tech stack). CHANGELOG [0.16.0] added. Full suite: 151 passed. Final commit pending.
+[Checkpoint — Session 16 COMPLETE]: Fixed 4 bugs (dashboard.py _health_indicators/max_drawdown wrong dict, _build_q1/max_drawdown wrong dict, _build_q2/corr_matrix wrong key, explain_panel.py Q1/max_drawdown wrong dict). Full cross-page key audit passed. README.md written (quickstart, structure, methodology, tests, config, disclaimer, tech stack). CHANGELOG [0.16.0] added. Full suite: 151 passed. Final commit b707cd9 made: "feat: Session 16 — integration fixes, README, project complete". PROJECT COMPLETE.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
