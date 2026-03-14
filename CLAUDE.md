@@ -148,9 +148,13 @@ Key note: arch 6.3.0 installed successfully with Python 3.12 (statsmodels 0.14.6
 
 [Checkpoint — Session 5 complete]: All 109 tests passing. Git commit a893c87 made: "feat: Session 5 — risk outlook pt1".
 
-[Checkpoint — Session 6 complete]: analytics/risk_outlook.py completed (_run_garch_monte_carlo vectorized GARCH-MC, _run_stress_tests alpha+beta×scenario_return, compute_all_risk_outlook master aggregator). analytics/market_signals.py implemented (all 11 signals, graceful per-signal fallback, yfinance batch download with MultiIndex extraction). tests/test_risk_outlook.py: 0 skipped (MC shape/positivity/percentile-ordering, stress keys/structure/types all passing). tests/test_market_signals.py: 11 new tests all passing. Full suite: 126 passed, 12 skipped (Session 7 optimization stubs only). pytest-mock installed (was missing from env; added to requirements). Git commit pending.
+[Checkpoint — Session 6 complete]: analytics/risk_outlook.py completed (_run_garch_monte_carlo vectorized GARCH-MC, _run_stress_tests alpha+beta×scenario_return, compute_all_risk_outlook master aggregator). analytics/market_signals.py implemented (all 11 signals, graceful per-signal fallback, yfinance batch download with MultiIndex extraction). tests/test_risk_outlook.py: 0 skipped (MC shape/positivity/percentile-ordering, stress keys/structure/types all passing). tests/test_market_signals.py: 11 new tests all passing. Full suite: 126 passed, 12 skipped (Session 7 optimization stubs only). pytest-mock installed (was missing from env; added to requirements). Git commit f4e52aa made: "feat: Session 6 — risk outlook pt2, market signals".
 
 Next session: Session 7 — optimization.py (efficient frontier 50 targets, max Sharpe, min variance, risk parity, CML, weight delta table).
+
+[Checkpoint — Session 7 complete]: analytics/optimization.py implemented (_optimize_min_variance, _optimize_max_sharpe, _optimize_risk_parity equal-RC via unnormalized squared-difference objective, _compute_frontier 50 points with feasible-max upper bound + warm-start, compute_all_optimization master aggregator with weight_delta_table). tests/test_optimization.py: 25 tests all passing, 0 skipped. Full suite: 151 passed, 0 skipped. Key note: max_sharpe_ratio test uses isfinite check (not >= 0) because mock data's drawdown period produces negative overall expected returns. Git commit pending.
+
+Next session: Session 8 — charts.py (all Plotly figure builders using config.py dark template).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

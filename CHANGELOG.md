@@ -5,6 +5,14 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.7.0] — 2026-03-13
+
+### Added
+- `analytics/optimization.py` (Session 7): `_optimize_min_variance`, `_optimize_max_sharpe`, `_optimize_risk_parity` (equal risk contribution via unnormalized squared-difference objective), `_compute_frontier` (50 points, feasible-max upper bound, warm-start), `compute_all_optimization` (master aggregator — frontier_vols, frontier_returns, frontier_weights, max_sharpe_weights/return/vol/ratio, min_var_weights/return/vol, risk_parity_weights/return/vol, cml_slope, weight_delta_table, optimizer_converged).
+- `tests/test_optimization.py` (Session 7): 12 previously skipped tests now passing — weight sum-to-one, non-negative, bounds check for max Sharpe / min var / risk parity; frontier length (50), frontier returns monotonically increasing, frontier vols U-shaped (min at left end). 0 skipped in optimization tests.
+
+---
+
 ## [0.6.0] — 2026-03-13
 
 ### Added
