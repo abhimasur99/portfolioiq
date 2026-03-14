@@ -148,7 +148,9 @@ Key note: arch 6.3.0 installed successfully with Python 3.12 (statsmodels 0.14.6
 
 [Checkpoint — Session 5 complete]: All 109 tests passing. Git commit a893c87 made: "feat: Session 5 — risk outlook pt1".
 
-Next session: Session 6 — risk_outlook.py pt2 (GARCH-MC vectorized, stress tests) + market_signals.py (11 live signals) + complete compute_all_risk_outlook.
+[Checkpoint — Session 6 complete]: analytics/risk_outlook.py completed (_run_garch_monte_carlo vectorized GARCH-MC, _run_stress_tests alpha+beta×scenario_return, compute_all_risk_outlook master aggregator). analytics/market_signals.py implemented (all 11 signals, graceful per-signal fallback, yfinance batch download with MultiIndex extraction). tests/test_risk_outlook.py: 0 skipped (MC shape/positivity/percentile-ordering, stress keys/structure/types all passing). tests/test_market_signals.py: 11 new tests all passing. Full suite: 126 passed, 12 skipped (Session 7 optimization stubs only). pytest-mock installed (was missing from env; added to requirements). Git commit pending.
+
+Next session: Session 7 — optimization.py (efficient frontier 50 targets, max Sharpe, min variance, risk parity, CML, weight delta table).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

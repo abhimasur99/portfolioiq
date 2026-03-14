@@ -233,7 +233,7 @@ def compute_skewness_kurtosis(portfolio_returns: pd.Series) -> tuple[float, floa
     return skewness, excess_kurtosis
 
 
-# ── Monte Carlo (Session 6) ───────────────────────────────────────────────────
+# ── Monte Carlo ───────────────────────────────────────────────────────────────
 
 def _run_garch_monte_carlo(
     portfolio_returns: pd.Series,
@@ -242,22 +242,108 @@ def _run_garch_monte_carlo(
     n_paths: int,
     n_steps: int,
 ) -> dict:
-    """GARCH-MC simulation. Implemented in Session 6."""
-    raise NotImplementedError("Implemented in Session 6.")
+    """Vectorized GARCH-MC portfolio simulation.
+
+    Pre-generates all (n_steps, n_paths) innovations in one numpy call —
+    no Python loops over paths. Only a sequential loop over steps is used
+    (required because each step's variance depends on the prior step's variance).
+
+    GARCH variance recursion (decimal units):
+        sigma²_t = omega_dec + alpha * r²_{t-1} + beta * sigma²_{t-1}
+
+    When garch_result is None (EWMA fallback), uses:
+        omega=0, alpha=0.06 (1-lambda), beta=0.94 (lambda)
+
+    Args:
+        portfolio_returns: pd.Series of daily log returns (used for drift mu).
+        garch_result: arch ResultsWrapper or None (EWMA fallback).
+        garch_vol_daily: float, daily decimal conditional vol from fit_garch.
+        n_paths: int, number of simulation paths.
+        n_steps: int, number of trading days to simulate.
+
+    Returns:
+        dict with keys:
+            values — np.ndarray of shape (n_steps+1, n_paths), portfolio values.
+                     Row 0 = 1.0 (normalized initial value).
+            p10, p50, p90 — np.ndarray of shape (n_steps+1,), percentile fans.
+    """
+    # Extract GARCH parameters in decimal units
+    if garch_result is not None:
+        omega_dec = float(garch_result.params["omega"]) / 1e4  # pct² → decimal²
+        alpha_param = float(garch_result.params["alpha[1]"])
+        beta_param = float(garch_result.params["beta[1]"])
+    else:
+        # EWMA: sigma²_t = 0.94*sigma²_{t-1} + 0.06*r²_{t-1}
+        omega_dec = 0.0
+        alpha_param = 0.06
+        beta_param = 0.94
+
+    mu = float(portfolio_returns.mean())      # daily drift
+    sigma2_init = garch_vol_daily ** 2        # initial daily variance
+
+    # Pre-generate all innovations at once: shape (n_steps, n_paths)
+    rng = np.random.default_rng(42)
+    Z = rng.standard_normal((n_steps, n_paths))
+
+    # Initialize state
+    sigma2 = np.full(n_paths, sigma2_init)    # current variance per path
+    values = np.ones((n_steps + 1, n_paths))  # portfolio values, start at 1.0
+
+    # Sequential step loop (vectorized over paths at each step)
+    for t in range(n_steps):
+        sigma = np.sqrt(np.maximum(sigma2, 0.0))
+        r_t = mu + sigma * Z[t]                         # shape (n_paths,)
+        values[t + 1] = values[t] * np.exp(r_t)
+        sigma2 = omega_dec + alpha_param * r_t ** 2 + beta_param * sigma2
+
+    p10 = np.percentile(values, 10, axis=1)
+    p50 = np.percentile(values, 50, axis=1)
+    p90 = np.percentile(values, 90, axis=1)
+
+    return {"values": values, "p10": p10, "p50": p50, "p90": p90}
 
 
-# ── Stress tests (Session 6) ──────────────────────────────────────────────────
+# ── Stress tests ──────────────────────────────────────────────────────────────
 
 def _run_stress_tests(
     portfolio_returns: pd.Series,
     benchmark_returns: pd.Series,
     performance: dict,
 ) -> dict:
-    """Scenario stress test results. Implemented in Session 6."""
-    raise NotImplementedError("Implemented in Session 6.")
+    """Apply historical stress scenarios to estimate portfolio impact.
+
+    Formula: portfolio_return = alpha + beta * scenario_index_return
+    Uses Jensen's alpha (annualized) and beta from the performance dict.
+
+    Args:
+        portfolio_returns: pd.Series (unused directly; reserved for future use).
+        benchmark_returns: pd.Series (unused directly; reserved for future use).
+        performance: dict from compute_all_performance(), must include 'alpha' and 'beta'.
+
+    Returns:
+        dict keyed by scenario name, each value is a dict with:
+            index_return     — float, the market scenario return (e.g. -0.37)
+            portfolio_return — float, estimated portfolio return in the scenario
+            description      — str, scenario description from config
+    """
+    from assets.config import STRESS_SCENARIOS
+
+    beta = float(performance["beta"])
+    alpha = float(performance["alpha"])  # Jensen's alpha (annualized decimal)
+
+    results = {}
+    for scenario_name, scenario_data in STRESS_SCENARIOS.items():
+        index_return = float(scenario_data["index_return"])
+        portfolio_return = alpha + beta * index_return
+        results[scenario_name] = {
+            "index_return": index_return,
+            "portfolio_return": float(portfolio_return),
+            "description": scenario_data["description"],
+        }
+    return results
 
 
-# ── Master aggregator (completed in Session 6) ────────────────────────────────
+# ── Master aggregator ─────────────────────────────────────────────────────────
 
 def compute_all_risk_outlook(
     portfolio_returns: pd.Series,
@@ -276,14 +362,64 @@ def compute_all_risk_outlook(
         settings: dict with keys: var_confidence, mc_horizon, mc_paths.
 
     Returns:
-        dict with keys: hist_vol, ewma_vol, garch_vol, garch_model,
-        var_95_hist, cvar_95_hist, var_99_hist, cvar_99_hist,
-        var_95_garch, var_monthly,
-        mc_paths_matrix, mc_p10, mc_p50, mc_p90,
-        stress_results, skewness, excess_kurtosis,
-        garch_fallback (bool, True if EWMA used instead of GARCH).
-
-    Raises:
-        NotImplementedError: Until Session 6 (MC and stress tests pending).
+        dict with keys:
+            hist_vol          — float, annualized historical volatility
+            ewma_vol          — float, annualized EWMA volatility (lambda=0.94)
+            garch_vol         — float, annualized GARCH conditional volatility
+            garch_model       — arch ResultsWrapper or None (EWMA fallback)
+            var_95_hist       — float, 95% historical VaR (negative = loss)
+            cvar_95_hist      — float, 95% historical CVaR
+            var_99_hist       — float, 99% historical VaR
+            cvar_99_hist      — float, 99% historical CVaR
+            var_95_garch      — float, GARCH-conditional 95% VaR (normal)
+            var_monthly       — float, 95% historical VaR scaled to 21 days
+            mc_paths_matrix   — np.ndarray (n_steps+1, n_paths) portfolio values
+            mc_p10            — np.ndarray (n_steps+1,) 10th percentile fan
+            mc_p50            — np.ndarray (n_steps+1,) median fan
+            mc_p90            — np.ndarray (n_steps+1,) 90th percentile fan
+            stress_results    — dict, scenario name → impact dict
+            skewness          — float
+            excess_kurtosis   — float
+            garch_fallback    — bool, True if EWMA was used instead of GARCH
     """
-    raise NotImplementedError("Completed in Session 6 (MC and stress tests pending).")
+    var_conf = float(settings.get("var_confidence", 0.95))
+    mc_horizon = int(settings.get("mc_horizon", 10))
+    mc_paths = int(settings.get("mc_paths", 1_000))
+    mc_steps = mc_horizon * 252
+
+    hist_vol = compute_historical_vol(portfolio_returns)
+    ewma_vol = compute_ewma_vol(portfolio_returns)
+    garch_result, garch_vol_daily, is_fallback = fit_garch(portfolio_returns)
+    garch_vol = garch_vol_daily * np.sqrt(252)
+
+    var_95_hist, cvar_95_hist = compute_var_cvar_historical(portfolio_returns, 0.95)
+    var_99_hist, cvar_99_hist = compute_var_cvar_historical(portfolio_returns, 0.99)
+    var_95_garch = compute_garch_var(portfolio_returns, garch_vol_daily, 0.95)
+    var_monthly = compute_var_monthly(var_95_hist)
+
+    mc_results = _run_garch_monte_carlo(
+        portfolio_returns, garch_result, garch_vol_daily, mc_paths, mc_steps
+    )
+    stress_results = _run_stress_tests(portfolio_returns, benchmark_returns, performance)
+    skewness, excess_kurtosis = compute_skewness_kurtosis(portfolio_returns)
+
+    return {
+        "hist_vol": hist_vol,
+        "ewma_vol": ewma_vol,
+        "garch_vol": garch_vol,
+        "garch_model": garch_result,
+        "var_95_hist": var_95_hist,
+        "cvar_95_hist": cvar_95_hist,
+        "var_99_hist": var_99_hist,
+        "cvar_99_hist": cvar_99_hist,
+        "var_95_garch": var_95_garch,
+        "var_monthly": var_monthly,
+        "mc_paths_matrix": mc_results["values"],
+        "mc_p10": mc_results["p10"],
+        "mc_p50": mc_results["p50"],
+        "mc_p90": mc_results["p90"],
+        "stress_results": stress_results,
+        "skewness": skewness,
+        "excess_kurtosis": excess_kurtosis,
+        "garch_fallback": is_fallback,
+    }

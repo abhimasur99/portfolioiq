@@ -28,6 +28,8 @@ from analytics.risk_outlook import (
     compute_garch_var,
     compute_var_monthly,
     compute_skewness_kurtosis,
+    _run_garch_monte_carlo,
+    _run_stress_tests,
 )
 
 
@@ -202,12 +204,74 @@ class TestSkewnessKurtosis:
 
 class TestMonteCarlo:
     def test_monte_carlo_shape(self, mock_portfolio_returns):
-        pytest.skip("Implemented in Session 6.")
+        """MC values array has shape (n_steps + 1, n_paths): rows = time steps, cols = paths."""
+        n_paths = 200
+        n_steps = 10  # horizon_years=1 would be 252; use 10 for speed
+        _, garch_vol_daily, _ = fit_garch(mock_portfolio_returns)
+        result = _run_garch_monte_carlo(mock_portfolio_returns, None, garch_vol_daily, n_paths, n_steps)
+        assert result["values"].shape == (n_steps + 1, n_paths)
+        assert result["p10"].shape == (n_steps + 1,)
+        assert result["p50"].shape == (n_steps + 1,)
+        assert result["p90"].shape == (n_steps + 1,)
 
     def test_monte_carlo_positive_values(self, mock_portfolio_returns):
-        pytest.skip("Implemented in Session 6.")
+        """All simulated portfolio values are strictly positive (log-normal cannot go negative)."""
+        n_paths = 200
+        n_steps = 10
+        _, garch_vol_daily, _ = fit_garch(mock_portfolio_returns)
+        result = _run_garch_monte_carlo(mock_portfolio_returns, None, garch_vol_daily, n_paths, n_steps)
+        assert float(result["values"].min()) > 0.0
+
+    def test_monte_carlo_starts_at_one(self, mock_portfolio_returns):
+        """MC values[0] == 1.0 for all paths (normalized to initial portfolio value)."""
+        n_paths = 100
+        n_steps = 5
+        _, garch_vol_daily, _ = fit_garch(mock_portfolio_returns)
+        result = _run_garch_monte_carlo(mock_portfolio_returns, None, garch_vol_daily, n_paths, n_steps)
+        np.testing.assert_array_equal(result["values"][0], np.ones(n_paths))
+
+    def test_monte_carlo_percentile_ordering(self, mock_portfolio_returns):
+        """p10 <= p50 <= p90 at every time step."""
+        n_paths = 500
+        n_steps = 10
+        _, garch_vol_daily, _ = fit_garch(mock_portfolio_returns)
+        result = _run_garch_monte_carlo(mock_portfolio_returns, None, garch_vol_daily, n_paths, n_steps)
+        assert np.all(result["p10"] <= result["p50"])
+        assert np.all(result["p50"] <= result["p90"])
 
 
 class TestStressTests:
-    def test_stress_test_keys(self, mock_portfolio_returns):
-        pytest.skip("Implemented in Session 6.")
+    def test_stress_test_keys(self, mock_portfolio_returns, mock_benchmark_returns):
+        """All 4 STRESS_SCENARIOS keys are present in stress test output."""
+        from assets.config import STRESS_SCENARIOS
+        from analytics.performance import compute_all_performance
+        performance = compute_all_performance(
+            mock_portfolio_returns, mock_benchmark_returns, risk_free_rate=0.05 / 252
+        )
+        result = _run_stress_tests(mock_portfolio_returns, mock_benchmark_returns, performance)
+        for scenario_name in STRESS_SCENARIOS:
+            assert scenario_name in result, f"Missing stress scenario: {scenario_name}"
+
+    def test_stress_test_value_structure(self, mock_portfolio_returns, mock_benchmark_returns):
+        """Each stress result has index_return, portfolio_return, and description keys."""
+        from analytics.performance import compute_all_performance
+        performance = compute_all_performance(
+            mock_portfolio_returns, mock_benchmark_returns, risk_free_rate=0.05 / 252
+        )
+        result = _run_stress_tests(mock_portfolio_returns, mock_benchmark_returns, performance)
+        for name, data in result.items():
+            assert "index_return" in data, f"Scenario {name} missing index_return"
+            assert "portfolio_return" in data, f"Scenario {name} missing portfolio_return"
+            assert "description" in data, f"Scenario {name} missing description"
+
+    def test_stress_test_portfolio_return_is_float(self, mock_portfolio_returns, mock_benchmark_returns):
+        """Stress test portfolio returns are Python floats."""
+        from analytics.performance import compute_all_performance
+        performance = compute_all_performance(
+            mock_portfolio_returns, mock_benchmark_returns, risk_free_rate=0.05 / 252
+        )
+        result = _run_stress_tests(mock_portfolio_returns, mock_benchmark_returns, performance)
+        for name, data in result.items():
+            assert isinstance(data["portfolio_return"], float), (
+                f"Scenario {name} portfolio_return is not a float"
+            )

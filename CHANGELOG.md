@@ -5,6 +5,16 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.6.0] — 2026-03-13
+
+### Added
+- `analytics/risk_outlook.py` (Session 6): `_run_garch_monte_carlo` (vectorized GARCH-MC, loop over steps only, numpy vectorized over paths), `_run_stress_tests` (alpha + beta × scenario_return for all 4 STRESS_SCENARIOS), `compute_all_risk_outlook` (master aggregator, complete).
+- `analytics/market_signals.py`: `fetch_all_signals` with all 11 signals — VIX level, VIX trend, VIX term structure, MOVE index, yield curve, credit spreads, copper-to-gold ratio, dollar index, oil sensitivity, rate sensitivity, tech concentration. Graceful fallback to "unavailable" per signal on fetch failure.
+- `tests/test_risk_outlook.py` (Session 6): MC shape, MC positive values, stress test keys — all previously skipped tests now passing. 0 skipped in risk_outlook tests.
+- `tests/test_market_signals.py`: all 6 tests — signal keys structure, status validity, oil/rate sensitivity range, VIX level positive, yield curve finite.
+
+---
+
 ## [0.5.0] — 2026-03-13
 
 ### Added
