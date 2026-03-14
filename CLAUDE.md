@@ -176,9 +176,13 @@ Next session: Session 12 — details_q3.py (Q3 Risk Outlook Deep Dive) + Risk Pr
 
 Next session: Session 13 — details_q4.py (Q4 Optimization Deep Dive with estimation error warning).
 
-[Checkpoint — Session 13 complete]: pages/details_q4.py (Q4 Optimization Deep Dive — prominent estimation error st.warning; conditional language throughout; insight block with Sharpe gap analysis / convergence status / vol-saving estimate; efficient frontier chart full width; current-vs-optimal bar chart; interactive weight delta table with formatted Δ columns; 11-row metrics table; Explain Numbers toggle). Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 13 complete]: pages/details_q4.py (Q4 Optimization Deep Dive — prominent estimation error st.warning; conditional language throughout; insight block with Sharpe gap analysis / convergence status / vol-saving estimate; efficient frontier chart full width; current-vs-optimal bar chart; interactive weight delta table with formatted Δ columns; 11-row metrics table; Explain Numbers toggle). Full suite: 151 passed. Git commit 2878eda made: "feat: Session 13 — Q4 Optimization Details with estimation error warning".
 
 Next session: Session 14 — guide.py (5-section methodology reference).
+
+[Checkpoint — Session 14 complete]: pages/guide.py (Guide screen — intro framing paragraph, 5 collapsible expanders each with 4-column st.dataframe: Section 1 Performance/11 rows, Section 2 Risk Factors/9 rows, Section 3 Risk Outlook/11 rows, Section 4 Optimization/7 rows, Section 5 Leading Indicators/11 rows; closing limitations statement; GUIDE_VERSION footer). Full suite: 151 passed. Git commit pending.
+
+Next session: Session 15 — settings.py (all configurable params, Save and Recompute).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.14.0] — 2026-03-13
+
+### Added
+- `pages/guide.py` (Session 14): full Guide screen — introductory framing paragraph (conditional characterisation, not prediction), five 4-column methodology tables (Metric / Formula-Method / What it tells you / Key assumption-limitation) covering Performance, Risk Factors, Risk Outlook, Optimization, and Leading Indicators; closing signal limitations statement; version date footer.
+
+---
+
 ## [0.13.0] — 2026-03-13
 
 ### Added
