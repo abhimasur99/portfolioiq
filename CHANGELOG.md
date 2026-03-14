@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.15.0] — 2026-03-13
+
+### Added
+- `pages/settings.py` (Session 15): full Settings screen — five grouped sections (Portfolio, Risk, Monte Carlo, Weight Bounds, Rebalancing); granular Save and Recompute button that detects which settings changed and recomputes only affected analytics layers (VaR/method/GARCH → risk_outlook; MC horizon/paths → risk_outlook; weight bounds → optimization; benchmark/period → informational redirect to Input since price re-fetch required); Restore Defaults button; current-values summary card when portfolio is loaded; all SK_ constants used, no raw string literals.
+
+---
+
 ## [0.14.0] — 2026-03-13
 
 ### Added

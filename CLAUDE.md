@@ -180,9 +180,13 @@ Next session: Session 13 — details_q4.py (Q4 Optimization Deep Dive with estim
 
 Next session: Session 14 — guide.py (5-section methodology reference).
 
-[Checkpoint — Session 14 complete]: pages/guide.py (Guide screen — intro framing paragraph, 5 collapsible expanders each with 4-column st.dataframe: Section 1 Performance/11 rows, Section 2 Risk Factors/9 rows, Section 3 Risk Outlook/11 rows, Section 4 Optimization/7 rows, Section 5 Leading Indicators/11 rows; closing limitations statement; GUIDE_VERSION footer). Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 14 complete]: pages/guide.py (Guide screen — intro framing paragraph, 5 collapsible expanders each with 4-column st.dataframe: Section 1 Performance/11 rows, Section 2 Risk Factors/9 rows, Section 3 Risk Outlook/11 rows, Section 4 Optimization/7 rows, Section 5 Leading Indicators/11 rows; closing limitations statement; GUIDE_VERSION footer). Full suite: 151 passed. Git commit 70e56e0 made: "feat: Session 14 — methodology guide screen (5 sections, 49 metrics)".
 
 Next session: Session 15 — settings.py (all configurable params, Save and Recompute).
+
+[Checkpoint — Session 15 complete]: pages/settings.py (Settings screen — 5 sections: Portfolio/benchmark+period, Risk/VaR-confidence+method+GARCH-refit, Monte Carlo/horizon+paths, Weight Bounds/min+max sliders, Rebalancing/drift-threshold; Save and Recompute button with change detection: benchmark/period → redirect to Input, risk_outlook params → _recompute_risk_outlook(), weight bounds → _recompute_optimization(), drift threshold → display-only; Restore Defaults button; current-values summary expander when portfolio loaded; all SK_ constants). Full suite: 151 passed. Git commit pending.
+
+Next session: Session 16 — full integration, 3-persona manual testing, README, polish.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
