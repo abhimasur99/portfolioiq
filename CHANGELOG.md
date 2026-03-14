@@ -5,6 +5,19 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.16.0] — 2026-03-13
+
+### Fixed
+- `pages/dashboard.py` `_health_indicators()`: Drawdown Risk indicator read `perf.get("max_drawdown")` — key lives in `risk_factors`. Fixed to `rf.get("max_drawdown")`.
+- `pages/dashboard.py` `_build_q1()`: Max DD KPI tile read `perf.get("max_drawdown")` — same wrong dict. Fixed to `analytics.get(SK_RISK_FACTORS, {}).get("max_drawdown")`.
+- `pages/dashboard.py` `_build_q2()`: Correlation heatmap read `rf.get("correlation_matrix")` — correct key is `"corr_matrix"`. Fixed. Was always rendering the empty fallback figure.
+- `components/explain_panel.py` Q1 panel: Max Drawdown display read `perf.get("max_drawdown")`. Fixed to `rf.get("max_drawdown")`.
+
+### Added
+- `README.md`: full project README — quickstart, project structure, analytics methodology summary (all 4 layers), test instructions, configuration table, navigation guide, tech stack table, disclaimer.
+
+---
+
 ## [0.15.0] — 2026-03-13
 
 ### Added

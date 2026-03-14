@@ -200,7 +200,7 @@ def _health_indicators(analytics: dict) -> list:
             indicators.append({"label": "Diversification", "status": "red", "value": val_str})
 
     # 4. Drawdown Risk — max drawdown
-    mdd = perf.get("max_drawdown", None)
+    mdd = rf.get("max_drawdown", None)
     if mdd is None:
         indicators.append({"label": "Drawdown Risk", "status": "amber", "value": "n/a"})
     elif mdd > -0.10:
@@ -274,7 +274,7 @@ def _build_q1(analytics: dict) -> tuple:
 
     cagr   = perf.get("cagr")
     sharpe = perf.get("sharpe")
-    mdd    = perf.get("max_drawdown")
+    mdd    = analytics.get(SK_RISK_FACTORS, {}).get("max_drawdown")
     vol    = perf.get("volatility")
 
     kpis = [
@@ -299,7 +299,7 @@ def _build_q2(analytics: dict) -> tuple:
     from components.charts import correlation_heatmap
 
     rf   = analytics.get(SK_RISK_FACTORS, {})
-    corr = rf.get("correlation_matrix")
+    corr = rf.get("corr_matrix")
 
     if corr is not None:
         chart = correlation_heatmap(corr)

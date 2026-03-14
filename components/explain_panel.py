@@ -29,7 +29,7 @@ def render_explain_panel(quadrant_id: str, analytics: dict) -> None:
     if quadrant_id == "q1":
         cagr   = perf.get("cagr", None)
         sharpe = perf.get("sharpe", None)
-        mdd    = perf.get("max_drawdown", None)
+        mdd    = rf.get("max_drawdown", None)
         st.markdown(
             f"**CAGR** ({_pct(cagr)}) is the compound annual growth rate — "
             "the smoothed annual return if the portfolio grew at a constant rate.\n\n"
