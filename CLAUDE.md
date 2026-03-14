@@ -172,9 +172,13 @@ Next session: Session 11 — details_q1.py (Q1 Performance Deep Dive) + details_
 
 Next session: Session 12 — details_q3.py (Q3 Risk Outlook Deep Dive) + Risk Preparedness Panel (11 market signals).
 
-[Checkpoint — Session 12 complete]: pages/details_q3.py (Q3 Risk Outlook Deep Dive — insight block with vol tier / GARCH vs hist comparison / tail shape language, Risk Preparedness Panel with all 11 signals in 3-col badge grid, 3 charts: GARCH vol / MC fan / stress test, 11-row metrics table with EWMA/GARCH/hist vol + VaR/CVaR at 95/99 + monthly VaR + skewness/kurtosis). Full suite: 151 passed. Git commit pending.
+[Checkpoint — Session 12 complete]: pages/details_q3.py (Q3 Risk Outlook Deep Dive — insight block with vol tier / GARCH vs hist comparison / tail shape language, Risk Preparedness Panel with all 11 signals in 3-col badge grid, 3 charts: GARCH vol / MC fan / stress test, 11-row metrics table with EWMA/GARCH/hist vol + VaR/CVaR at 95/99 + monthly VaR + skewness/kurtosis). Full suite: 151 passed. Git commit 4a27363 made: "feat: Session 12 — Q3 Risk Outlook Details + Risk Preparedness Panel".
 
 Next session: Session 13 — details_q4.py (Q4 Optimization Deep Dive with estimation error warning).
+
+[Checkpoint — Session 13 complete]: pages/details_q4.py (Q4 Optimization Deep Dive — prominent estimation error st.warning; conditional language throughout; insight block with Sharpe gap analysis / convergence status / vol-saving estimate; efficient frontier chart full width; current-vs-optimal bar chart; interactive weight delta table with formatted Δ columns; 11-row metrics table; Explain Numbers toggle). Full suite: 151 passed. Git commit pending.
+
+Next session: Session 14 — guide.py (5-section methodology reference).
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

@@ -5,6 +5,13 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.13.0] — 2026-03-13
+
+### Added
+- `pages/details_q4.py` (Session 13): Q4 Optimization Deep Dive — back button, prominent estimation error warning (conditional language throughout; never prescriptive), insight block (Sharpe gap, convergence status, weight concentration of each optimizer output), efficient frontier chart (full width, all 3 optimizer portfolios + current portfolio + CML), current-vs-optimal bar chart, interactive weight delta table (current / max-sharpe / min-var / risk-parity weights + deltas per ticker), full 9-row metrics table (returns/vols/ratios for all 3 portfolios + CML slope + convergence flag), inline Explain Numbers panel.
+
+---
+
 ## [0.12.0] — 2026-03-13
 
 ### Added
