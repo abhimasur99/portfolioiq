@@ -114,7 +114,7 @@ Completed:
 - tests/test_data_fetcher.py: 21 tests, all passing. Covers MultiIndex extraction, NaN dropping, invalid ticker error, flat column handling, ^IRX conversion, NaN handling, fetch failure fallback, empty result fallback, validate_tickers.
 - .venv: created with Python 3.12 (3.11 not installed — see Known Issues).
 
-[Checkpoint — Session 2 complete]: All tests passing (21/21). Git commit pending.
+[Checkpoint — Session 2 complete]: All tests passing (21/21). Git commit 45e5537 made: "feat: Session 2 — data layer (data_fetcher.py, conftest.py, 21 tests)".
 
 Next session: Session 3 — returns.py + performance.py (log returns, CAGR, Sharpe, Sortino, Treynor, Info ratio, alpha, beta, R², rolling metrics) + implement test_returns.py and test_performance.py.
 
@@ -147,6 +147,35 @@ Remaining after this batch: [list]
 If rate limit hits here, resume from: [specific file]
 ```
 This is visible in the chat history even if tool calls don't complete.
+
+---
+
+## Reading Protocol
+
+Which files to read and in which order, depending on the situation.
+
+**Situation 1 — Clean session start (no rate limit, normal continuation):**
+1. Memory files (auto-loaded via MEMORY.md index): user_profile, project_overview, project_session_plan, feedback_general, project_locked_decisions
+2. CLAUDE.md (this file) — confirm Current State, identify which session is next
+3. Stub file(s) for today's session target — read Dependencies: and docstrings before writing
+4. assets/config.py — confirm any constants needed for today's module (colors, SK_ keys, defaults)
+
+**Situation 2 — Rate limit recovery (resuming a partially-completed session):**
+1. CLAUDE.md — find last checkpoint line in Current State (this is the resume point)
+2. `git diff HEAD` — shows exactly which files changed since last commit
+3. Chat history STATUS CHECKPOINT — identifies which batch was in progress when rate limit hit
+4. Stub for the in-progress file — resume from where the batch was interrupted
+
+**Situation 3 — Mid-implementation (already in a session, writing a new module):**
+1. Stub Dependencies: section for the target module — lists all imports needed
+2. assets/config.py — look up any SK_ constants, colors, or defaults referenced
+3. Related already-implemented module (e.g., read returns.py before performance.py)
+
+**File authority hierarchy (most to least authoritative):**
+- CLAUDE.md Current State — what's actually done
+- git log / git diff — what files changed
+- Memory files — session plan and preferences
+- CHANGELOG.md — human-readable session summary
 
 ---
 
