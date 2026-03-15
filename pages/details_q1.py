@@ -149,13 +149,26 @@ def render() -> None:
 
         with right_col:
             st.markdown("##### Key Metrics")
-            summary = {
-                "Metric": ["CAGR", "Ann. Volatility", "Sharpe Ratio", "Max Drawdown",
-                            "Calmar Ratio", "Beta"],
-                "Value":  [_pct(cagr), _pct(vol, sign=False), _fmt(sharpe),
-                            _pct(max_dd), _fmt(calmar), _fmt(beta)],
-            }
-            st.dataframe(pd.DataFrame(summary), hide_index=True, use_container_width=True)
+            _kms = [
+                ("CAGR",          _pct(cagr),
+                 "Compound Annual Growth Rate — the constant yearly return that matches total portfolio growth. Accounts for compounding."),
+                ("Ann. Volatility", _pct(vol, sign=False),
+                 "Annualised standard deviation of daily returns (×√252). Higher = wider daily swings in both directions."),
+                ("Sharpe Ratio",  _fmt(sharpe),
+                 "Excess return per unit of total risk. Above 0.5 is acceptable; above 1.0 is strong; below 0 means underperforming cash on a risk-adjusted basis."),
+                ("Max Drawdown",  _pct(max_dd),
+                 "Largest peak-to-trough decline over the period. Worst loss a buy-and-hold investor would have experienced."),
+                ("Calmar Ratio",  _fmt(calmar),
+                 "CAGR ÷ |Max Drawdown|. Higher = better return per unit of drawdown risk absorbed."),
+                ("Beta",          _fmt(beta),
+                 "Sensitivity to benchmark moves. β > 1 amplifies market swings; β < 1 dampens them."),
+            ]
+            for i in range(0, len(_kms), 2):
+                _row = _kms[i:i + 2]
+                _cols = st.columns(len(_row))
+                for _col, (_lbl, _val, _hlp) in zip(_cols, _row):
+                    with _col:
+                        st.metric(label=_lbl, value=_val, help=_hlp)
 
     st.markdown("---")
 

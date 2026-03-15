@@ -155,13 +155,26 @@ def render() -> None:
 
         with right_col:
             st.markdown("##### Key Metrics")
-            summary = {
-                "Metric": ["Effective N", "HHI", "Div. Ratio", "Max Drawdown",
-                            "Calmar", "Ulcer Index"],
-                "Value":  [_fmt(eff_n, 1), _fmt(hhi, 3), _fmt(div_ratio),
-                            _pct(max_dd), _fmt(calmar), _fmt(ulcer_index)],
-            }
-            st.dataframe(pd.DataFrame(summary), hide_index=True, use_container_width=True)
+            _kms = [
+                ("Effective N",  _fmt(eff_n, 1),
+                 "Number of truly independent positions after accounting for correlations. Lower than your actual holding count = concentrated."),
+                ("HHI",          _fmt(hhi, 3),
+                 "Sum of squared weights — equals 1/N for equal weight, 1.0 for a single asset. Lower = more diversified."),
+                ("Div. Ratio",   _fmt(div_ratio),
+                 "Weighted-average individual volatility ÷ portfolio volatility. Above 1.0 confirms diversification is actively reducing risk."),
+                ("Max Drawdown", _pct(max_dd),
+                 "Largest peak-to-trough portfolio decline. Worst loss a buy-and-hold investor would have experienced."),
+                ("Calmar Ratio", _fmt(calmar),
+                 "CAGR ÷ |Max Drawdown|. Higher = better return per unit of drawdown risk absorbed."),
+                ("Ulcer Index",  _fmt(ulcer_index),
+                 "Root mean square of all drawdown values — penalises both depth and duration of underwater periods. Lower is better."),
+            ]
+            for i in range(0, len(_kms), 2):
+                _row = _kms[i:i + 2]
+                _cols = st.columns(len(_row))
+                for _col, (_lbl, _val, _hlp) in zip(_cols, _row):
+                    with _col:
+                        st.metric(label=_lbl, value=_val, help=_hlp)
 
     st.markdown("---")
 

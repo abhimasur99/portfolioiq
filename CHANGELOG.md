@@ -5,6 +5,17 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.19.0] — 2026-03-15
+
+### Fixed
+- `app.py`: Navigating away from Dashboard (to INPUT, GUIDE, or SETTINGS) now clears `_dashboard_details`, so returning to Dashboard always shows the main dashboard, not a More Details sub-page.
+
+### Changed
+- `pages/details_q1.py`, `details_q2.py`, `details_q3.py`: Replaced Key Metrics `st.dataframe` summary tables with `st.metric()` grids (2 per row) carrying `help=` tooltip text on every metric.
+- `pages/details_q3.py` `_render_preparedness_panel()`: Converted 11-signal HTML card grid to `st.metric()` tiles; interpretation text moved into the `help=` tooltip. Unused color imports removed.
+
+---
+
 ## [0.18.0] — 2026-03-15
 
 ### Changed

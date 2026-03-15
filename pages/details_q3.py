@@ -23,10 +23,6 @@ import pandas as pd
 import streamlit as st
 
 from assets.config import (
-    COLOR_AMBER,
-    COLOR_GREEN,
-    COLOR_RED,
-    COLOR_TEXT_MUTED,
     SK_ANALYTICS,
     SK_MARKET_SIGNALS,
     SK_MC_HORIZON,
@@ -50,12 +46,6 @@ _SIGNAL_LABELS = {
     "tech_concentration": "Tech Concentration",
 }
 
-_STATUS_COLOR = {
-    "green":       COLOR_GREEN,
-    "amber":       COLOR_AMBER,
-    "red":         COLOR_RED,
-    "unavailable": COLOR_TEXT_MUTED,
-}
 _STATUS_EMOJI = {
     "green":       "🟢",
     "amber":       "🟡",
@@ -98,10 +88,11 @@ def _fmt_signal_value(val) -> str:
 # ── Risk Preparedness Panel ─────────────────────────────────────────────────────
 
 def _render_preparedness_panel(signals: dict) -> None:
-    """Render the 11-signal risk preparedness grid."""
+    """Render the 11-signal risk preparedness grid using st.metric with ? tooltips."""
     st.markdown("##### Live Risk Preparedness Panel")
     st.caption(
         "Forward-looking market environment signals fetched live at portfolio load time. "
+        "Hover the ? icon on each signal for its interpretation. "
         "These are awareness indicators, not predictions or investment advice."
     )
 
@@ -109,29 +100,18 @@ def _render_preparedness_panel(signals: dict) -> None:
     # Render in rows of 3
     for row_start in range(0, len(signal_keys), 3):
         row_keys = signal_keys[row_start : row_start + 3]
-        cols = st.columns(len(row_keys))
+        cols = st.columns(3)
         for col, key in zip(cols, row_keys):
-            sig   = signals.get(key, {})
-            label = _SIGNAL_LABELS[key]
-            val   = sig.get("value")
+            sig    = signals.get(key, {})
+            label  = _SIGNAL_LABELS[key]
+            val    = sig.get("value")
             status = sig.get("status", "unavailable")
             interp = sig.get("interpretation", "No data available.")
-            color  = _STATUS_COLOR.get(status, COLOR_TEXT_MUTED)
             emoji  = _STATUS_EMOJI.get(status, "⚪")
+            display_val = f"{emoji} {_fmt_signal_value(val)}" if val is not None else f"{emoji} n/a"
 
             with col:
-                st.markdown(
-                    f'<div style="border:1px solid {color};border-radius:8px;'
-                    f'padding:10px 12px;background:rgba(0,0,0,0.2);margin-bottom:8px;">'
-                    f'<div style="font-size:0.72rem;color:{COLOR_TEXT_MUTED};'
-                    f'margin-bottom:4px;">{label}</div>'
-                    f'<div style="font-size:1.0rem;color:{color};font-weight:600;">'
-                    f'{emoji} {_fmt_signal_value(val)}</div>'
-                    f'<div style="font-size:0.72rem;color:{COLOR_TEXT_MUTED};'
-                    f'margin-top:6px;line-height:1.3;">{interp}</div>'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
+                st.metric(label=label, value=display_val, help=interp)
 
     st.caption(
         "_Signals are updated each time you load a portfolio. Market data is sourced from "
@@ -249,14 +229,26 @@ def render() -> None:
 
         with right_col:
             st.markdown("##### Key Metrics")
-            summary = {
-                "Metric": ["Hist. Vol (ann.)", "GARCH Vol (ann.)", "VaR 95% (daily)",
-                            "CVaR 95% (daily)", "VaR 95% (monthly)", "Skewness"],
-                "Value":  [_pct(hist_vol, sign=False), _pct(garch_vol, sign=False),
-                            _pct(var_95_hist), _pct(cvar_95_hist),
-                            _pct(var_monthly), _fmt(skewness)],
-            }
-            st.dataframe(pd.DataFrame(summary), hide_index=True, use_container_width=True)
+            _kms = [
+                ("Hist. Vol",      _pct(hist_vol, sign=False),
+                 "Full-period annualised volatility from historical daily returns. Constant-weight estimate over the selected period."),
+                ("GARCH Vol",      _pct(garch_vol, sign=False),
+                 "Forward-looking volatility from GARCH(1,1) — weights recent moves more heavily. Falls back to EWMA if data is insufficient or fit is non-stationary."),
+                ("VaR 95% (day)",  _pct(var_95_hist),
+                 "Worst daily loss in 95% of trading days (historical). On roughly 1 in 20 days, losses exceeded this threshold."),
+                ("CVaR 95% (day)", _pct(cvar_95_hist),
+                 "Average loss on the worst 5% of days (Expected Shortfall). More severe than VaR and better captures tail risk."),
+                ("VaR 95% (mo.)",  _pct(var_monthly),
+                 "Daily VaR 95% scaled to a monthly horizon using the i.i.d. approximation (×√21). Directional estimate only."),
+                ("Skewness",       _fmt(skewness),
+                 "Asymmetry of the return distribution. Negative skew means more frequent large losses than gains."),
+            ]
+            for i in range(0, len(_kms), 2):
+                _row = _kms[i:i + 2]
+                _cols = st.columns(len(_row))
+                for _col, (_lbl, _val, _hlp) in zip(_cols, _row):
+                    with _col:
+                        st.metric(label=_lbl, value=_val, help=_hlp)
 
     st.markdown("---")
 
