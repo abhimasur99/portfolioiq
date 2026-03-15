@@ -29,8 +29,6 @@ from assets.config import (
     SK_RISK_OUTLOOK,
 )
 
-_EXPLAIN_KEY = "_explain_open_q1_details"
-
 
 # ── Formatting helpers ──────────────────────────────────────────────────────────
 
@@ -204,81 +202,3 @@ def render() -> None:
         key="_det_q1_rbeta",
     )
 
-    st.markdown("---")
-
-    # ── Full metrics table ─────────────────────────────────────────────────────
-    st.markdown("##### All Performance Metrics")
-
-    metrics_data = {
-        "Metric": [
-            "CAGR",
-            "Annualised Volatility",
-            "Sharpe Ratio",
-            "Sortino Ratio",
-            "Treynor Ratio",
-            "Information Ratio",
-            "Jensen's Alpha",
-            "Beta",
-            "R-Squared",
-            "Best Month",
-            "Worst Month",
-            "Best Calendar Year",
-            "Worst Calendar Year",
-            "Max Drawdown",
-            "Calmar Ratio",
-        ],
-        "Value": [
-            _pct(cagr),
-            _pct(vol, sign=False),
-            _fmt(sharpe),
-            _fmt(sortino),
-            _fmt(treynor),
-            _fmt(info_r),
-            _pct(alpha),
-            _fmt(beta),
-            _fmt(r_sq),
-            _pct(best_mo),
-            _pct(worst_mo),
-            _pct(best_yr),
-            _pct(worst_yr),
-            _pct(max_dd),
-            _fmt(calmar),
-        ],
-        "What it measures": [
-            "Compound annual growth rate — smoothed annualised return assuming constant compounding",
-            "Standard deviation of daily returns × √252 — total price fluctuation per year",
-            "Excess return per unit of total risk (daily return − risk-free rate) ÷ volatility",
-            "Like Sharpe, but only penalises downside volatility (semi-deviation below 0)",
-            "Excess return per unit of systematic risk (beta × market return)",
-            "Active return over benchmark per unit of tracking error — active management skill",
-            "Excess return not explained by benchmark exposure (β × benchmark); alpha > 0 is outperformance",
-            "Sensitivity to benchmark moves; β=1.2 means portfolio moves 1.2× the benchmark",
-            "Proportion of portfolio variance explained by benchmark; R²=1.0 is perfect tracking",
-            "Highest single-month total return in the period",
-            "Lowest single-month total return in the period",
-            "Best full calendar year total return",
-            "Worst full calendar year total return",
-            "Largest peak-to-trough portfolio decline; worst loss an investor experienced",
-            "CAGR ÷ |Max Drawdown|; higher means better return per unit of drawdown risk",
-        ],
-    }
-
-    st.dataframe(
-        pd.DataFrame(metrics_data),
-        hide_index=True,
-        use_container_width=True,
-    )
-
-    st.markdown("---")
-
-    # ── Explain Numbers ────────────────────────────────────────────────────────
-    if st.button("Explain Numbers", key="_det_q1_exp_btn", use_container_width=True):
-        st.session_state[_EXPLAIN_KEY] = not st.session_state.get(_EXPLAIN_KEY, False)
-
-    if st.session_state.get(_EXPLAIN_KEY, False):
-        st.markdown("---")
-        from components.explain_panel import render_explain_panel
-        render_explain_panel("q1", analytics)
-        if st.button("Close explanation", key="_det_q1_close_exp"):
-            st.session_state[_EXPLAIN_KEY] = False
-            st.rerun()

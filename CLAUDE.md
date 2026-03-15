@@ -208,7 +208,9 @@ Issues found and fixed (see TESTING_LOG.md for full tracker):
 
 [Checkpoint — Testing Session T1 COMPLETE]: CHANGELOG [0.17.0] added. All 10 modified files staged for commit. Remaining open: TL-006 (weight preview liveness — deferred), TL-007 (guide tables — deferred pending Stage C), TL-010 (tech concentration — DEFERRED/v2), TL-013 (page transitions — open).
 
-**Next session: Stage B** — ? icon tooltip refactor: add help= to all st.metric() KPI calls, remove Explain Numbers + All Metrics sections from all 4 details pages, health indicator reorder.
+**[Checkpoint — Stage B COMPLETE]**: ? tooltip refactor done. dashboard_quad.py: help= on all st.metric() calls, Explain Numbers removed. dashboard.py: help text on all 16 KPI dicts, health indicators reordered (Market Stress → Return Quality → Volatility → Drawdown → Diversification → Efficiency). details_q1/q2/q3/q4: All Metrics tables + Explain Numbers blocks removed. explain_panel.py now unreferenced. CHANGELOG [0.18.0] added.
+
+**Next: Stage C** — Guide page redesign. TL-007 OPEN. Discuss approach before implementing.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

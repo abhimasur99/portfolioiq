@@ -6,15 +6,14 @@ Renders one of the four analytical quadrants on the main dashboard.
 Each quadrant has a consistent layout:
 - Quadrant header (title, subtitle).
 - Primary chart (compact height, use_container_width=True).
-- Row of 3-4 KPI metric tiles.
+- Row of 3-4 KPI metric tiles with inline ? tooltips (help= parameter).
 - Contextual flag (amber/red/green badge with one-line message).
-- Two action buttons: "Explain Numbers" and "More Details".
+- One action button: "More Details".
 
-The Explain Numbers button opens the explain_panel overlay without navigating.
 The More Details button sets a session state key to route to the correct
 details page and calls st.rerun().
 
-Implemented in: Session 10.
+Implemented in: Session 10. Updated Stage B: ? tooltips, removed Explain Numbers.
 """
 
 import streamlit as st
@@ -36,8 +35,6 @@ def render_quadrant(
     flag: dict | None,
     details_page: str,
 ) -> None:
-    from components.explain_panel import render_explain_panel
-
     hdr_col, badge_col = st.columns([5, 2])
     with hdr_col:
         st.markdown(f"##### {title}")
@@ -65,24 +62,11 @@ def render_quadrant(
                     value=kpi.get("value", "---"),
                     delta=kpi.get("delta"),
                     delta_color=kpi.get("delta_color", "normal"),
+                    help=kpi.get("help"),
                 )
 
-    toggle_key = f"_explain_open_{quadrant_id}"
-    btn_l, btn_r = st.columns(2)
-    with btn_l:
-        if st.button("Explain Numbers", key=f"_btn_exp_{quadrant_id}", use_container_width=True):
-            st.session_state[toggle_key] = not st.session_state.get(toggle_key, False)
-    with btn_r:
-        if st.button("More Details →", key=f"_btn_det_{quadrant_id}", type="primary", use_container_width=True):
-            st.session_state[_SK_DETAILS] = details_page
-            st.rerun()
-
-    if st.session_state.get(toggle_key, False):
-        st.markdown("---")
-        analytics = st.session_state.get("analytics", {})
-        render_explain_panel(quadrant_id, analytics)
-        if st.button("Close explanation", key=f"_close_exp_{quadrant_id}"):
-            st.session_state[toggle_key] = False
-            st.rerun()
+    if st.button("More Details →", key=f"_btn_det_{quadrant_id}", type="primary", use_container_width=True):
+        st.session_state[_SK_DETAILS] = details_page
+        st.rerun()
 
     st.markdown("---")

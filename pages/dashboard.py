@@ -181,7 +181,20 @@ def _health_indicators(analytics: dict) -> list:
 
     indicators = []
 
-    # 1. Return Quality — Sharpe ratio
+    # 1. Market Stress — VIX level from live signals (external context first)
+    vix_sig = sig.get("vix_level", {})
+    vix_status = vix_sig.get("status", "unavailable")
+    vix_val    = vix_sig.get("value", None)
+    if vix_status == "unavailable" or vix_val is None:
+        indicators.append({"label": "Market Stress", "status": "amber", "value": "VIX n/a"})
+    else:
+        indicators.append({
+            "label": "Market Stress",
+            "status": vix_status,
+            "value": f"VIX {vix_val:.1f}",
+        })
+
+    # 2. Return Quality — Sharpe ratio
     sharpe = perf.get("sharpe", None)
     if sharpe is None:
         indicators.append({"label": "Return Quality", "status": "amber", "value": "n/a"})
@@ -192,7 +205,7 @@ def _health_indicators(analytics: dict) -> list:
     else:
         indicators.append({"label": "Return Quality", "status": "red", "value": f"{sharpe:.2f} Sharpe"})
 
-    # 2. Volatility Risk — historical vol
+    # 3. Volatility — historical vol
     hvol = ro.get("hist_vol", None)
     if hvol is None:
         indicators.append({"label": "Volatility", "status": "amber", "value": "n/a"})
@@ -203,7 +216,18 @@ def _health_indicators(analytics: dict) -> list:
     else:
         indicators.append({"label": "Volatility", "status": "red", "value": f"{hvol*100:.1f}% ann."})
 
-    # 3. Diversification — Effective N relative to n holdings
+    # 4. Drawdown Risk — max drawdown
+    mdd = rf.get("max_drawdown", None)
+    if mdd is None:
+        indicators.append({"label": "Drawdown Risk", "status": "amber", "value": "n/a"})
+    elif mdd > -0.10:
+        indicators.append({"label": "Drawdown Risk", "status": "green", "value": f"{mdd*100:.1f}%"})
+    elif mdd > -0.25:
+        indicators.append({"label": "Drawdown Risk", "status": "amber", "value": f"{mdd*100:.1f}%"})
+    else:
+        indicators.append({"label": "Drawdown Risk", "status": "red", "value": f"{mdd*100:.1f}%"})
+
+    # 5. Diversification — Effective N relative to n holdings
     eff_n = rf.get("effective_n", None)
     tickers = st.session_state.get(SK_TICKERS, [])
     n_assets = max(len(tickers), 1)
@@ -218,30 +242,6 @@ def _health_indicators(analytics: dict) -> list:
             indicators.append({"label": "Diversification", "status": "amber", "value": val_str})
         else:
             indicators.append({"label": "Diversification", "status": "red", "value": val_str})
-
-    # 4. Drawdown Risk — max drawdown
-    mdd = rf.get("max_drawdown", None)
-    if mdd is None:
-        indicators.append({"label": "Drawdown Risk", "status": "amber", "value": "n/a"})
-    elif mdd > -0.10:
-        indicators.append({"label": "Drawdown Risk", "status": "green", "value": f"{mdd*100:.1f}%"})
-    elif mdd > -0.25:
-        indicators.append({"label": "Drawdown Risk", "status": "amber", "value": f"{mdd*100:.1f}%"})
-    else:
-        indicators.append({"label": "Drawdown Risk", "status": "red", "value": f"{mdd*100:.1f}%"})
-
-    # 5. Market Stress — VIX level from live signals
-    vix_sig = sig.get("vix_level", {})
-    vix_status = vix_sig.get("status", "unavailable")
-    vix_val    = vix_sig.get("value", None)
-    if vix_status == "unavailable" or vix_val is None:
-        indicators.append({"label": "Market Stress", "status": "amber", "value": "VIX n/a"})
-    else:
-        indicators.append({
-            "label": "Market Stress",
-            "status": vix_status,
-            "value": f"VIX {vix_val:.1f}",
-        })
 
     # 6. Portfolio Efficiency — distance from efficient frontier
     converged = opt.get("optimizer_converged", False)
@@ -298,10 +298,14 @@ def _build_q1(analytics: dict) -> tuple:
     vol    = perf.get("volatility")
 
     kpis = [
-        {"label": "CAGR",       "value": _pct(cagr)},
-        {"label": "Sharpe",     "value": _fmt(sharpe)},
-        {"label": "Max DD",     "value": _pct(mdd)},
-        {"label": "Ann. Vol",   "value": _pct(vol, sign=False)},
+        {"label": "CAGR",     "value": _pct(cagr),
+         "help": "Compound Annual Growth Rate — the constant yearly return that matches total portfolio growth over the period. Accounts for compounding."},
+        {"label": "Sharpe",   "value": _fmt(sharpe),
+         "help": "Excess return per unit of total risk. Above 0.5 is acceptable; above 1.0 is strong; below 0 means underperforming cash on a risk-adjusted basis."},
+        {"label": "Max DD",   "value": _pct(mdd),
+         "help": "Largest peak-to-trough decline over the period. Worst loss a buy-and-hold investor would have experienced."},
+        {"label": "Ann. Vol", "value": _pct(vol, sign=False),
+         "help": "Annualised standard deviation of daily returns. Higher = wider daily swings in both directions."},
     ]
 
     if sharpe is not None and sharpe < 0:
@@ -333,10 +337,14 @@ def _build_q2(analytics: dict) -> tuple:
     beta  = analytics.get(SK_PERFORMANCE, {}).get("beta")
 
     kpis = [
-        {"label": "Beta",        "value": _fmt(beta)},
-        {"label": "Effective N", "value": _fmt(eff_n, 1)},
-        {"label": "HHI",         "value": _fmt(hhi, 3)},
-        {"label": "Div. Ratio",  "value": _fmt(dr)},
+        {"label": "Beta",        "value": _fmt(beta),
+         "help": "Sensitivity to benchmark. β > 1 amplifies market moves; β < 1 dampens them."},
+        {"label": "Effective N", "value": _fmt(eff_n, 1),
+         "help": "Number of truly independent positions after accounting for correlations. Lower than your actual holding count means the portfolio is concentrated."},
+        {"label": "HHI",         "value": _fmt(hhi, 3),
+         "help": "Sum of squared weights — equals 1/N for equal weight, 1.0 for a single asset. Lower = more diversified."},
+        {"label": "Div. Ratio",  "value": _fmt(dr),
+         "help": "Weighted-average individual volatility divided by portfolio volatility. Above 1.0 confirms diversification is reducing risk."},
     ]
 
     tickers = st.session_state.get(SK_TICKERS, [])
@@ -373,10 +381,14 @@ def _build_q3(analytics: dict) -> tuple:
     gvol   = ro.get("garch_vol")
 
     kpis = [
-        {"label": "VaR 95%",    "value": _pct(var95)},
-        {"label": "CVaR 95%",   "value": _pct(cvar95)},
-        {"label": "Hist. Vol",  "value": _pct(hvol, sign=False)},
-        {"label": "GARCH Vol",  "value": _pct(gvol, sign=False)},
+        {"label": "VaR 95%",   "value": _pct(var95),
+         "help": "Worst daily loss in 95% of trading days (historical). On roughly 1 in 20 days, losses exceeded this threshold."},
+        {"label": "CVaR 95%",  "value": _pct(cvar95),
+         "help": "Average loss on the worst 5% of days (Expected Shortfall). More severe than VaR and better captures tail risk."},
+        {"label": "Hist. Vol", "value": _pct(hvol, sign=False),
+         "help": "Full-period annualised volatility from historical daily returns. Constant-weight estimate over the selected period."},
+        {"label": "GARCH Vol", "value": _pct(gvol, sign=False),
+         "help": "Forward-looking volatility estimate from a GARCH(1,1) model, which weights recent moves more heavily than older ones."},
     ]
 
     if var95 is not None and var95 < -0.03:
@@ -427,10 +439,14 @@ def _build_q4(analytics: dict) -> tuple:
     cur_s    = perf.get("sharpe")
 
     kpis = [
-        {"label": "Max Sharpe",    "value": _fmt(ms_ratio)},
-        {"label": "Max Shrp Ret",  "value": _pct(ms_ret)},
-        {"label": "Min Var Vol",   "value": _pct(mv_vol, sign=False)},
-        {"label": "Current Sharpe","value": _fmt(cur_s)},
+        {"label": "Max Sharpe",     "value": _fmt(ms_ratio),
+         "help": "Highest achievable Sharpe ratio along the efficient frontier under the weight constraints. Subject to estimation error in expected returns."},
+        {"label": "Max Shrp Ret",   "value": _pct(ms_ret),
+         "help": "Expected annualised return at the maximum Sharpe (tangency) portfolio, estimated from historical data."},
+        {"label": "Min Var Vol",    "value": _pct(mv_vol, sign=False),
+         "help": "Lowest achievable portfolio volatility along the efficient frontier under the weight constraints."},
+        {"label": "Current Sharpe", "value": _fmt(cur_s),
+         "help": "Your portfolio's Sharpe ratio at the current weights. Compare to Max Sharpe to see how far from optimal the allocation is."},
     ]
 
     converged = opt.get("optimizer_converged", False)

@@ -5,6 +5,19 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.18.0] — 2026-03-15
+
+### Changed
+- `components/dashboard_quad.py`: Added `help=kpi.get("help")` to `st.metric()` calls — renders inline `?` tooltip on hover for every KPI tile. Removed "Explain Numbers" toggle button and explain panel block. "More Details →" is now the only action button per quadrant.
+- `pages/dashboard.py` `_build_q1/q2/q3/q4()`: Added `"help"` key to all 16 KPI dicts with concise 1–2 sentence tooltip text per metric.
+- `pages/dashboard.py` `_health_indicators()`: Reordered health signals — Market Stress → Return Quality → Volatility → Drawdown Risk → Diversification → Efficiency.
+- `pages/details_q1.py`, `details_q2.py`, `details_q3.py`, `details_q4.py`: Removed "All Metrics" dataframe table and "Explain Numbers" toggle + explain panel from all four details screens.
+
+### Removed
+- `components/explain_panel.py` is now unreferenced — no longer called from any page.
+
+---
+
 ## [0.17.0] — 2026-03-15
 
 ### Fixed

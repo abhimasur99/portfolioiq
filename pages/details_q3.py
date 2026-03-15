@@ -35,8 +35,6 @@ from assets.config import (
     SK_RISK_OUTLOOK,
 )
 
-_EXPLAIN_KEY = "_explain_open_q3_details"
-
 # Signal display labels (key → human-readable name)
 _SIGNAL_LABELS = {
     "vix_level":          "VIX Level",
@@ -309,73 +307,3 @@ def render() -> None:
         else:
             st.info("Stress test data not available.")
 
-    st.markdown("---")
-
-    # ── Full metrics table ─────────────────────────────────────────────────────
-    st.markdown("##### All Risk Outlook Metrics")
-
-    garch_label = "EWMA (GARCH fallback)" if is_fallback else "GARCH(1,1)"
-
-    metrics_data = {
-        "Metric": [
-            "Historical Volatility (ann.)",
-            "EWMA Volatility (ann.)",
-            f"{garch_label} Volatility (ann.)",
-            "VaR 95% — Historical (daily)",
-            "CVaR 95% — Historical (daily)",
-            "VaR 99% — Historical (daily)",
-            "CVaR 99% — Historical (daily)",
-            "VaR 95% — GARCH (daily)",
-            "VaR 95% — Monthly Scaled",
-            "Return Skewness",
-            "Excess Kurtosis",
-        ],
-        "Value": [
-            _pct(hist_vol, sign=False),
-            _pct(ewma_vol, sign=False),
-            _pct(garch_vol, sign=False),
-            _pct(var_95_hist),
-            _pct(cvar_95_hist),
-            _pct(var_99_hist),
-            _pct(cvar_99_hist),
-            _pct(var_95_garch),
-            _pct(var_monthly),
-            _fmt(skewness),
-            _fmt(excess_kurt),
-        ],
-        "What it measures": [
-            "Standard deviation of daily log returns × √252. Constant-weight estimate over full period.",
-            "Exponentially-weighted moving average of variance (λ=0.94, RiskMetrics). More weight on recent days.",
-            "Conditional variance from GARCH(1,1) fit — captures volatility clustering and mean reversion. "
-            "Falls back to EWMA if insufficient data or non-stationary fit (α+β≥1).",
-            "5th percentile of historical daily return distribution — threshold loss on worst 5% of days.",
-            "Average loss on the worst 5% of days. Always worse than VaR; this is the expected shortfall.",
-            "1st percentile threshold — loss exceeded only 1% of trading days historically.",
-            "Average loss on the worst 1% of days. Extreme tail risk estimate.",
-            "VaR using GARCH-implied conditional volatility × normal quantile (1.645σ). Forward-looking.",
-            "Daily VaR 95% scaled to monthly horizon using i.i.d. approximation (×√21). Directional only.",
-            "Asymmetry of the return distribution. Negative skew means more large losses than gains.",
-            "Tail thickness beyond a normal distribution. Excess kurtosis > 0 means fatter tails — "
-            "extreme events occur more often than the normal distribution predicts.",
-        ],
-    }
-
-    st.dataframe(
-        pd.DataFrame(metrics_data),
-        hide_index=True,
-        use_container_width=True,
-    )
-
-    st.markdown("---")
-
-    # ── Explain Numbers ────────────────────────────────────────────────────────
-    if st.button("Explain Numbers", key="_det_q3_exp_btn", use_container_width=True):
-        st.session_state[_EXPLAIN_KEY] = not st.session_state.get(_EXPLAIN_KEY, False)
-
-    if st.session_state.get(_EXPLAIN_KEY, False):
-        st.markdown("---")
-        from components.explain_panel import render_explain_panel
-        render_explain_panel("q3", analytics)
-        if st.button("Close explanation", key="_det_q3_close_exp"):
-            st.session_state[_EXPLAIN_KEY] = False
-            st.rerun()

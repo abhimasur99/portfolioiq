@@ -34,9 +34,6 @@ from assets.config import (
     SK_WEIGHTS,
 )
 
-_EXPLAIN_KEY = "_explain_open_q4_details"
-
-
 # ── Formatting helpers ──────────────────────────────────────────────────────────
 
 def _pct(val, decimals: int = 1, sign: bool = True) -> str:
@@ -263,64 +260,3 @@ def render() -> None:
     else:
         st.info("Weight delta table not available.")
 
-    st.markdown("---")
-
-    # ── Full metrics table ─────────────────────────────────────────────────────
-    st.markdown("##### All Optimization Metrics")
-
-    metrics_data = {
-        "Metric": [
-            "Max Sharpe — Annualised Return",
-            "Max Sharpe — Annualised Volatility",
-            "Max Sharpe — Sharpe Ratio",
-            "Min Variance — Annualised Return",
-            "Min Variance — Annualised Volatility",
-            "Min Variance — Sharpe Ratio",
-            "Risk Parity — Annualised Return",
-            "Risk Parity — Annualised Volatility",
-            "Risk Parity — Sharpe Ratio",
-            "CML Slope (Tangency Sharpe)",
-            "Optimizer Converged",
-        ],
-        "Value": [
-            _pct(ms_return), _pct(ms_vol, sign=False), _fmt(ms_ratio),
-            _pct(mv_return), _pct(mv_vol, sign=False), _fmt(mv_ratio),
-            _pct(rp_return), _pct(rp_vol, sign=False), _fmt(rp_ratio),
-            _fmt(cml_slope),
-            "Yes" if converged else "No — results may not be globally optimal",
-        ],
-        "What it measures": [
-            "Expected annualised return of the tangency portfolio (historical estimate).",
-            "Expected annualised volatility of the tangency portfolio.",
-            "Sharpe ratio at the tangency point — slope of the Capital Market Line.",
-            "Expected annualised return of the global minimum variance portfolio.",
-            "Lowest achievable portfolio volatility under the weight constraints.",
-            "Sharpe ratio of the minimum variance portfolio.",
-            "Expected return of the equal risk contribution portfolio.",
-            "Volatility of the risk parity portfolio — typically between Min Var and Max Sharpe.",
-            "Sharpe ratio of the risk parity portfolio.",
-            "Slope of the Capital Market Line from the risk-free rate through the tangency portfolio. "
-            "Equals the Max Sharpe ratio.",
-            "Whether scipy SLSQP found a converged solution for all three optimizers.",
-        ],
-    }
-
-    st.dataframe(
-        pd.DataFrame(metrics_data),
-        hide_index=True,
-        use_container_width=True,
-    )
-
-    st.markdown("---")
-
-    # ── Explain Numbers ────────────────────────────────────────────────────────
-    if st.button("Explain Numbers", key="_det_q4_exp_btn", use_container_width=True):
-        st.session_state[_EXPLAIN_KEY] = not st.session_state.get(_EXPLAIN_KEY, False)
-
-    if st.session_state.get(_EXPLAIN_KEY, False):
-        st.markdown("---")
-        from components.explain_panel import render_explain_panel
-        render_explain_panel("q4", analytics)
-        if st.button("Close explanation", key="_det_q4_close_exp"):
-            st.session_state[_EXPLAIN_KEY] = False
-            st.rerun()

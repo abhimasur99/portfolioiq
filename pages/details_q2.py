@@ -27,8 +27,6 @@ from assets.config import (
     SK_WEIGHTS,
 )
 
-_EXPLAIN_KEY = "_explain_open_q2_details"
-
 
 # ── Formatting helpers ──────────────────────────────────────────────────────────
 
@@ -216,71 +214,3 @@ def render() -> None:
             key="_det_q2_sectors",
         )
 
-    st.markdown("---")
-
-    # ── Full metrics table ─────────────────────────────────────────────────────
-    st.markdown("##### All Risk Factor Metrics")
-
-    metrics_data = {
-        "Metric": [
-            "HHI (Herfindahl-Hirschman Index)",
-            "Effective N",
-            "Diversification Ratio",
-            "Max Drawdown",
-            "Calmar Ratio",
-            "Recovery Days",
-            "Ulcer Index",
-            "Beta (vs Benchmark)",
-            "R-Squared",
-        ],
-        "Value": [
-            _fmt(hhi, 3),
-            _fmt(eff_n, 1),
-            _fmt(div_ratio),
-            _pct(max_dd),
-            _fmt(calmar),
-            str(recovery_days) if recovery_days is not None else "n/a",
-            _fmt(ulcer_index),
-            _fmt(beta),
-            _fmt(r_squared),
-        ],
-        "What it measures": [
-            "Weight concentration — ranges from 1/N (equal weight) to 1.0 (single holding). "
-            "Lower is more diversified.",
-            "Number of truly independent positions after accounting for correlations. "
-            "Concentrated portfolios show Effective N << actual number of holdings.",
-            "Ratio of weighted-average individual vols to portfolio vol. "
-            "Values above 1.0 confirm diversification is reducing risk.",
-            "Largest peak-to-trough portfolio decline over the period. "
-            "Represents the worst realised loss for a buy-and-hold investor.",
-            "CAGR ÷ |Max Drawdown|. Higher values mean better return earned per unit of "
-            "drawdown risk absorbed.",
-            "Trading days from the trough of the deepest drawdown back to the prior peak. "
-            "None if still in drawdown at period end.",
-            "Root mean square of all drawdown values — penalises depth and duration of "
-            "underwater periods. Lower is better.",
-            "Portfolio sensitivity to benchmark. β > 1 amplifies market moves; β < 1 dampens.",
-            "Proportion of portfolio variance explained by benchmark variance. "
-            "R² near 1.0 indicates high index-like behaviour.",
-        ],
-    }
-
-    st.dataframe(
-        pd.DataFrame(metrics_data),
-        hide_index=True,
-        use_container_width=True,
-    )
-
-    st.markdown("---")
-
-    # ── Explain Numbers ────────────────────────────────────────────────────────
-    if st.button("Explain Numbers", key="_det_q2_exp_btn", use_container_width=True):
-        st.session_state[_EXPLAIN_KEY] = not st.session_state.get(_EXPLAIN_KEY, False)
-
-    if st.session_state.get(_EXPLAIN_KEY, False):
-        st.markdown("---")
-        from components.explain_panel import render_explain_panel
-        render_explain_panel("q2", analytics)
-        if st.button("Close explanation", key="_det_q2_close_exp"):
-            st.session_state[_EXPLAIN_KEY] = False
-            st.rerun()
