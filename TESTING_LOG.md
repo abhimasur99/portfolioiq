@@ -25,9 +25,9 @@
 
 | ID | P | Screen | Description | Status | Commit |
 |----|---|--------|-------------|--------|--------|
-| TL-001 | P0 | Details Q1–Q4 | DuplicateWidgetID crashes all More Details screens — Back button rendered twice (once in dashboard._route_details, once in each details page) | OPEN | — |
-| TL-002 | P1 | Input | Portfolio entries lost when navigating back from dashboard — st.form submission clears _KEY_TICKER_EDITOR widget state | OPEN | — |
-| TL-003 | P1 | Dashboard | Ticker tape repeats each ticker 3× — tape_inner * 3 with few tickers makes repetition obvious | OPEN | — |
+| TL-001 | P0 | Details Q1–Q4 | DuplicateWidgetID crashes all More Details screens — Back button rendered twice (once in dashboard._route_details, once in each details page) | FIXED (beba3ef) | beba3ef |
+| TL-002 | P1 | Input | Portfolio entries lost when navigating back from dashboard — st.form submission clears _KEY_TICKER_EDITOR widget state | FIXED (beba3ef) | beba3ef |
+| TL-003 | P1 | Dashboard | Ticker tape repeats each ticker 3× — tape_inner * 3 with few tickers makes repetition obvious | FIXED (beba3ef) | beba3ef |
 | TL-004 | P1 | Terminal | VXMT 404 warning on every load — VXMT is delisted; signal already degrades gracefully to "unavailable" | WONTFIX/EXPECTED | — |
 | TL-005 | P2 | Dashboard | Holdings strip shows price already visible in ticker tape above it | OPEN | — |
 | TL-006 | P2 | Input | Weight preview only updates after clicking Analyse — live update removed when st.form was added | OPEN | — |
