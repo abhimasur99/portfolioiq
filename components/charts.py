@@ -262,13 +262,13 @@ def correlation_heatmap(corr_matrix: pd.DataFrame) -> go.Figure:
     n = len(labels)
     z = corr_matrix.values
 
-    # Conditional text color: use dark text for mid-range, light for extremes
+    # Conditional text color: near-0 cells are white background → dark text.
+    # Near-±1 cells are blue/red background → light text.
     text_colors = []
     for row in z:
         row_colors = []
         for val in row:
-            # Absolute value drives darkness; white background → use dark text
-            row_colors.append(COLOR_TEXT if abs(val) < 0.6 else COLOR_BG_SECONDARY)
+            row_colors.append("#000000" if abs(val) < 0.6 else COLOR_TEXT)
         text_colors.append(row_colors)
 
     annotations = []

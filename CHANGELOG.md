@@ -5,6 +5,22 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.17.0] — 2026-03-15
+
+### Fixed
+- `assets/style.css`: Ticker tape animation class mismatch — HTML used `ticker-tape`/`ticker-tape-content`; CSS targets `ticker-tape-container`/`ticker-tape-track`. Fixed HTML class names in `_render_ticker_tape()`. (TL-003)
+- `assets/style.css`: Ticker scroll speed reduced from 60s to 30s for better readability.
+- `pages/dashboard.py` `_render_holdings_strip()`: Replaced per-ticker price columns with a single full-width stacked segmented breakdown bar; each ticker gets a color-coded segment proportional to weight, labelled with symbol and percentage. (TL-005 / TL-016)
+- `pages/dashboard.py` `_check_loaded()`: "Go to Input →" button did nothing — now sets `_nav_pending` + reruns correctly. (TL-014 related)
+- `components/charts.py` `correlation_heatmap()`: Text on near-zero (white background) cells was invisible — changed to `#000000` for abs(val) < 0.6, `COLOR_TEXT` for abs(val) >= 0.6. (TL-008)
+- `analytics/risk_factors.py` `fetch_sector_weights()`: ETFs labeled "Unknown" sector — added `quoteType` check; ETF/MUTUALFUND quote types now labeled "ETF / Fund". (TL-009)
+- `assets/config.py` `STRESS_SCENARIOS`: Reordered to chronological — 2000 Dot-Com → 2008 GFC → 2020 COVID → 2022 Rate Shock. (TL-011)
+- `pages/details_q4.py`: Warning title changed from "Estimation Error Warning" to "Optimizer Assumptions". (TL-012)
+- `pages/settings.py`: Weight bounds and drift threshold sliders showed "0 to 0" / "1 to 1" — switched from float (0.0–1.0) + `format="%.0f%%"` to integer (0–100) + `format="%d%%"`, converting back to decimal on save. (TL-015)
+- `app.py` + `pages/input.py`: Auto-redirect to Dashboard after re-analyse failed on second run — replaced `key="nav_radio"` approach (blocked by Streamlit widget-state restriction) with `_nav_pending` / `_current_nav` plain-key pattern; `index=` only passed to radio when programmatic override is needed, eliminating two-click lag. (TL-014)
+
+---
+
 ## [0.16.0] — 2026-03-13
 
 ### Fixed

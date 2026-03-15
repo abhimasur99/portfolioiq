@@ -313,26 +313,28 @@ def render() -> None:
 
     col_wl, col_wh = st.columns(2)
     with col_wl:
-        new_weight_min = st.slider(
+        new_weight_min_pct = st.slider(
             "Minimum position weight",
-            min_value=0.0,
-            max_value=0.30,
-            value=float(st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)),
-            step=0.01,
-            format="%.0f%%",
+            min_value=0,
+            max_value=30,
+            value=int(round(float(st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)) * 100)),
+            step=1,
+            format="%d%%",
             help="No position can fall below this weight in any optimizer output.",
         )
+    new_weight_min = new_weight_min_pct / 100
 
     with col_wh:
-        new_weight_max = st.slider(
+        new_weight_max_pct = st.slider(
             "Maximum position weight",
-            min_value=0.20,
-            max_value=1.00,
-            value=float(st.session_state.get(SK_WEIGHT_MAX, DEFAULT_WEIGHT_MAX)),
-            step=0.05,
-            format="%.0f%%",
+            min_value=20,
+            max_value=100,
+            value=int(round(float(st.session_state.get(SK_WEIGHT_MAX, DEFAULT_WEIGHT_MAX)) * 100)),
+            step=5,
+            format="%d%%",
             help="No position can exceed this weight in any optimizer output.",
         )
+    new_weight_max = new_weight_max_pct / 100
 
     if new_weight_min >= new_weight_max:
         st.warning("Minimum weight must be less than maximum weight.")
@@ -346,15 +348,16 @@ def render() -> None:
         "It is a display setting — no recomputation is needed."
     )
 
-    new_drift_threshold = st.slider(
+    new_drift_threshold_pct = st.slider(
         "Drift threshold",
-        min_value=0.01,
-        max_value=0.20,
-        value=float(st.session_state.get(SK_DRIFT_THRESHOLD, DEFAULT_DRIFT_THRESHOLD)),
-        step=0.01,
-        format="%.0f%%",
+        min_value=1,
+        max_value=20,
+        value=int(round(float(st.session_state.get(SK_DRIFT_THRESHOLD, DEFAULT_DRIFT_THRESHOLD)) * 100)),
+        step=1,
+        format="%d%%",
         help="A position is flagged for rebalancing if its weight has drifted by more than this amount.",
     )
+    new_drift_threshold = new_drift_threshold_pct / 100
 
     st.markdown("---")
 

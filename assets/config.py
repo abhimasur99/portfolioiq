@@ -201,6 +201,10 @@ SIGNAL_DXY      = "DX-Y.NYB"   # US Dollar Index
 # ─── Stress Test Scenarios ────────────────────────────────────────────────────
 
 STRESS_SCENARIOS = {
+    "2000 Dot-Com Bust": {
+        "index_return": -0.78,
+        "description":  "Nasdaq fell ~78% over 2.5 years (2000–2002).",
+    },
     "2008 Global Financial Crisis": {
         "index_return": -0.37,
         "description":  "SPY fell ~37% in 2008.",
@@ -208,10 +212,6 @@ STRESS_SCENARIOS = {
     "2020 COVID Crash": {
         "index_return": -0.34,
         "description":  "SPY fell ~34% peak-to-trough (Feb–Mar 2020).",
-    },
-    "2000 Dot-Com Bust": {
-        "index_return": -0.78,
-        "description":  "Nasdaq fell ~78% over 2.5 years (2000–2002).",
     },
     "2022 Rate Shock": {
         "index_return": -0.18,

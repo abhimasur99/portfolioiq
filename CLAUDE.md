@@ -190,6 +190,26 @@ Next session: Session 16 — full integration, 3-persona manual testing, README,
 
 [Checkpoint — Session 16 COMPLETE]: Fixed 4 bugs (dashboard.py _health_indicators/max_drawdown wrong dict, _build_q1/max_drawdown wrong dict, _build_q2/corr_matrix wrong key, explain_panel.py Q1/max_drawdown wrong dict). Full cross-page key audit passed. README.md written (quickstart, structure, methodology, tests, config, disclaimer, tech stack). CHANGELOG [0.16.0] added. Full suite: 151 passed. Final commit b707cd9 made: "feat: Session 16 — integration fixes, README, project complete". PROJECT COMPLETE.
 
+**Testing Phase — Session T1 (2026-03-14 / 2026-03-15)**
+
+Issues found and fixed (see TESTING_LOG.md for full tracker):
+- TL-003 FIXED: Ticker tape CSS class mismatch (style.css + dashboard.py _render_ticker_tape)
+- TL-005 FIXED: Holdings strip — replaced price columns with stacked segmented breakdown bar (dashboard.py)
+- TL-008 FIXED: Correlation heatmap text invisible on near-zero cells (charts.py)
+- TL-009 FIXED: ETF sector showed "Unknown" — quoteType check now labels as "ETF / Fund" (risk_factors.py)
+- TL-011 FIXED: Stress test scenarios not chronological — reordered in config.py STRESS_SCENARIOS
+- TL-012 FIXED: "Estimation Error Warning" → "Optimizer Assumptions" (details_q4.py)
+- TL-014 FIXED: Auto-redirect to Dashboard failed on re-analyse — _nav_pending/_current_nav plain-key pattern; radio has no key=, index= only passed on programmatic override (app.py + input.py)
+- TL-015 FIXED: Settings sliders showed "0 to 0" — switched to integer 0–100 scale + format="%d%%" (settings.py)
+- TL-016 FIXED: Holdings strip redesigned to stacked breakdown bar (same as TL-005 resolution)
+- "Go to Input" button on guard screen fixed to use _nav_pending pattern (dashboard.py)
+- Two-click nav lag fixed — index= now omitted on normal reruns (app.py)
+- Ticker scroll speed: 60s → 30s (style.css)
+
+[Checkpoint — Testing Session T1 COMPLETE]: CHANGELOG [0.17.0] added. All 10 modified files staged for commit. Remaining open: TL-006 (weight preview liveness — deferred), TL-007 (guide tables — deferred pending Stage C), TL-010 (tech concentration — DEFERRED/v2), TL-013 (page transitions — open).
+
+**Next session: Stage B** — ? icon tooltip refactor: add help= to all st.metric() KPI calls, remove Explain Numbers + All Metrics sections from all 4 details pages, health indicator reorder.
+
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
 ---

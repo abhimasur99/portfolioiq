@@ -80,15 +80,28 @@ for key, value in _defaults.items():
 # Four permanent items only. Order matters for display.
 _NAV_ITEMS = ["INPUT", "DASHBOARD", "GUIDE", "SETTINGS"]
 
-# Default to DASHBOARD if portfolio is loaded, otherwise INPUT.
-_default_page = "DASHBOARD" if st.session_state[SK_PORTFOLIO_LOADED] else "INPUT"
+# Navigation state is tracked in _current_nav (a plain session state key, not
+# widget-bound). Pages request navigation by setting _nav_pending; this block
+# resolves it before the radio is rendered, avoiding widget-state restrictions.
+#
+# index= is only passed when a programmatic override is needed (_nav_pending fired
+# or first load). On normal reruns it is omitted so Streamlit tracks the radio's
+# own state by position — passing index= every run causes a two-click lag.
+_nav_target = st.session_state.pop("_nav_pending", None)
+if _nav_target and _nav_target in _NAV_ITEMS:
+    _nav_index = _NAV_ITEMS.index(_nav_target)
+elif "_current_nav" not in st.session_state:
+    _nav_index = 1 if st.session_state[SK_PORTFOLIO_LOADED] else 0
+else:
+    _nav_index = None  # normal rerun — let radio track its own state
 
-selected_page = st.sidebar.radio(
-    label="Navigation",
-    options=_NAV_ITEMS,
-    index=_NAV_ITEMS.index(_default_page),
-    label_visibility="collapsed",
-)
+_radio_kwargs: dict = dict(label="Navigation", options=_NAV_ITEMS, label_visibility="collapsed")
+if _nav_index is not None:
+    _radio_kwargs["index"] = _nav_index
+
+selected_page = st.sidebar.radio(**_radio_kwargs)
+# Sync user's manual nav click back to our state variable
+st.session_state["_current_nav"] = selected_page
 
 # ── Page routing ───────────────────────────────────────────────────────────────
 if selected_page == "INPUT":

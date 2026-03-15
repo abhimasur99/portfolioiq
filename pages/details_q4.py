@@ -102,9 +102,9 @@ def render() -> None:
     st.title("Optimization — Deep Dive")
     st.caption("Prescriptive analytics: efficient frontier, optimizer portfolios, and weight deltas.")
 
-    # ── Estimation error warning ───────────────────────────────────────────────
+    # ── Optimizer assumptions notice ───────────────────────────────────────────
     st.warning(
-        "**Estimation Error Warning — Read Before Interpreting.**  \n"
+        "**Optimizer Assumptions — Read Before Interpreting.**  \n"
         "Mean-variance optimization is highly sensitive to the expected return inputs, "
         "which are estimated from historical data and carry substantial uncertainty. "
         "Small changes in return estimates can produce very different frontier shapes and "

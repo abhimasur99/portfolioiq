@@ -144,7 +144,7 @@ h4, h5, h6 {
 .ticker-tape-track {
     display: flex;
     white-space: nowrap;
-    animation: ticker-scroll 60s linear infinite;
+    animation: ticker-scroll 30s linear infinite;
 }
 
 .ticker-tape-track:hover {

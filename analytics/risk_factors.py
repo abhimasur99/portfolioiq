@@ -296,11 +296,16 @@ def fetch_sector_weights(weights: pd.Series) -> dict:
         logger.warning("yfinance not available — sector weights skipped.")
         return {}
 
+    _ETF_QUOTE_TYPES = {"etf", "mutualfund"}
+
     sector_weights: dict[str, float] = {}
     for ticker, weight in weights.items():
         try:
             info = yf.Ticker(ticker).info
-            sector = info.get("sector") or "Unknown"
+            sector = info.get("sector") or ""
+            if not sector:
+                quote_type = (info.get("quoteType") or "").lower()
+                sector = "ETF / Fund" if quote_type in _ETF_QUOTE_TYPES else "Unknown"
         except Exception as exc:
             logger.warning("Sector fetch failed for %s: %s", ticker, exc)
             sector = "Unknown"

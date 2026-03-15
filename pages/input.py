@@ -456,4 +456,5 @@ def render() -> None:
                         tickers, benchmark, period, weights, portfolio_name
                     )
                     if success:
+                        st.session_state["_nav_pending"] = "DASHBOARD"
                         st.rerun()

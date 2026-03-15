@@ -25,7 +25,7 @@ import pandas as pd
 import streamlit as st
 
 from assets.config import (
-    COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED,
+    COLOR_BLUE, COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED,
     SK_ANALYTICS, SK_BENCH_RETURNS, SK_BENCHMARK, SK_PERFORMANCE,
     SK_PORTFOLIO_LOADED, SK_PORTFOLIO_NAME, SK_PORT_RETURNS,
     SK_PRICE_DATA, SK_RISK_FACTORS, SK_RISK_OUTLOOK,
@@ -36,6 +36,18 @@ from assets.config import (
 # Routing key set by render_quadrant More Details button
 _SK_DETAILS = "_dashboard_details"
 
+# Color palette for holdings segments (cycles if > 8 tickers)
+_HOLDING_COLORS = [
+    "#00d4ff",  # blue
+    "#2aba6a",  # green
+    "#ef9f27",  # amber
+    "#a855f7",  # purple
+    "#e24b4a",  # red
+    "#06b6d4",  # teal
+    "#f97316",  # orange
+    "#ec4899",  # pink
+]
+
 
 # ── Guard ──────────────────────────────────────────────────────────────────────
 
@@ -43,7 +55,8 @@ def _check_loaded() -> bool:
     if not st.session_state.get(SK_PORTFOLIO_LOADED, False):
         st.warning("No portfolio loaded. Please go to **INPUT** and analyse your portfolio first.")
         if st.button("Go to Input →"):
-            st.session_state[SK_PORTFOLIO_LOADED] = False
+            st.session_state["_nav_pending"] = "INPUT"
+            st.rerun()
         return False
     return True
 
@@ -111,8 +124,8 @@ def _render_ticker_tape() -> None:
 
     tape_inner = " &nbsp;|&nbsp; ".join(segments)
     tape_html = (
-        '<div class="ticker-tape">'
-        '<div class="ticker-tape-content">'
+        '<div class="ticker-tape-container">'
+        '<div class="ticker-tape-track">'
         + tape_inner * 2  # repeat once for seamless CSS loop
         + "</div></div>"
     )
@@ -122,28 +135,35 @@ def _render_ticker_tape() -> None:
 # ── Holdings strip ─────────────────────────────────────────────────────────────
 
 def _render_holdings_strip() -> None:
-    """Render a compact horizontal strip showing ticker, weight, latest price."""
-    prices:  pd.DataFrame = st.session_state.get(SK_PRICE_DATA, pd.DataFrame())
-    tickers: list         = st.session_state.get(SK_TICKERS, [])
-    weights: pd.Series    = st.session_state.get(SK_WEIGHTS, pd.Series(dtype=float))
+    """Render a full-width stacked segmented bar showing each ticker's portfolio weight."""
+    tickers: list      = st.session_state.get(SK_TICKERS, [])
+    weights: pd.Series = st.session_state.get(SK_WEIGHTS, pd.Series(dtype=float))
 
-    if not tickers or prices.empty:
+    if not tickers:
         return
 
-    cols = st.columns(len(tickers))
-    for col, ticker in zip(cols, tickers):
-        with col:
-            w = float(weights.get(ticker, 0.0))
-            price_series = prices.get(ticker, pd.Series(dtype=float)).dropna()
-            latest_price = f"${price_series.iloc[-1]:.2f}" if len(price_series) > 0 else "n/a"
-            st.markdown(
-                f'<div style="text-align:center;">'
-                f'<div style="font-weight:bold;font-size:1.0rem;">{ticker}</div>'
-                f'<div style="font-size:0.85rem;color:{COLOR_TEXT_MUTED};">{w*100:.1f}%</div>'
-                f'<div style="font-size:0.85rem;">{latest_price}</div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+    segments = []
+    for i, ticker in enumerate(tickers):
+        w_pct = float(weights.get(ticker, 0.0)) * 100
+        color = _HOLDING_COLORS[i % len(_HOLDING_COLORS)]
+        # Show label inside segment; skip text for very narrow segments (<8%)
+        label = f"{ticker} {w_pct:.0f}%" if w_pct >= 12 else (ticker if w_pct >= 8 else "")
+        segments.append(
+            f'<div style="width:{w_pct:.2f}%;background:{color};display:flex;'
+            f'align-items:center;justify-content:center;overflow:hidden;'
+            f'white-space:nowrap;padding:0 4px;">'
+            f'<span style="font-size:0.78rem;font-weight:700;color:#000;letter-spacing:0.03em;">'
+            f'{label}</span>'
+            f'</div>'
+        )
+
+    bar_html = (
+        '<div style="display:flex;width:100%;height:34px;border-radius:5px;'
+        'overflow:hidden;margin:4px 0 8px;">'
+        + "".join(segments)
+        + "</div>"
+    )
+    st.markdown(bar_html, unsafe_allow_html=True)
 
 
 # ── Health bar ─────────────────────────────────────────────────────────────────
