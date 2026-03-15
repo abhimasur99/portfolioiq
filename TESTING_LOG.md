@@ -31,7 +31,7 @@
 | TL-004 | P1 | Terminal | VXMT 404 warning on every load — VXMT is delisted; signal already degrades gracefully to "unavailable" | WONTFIX/EXPECTED | — |
 | TL-005 | P2 | Dashboard | Holdings strip shows price already visible in ticker tape above it — replaced with horizontal weight bar | FIXED | — |
 | TL-006 | P2 | Input | Weight preview only updates after clicking Analyse — live update removed when st.form was added | OPEN | — |
-| TL-007 | P3 | Guide | Tables unreadable — cell text too long, columns overflow and are unreadable | OPEN | — |
+| TL-007 | P3 | Guide | Tables unreadable — cell text too long, columns overflow and are unreadable | FIXED | — |
 
 | TL-008 | P2 | Details Q2 | Correlation matrix: some numbers invisible — text color not contrasting against cell background color | FIXED | — |
 | TL-009 | P2 | Details Q2 | ETFs (e.g. GLD) show as "Unknown" sector — yfinance doesn't classify ETFs under GICS sectors | FIXED | — |

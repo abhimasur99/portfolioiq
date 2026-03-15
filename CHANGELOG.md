@@ -5,6 +5,16 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.20.0] — 2026-03-15
+
+### Changed
+- `pages/guide.py`: Complete redesign (Stage C / TL-007). Replaced 5 wide 4-column methodology tables with a readable 3-section layout: (1) How to Use — 4-step walkthrough, (2) What Each Quadrant Tells You — one paragraph per quadrant, (3) Key Limitations — 4 concise bullets. Version bumped to v1.1. `pandas` import removed.
+
+### Removed
+- All metric-by-metric formula/limitation tables from guide.py (`_PERF_ROWS`, `_RISK_FACTORS_ROWS`, `_RISK_OUTLOOK_ROWS`, `_OPTIMIZATION_ROWS`, `_SIGNALS_ROWS`, `_render_table`). Metric definitions now live in ? tooltips on every KPI tile.
+
+---
+
 ## [0.19.0] — 2026-03-15
 
 ### Fixed

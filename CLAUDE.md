@@ -210,7 +210,9 @@ Issues found and fixed (see TESTING_LOG.md for full tracker):
 
 **[Checkpoint — Stage B COMPLETE]**: ? tooltip refactor done. dashboard_quad.py: help= on all st.metric() calls, Explain Numbers removed. dashboard.py: help text on all 16 KPI dicts, health indicators reordered (Market Stress → Return Quality → Volatility → Drawdown → Diversification → Efficiency). details_q1/q2/q3/q4: All Metrics tables + Explain Numbers blocks removed. explain_panel.py now unreferenced. CHANGELOG [0.18.0] added.
 
-**Next: Stage C** — Guide page redesign. TL-007 OPEN. Discuss approach before implementing.
+**[Checkpoint — Stage C COMPLETE]**: Guide redesigned. All 5 metric tables removed. New 3-section layout: How to Use (4-step walkthrough) → What Each Quadrant Tells You (4 paragraphs) → Key Limitations. TL-007 FIXED. CHANGELOG [0.20.0]. Commit: see git log.
+
+**Open items remaining:** TL-006 (weight preview liveness — deferred), TL-010 (tech concentration — DEFERRED/v2), TL-013 (page transitions — open). Testing phase substantially complete.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
