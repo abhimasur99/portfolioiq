@@ -113,7 +113,7 @@ def _render_ticker_tape() -> None:
     tape_html = (
         '<div class="ticker-tape">'
         '<div class="ticker-tape-content">'
-        + tape_inner * 3  # repeat for seamless loop
+        + tape_inner * 2  # repeat once for seamless CSS loop
         + "</div></div>"
     )
     st.markdown(tape_html, unsafe_allow_html=True)

@@ -35,7 +35,6 @@ from assets.config import (
     SK_RISK_OUTLOOK,
 )
 
-_SK_DETAILS  = "_dashboard_details"
 _EXPLAIN_KEY = "_explain_open_q3_details"
 
 # Signal display labels (key → human-readable name)
@@ -147,11 +146,6 @@ def _render_preparedness_panel(signals: dict) -> None:
 
 def render() -> None:
     """Render the Q3 (Risk Outlook) More Details screen."""
-    # ── Back button ────────────────────────────────────────────────────────────
-    if st.button("← Back to Dashboard"):
-        st.session_state.pop(_SK_DETAILS, None)
-        st.rerun()
-
     analytics   = st.session_state.get(SK_ANALYTICS, {})
     ro          = analytics.get(SK_RISK_OUTLOOK, {})
     signals     = analytics.get(SK_MARKET_SIGNALS, {})

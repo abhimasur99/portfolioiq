@@ -251,6 +251,27 @@ Which files to read and in which order, depending on the situation.
 
 ---
 
+## Testing Phase Protocol
+
+Applies after Session 16 (build complete). Run alongside Session Continuity Protocol.
+
+**Rule T1 — Session start:** Read CLAUDE.md + TESTING_LOG.md. Confirm which issues are OPEN / IN-PROGRESS / FIXED before writing any code.
+
+**Rule T2 — Bug found:** Add to TESTING_LOG.md immediately (append a row, never delete). Assign next ID (TL-NNN) and severity (P0–P3). Do not fix without user confirmation of priority.
+
+**Rule T3 — Fix order:** P0 → P1 → P2 → P3. Commit after each priority tier. Commit format: `fix: TL-NNN — short description`. Update TESTING_LOG.md status + commit hash.
+
+**Rule T4 — On interruption (context limit / session end):** Write in-progress checkpoint to CLAUDE.md (same Rule 2 format as build phase), update TESTING_LOG.md statuses, commit both, then stop. Next session reads CLAUDE.md checkpoint → TESTING_LOG.md → resumes from next step.
+
+**Rule T5 — Status transitions:** OPEN → IN-PROGRESS (when actively being fixed in this session) → FIXED (commit hash) | DEFERRED (reason, review later) | WONTFIX (reason, permanent).
+
+**Canonical files for testing phase:**
+- `TESTING_LOG.md` — issue tracker, session notes
+- `CLAUDE.md` — checkpoint log (same as build phase)
+- `CHANGELOG.md` — one entry per fix commit
+
+---
+
 ## Standard Session Opening Prompt
 
 "Please read CLAUDE.md first and confirm you understand the current project state.

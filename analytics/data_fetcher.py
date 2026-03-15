@@ -264,8 +264,8 @@ def validate_tickers(tickers: list[str]) -> tuple[list[str], list[str]]:
         return valid, invalid
 
     except Exception as exc:
-        logger.error("Ticker validation failed: %s", exc)
-        return [], tickers  # conservative: mark all as invalid on error
+        logger.warning("Ticker validation skipped (network/API error: %s) — proceeding to main fetch", exc)
+        return tickers, []  # skip validation; let the main pipeline surface the real error
 
 
 # ── Public cached API ─────────────────────────────────────────────────────────

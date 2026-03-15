@@ -27,7 +27,6 @@ from assets.config import (
     SK_WEIGHTS,
 )
 
-_SK_DETAILS  = "_dashboard_details"
 _EXPLAIN_KEY = "_explain_open_q2_details"
 
 
@@ -56,11 +55,6 @@ def _fmt(val, decimals: int = 2) -> str:
 
 def render() -> None:
     """Render the Q2 (Risk Factors) More Details screen."""
-    # ── Back button ────────────────────────────────────────────────────────────
-    if st.button("← Back to Dashboard"):
-        st.session_state.pop(_SK_DETAILS, None)
-        st.rerun()
-
     analytics = st.session_state.get(SK_ANALYTICS, {})
     perf      = analytics.get(SK_PERFORMANCE, {})
     rf        = analytics.get(SK_RISK_FACTORS, {})

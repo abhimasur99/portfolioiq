@@ -67,20 +67,36 @@ from assets.config import (
 _MAX_TICKERS = 10
 _MIN_TICKERS = 2
 
-# Session-local keys for the input form state
-_KEY_PORTFOLIO_DF  = "_input_portfolio_df"
-_KEY_TICKER_EDITOR = "_ticker_editor"
+# Session-local keys for the input form state.
+# _KEY_PORTFOLIO_BASE is the fixed initial DataFrame — never overwritten after
+# init. _KEY_TICKER_EDITOR is the data_editor widget key that Streamlit uses to
+# accumulate row-level diffs (edited_rows / added_rows / deleted_rows). Keeping
+# the base fixed and letting the key own the diffs avoids the double-apply bug
+# that occurs when edited_df is written back as the new base on every rerun.
+_KEY_PORTFOLIO_BASE = "_input_portfolio_base"
+_KEY_TICKER_EDITOR  = "_ticker_editor"
+_KEY_LAST_SUBMITTED = "_input_last_submitted"
 
 
 # ── Form helpers ───────────────────────────────────────────────────────────────
 
 def _init_input_state() -> None:
-    """Initialise the editable holdings DataFrame in session state."""
-    if _KEY_PORTFOLIO_DF not in st.session_state:
-        st.session_state[_KEY_PORTFOLIO_DF] = pd.DataFrame({
-            "Ticker":        ["", "", "", ""],
-            "USD Amount ($)": [0.0, 0.0, 0.0, 0.0],
-        })
+    """Initialise the fixed-base holdings DataFrame in session state.
+
+    On first load: 4 empty rows.
+    After a successful pipeline run: seed base from the last submitted DataFrame
+    so navigating back to INPUT shows the previously entered portfolio.
+    Clears any stale _KEY_TICKER_EDITOR diffs so they don't double-apply.
+    """
+    if _KEY_PORTFOLIO_BASE not in st.session_state:
+        if _KEY_LAST_SUBMITTED in st.session_state:
+            st.session_state[_KEY_PORTFOLIO_BASE] = st.session_state[_KEY_LAST_SUBMITTED].copy()
+            st.session_state.pop(_KEY_TICKER_EDITOR, None)  # stale diffs would double-apply
+        else:
+            st.session_state[_KEY_PORTFOLIO_BASE] = pd.DataFrame({
+                "Ticker":        ["", "", "", ""],
+                "USD Amount ($)": [0.0, 0.0, 0.0, 0.0],
+            })
 
 
 def _parse_portfolio_df(df: pd.DataFrame) -> tuple:
@@ -291,73 +307,74 @@ def render() -> None:
     col_form, col_preview = st.columns([3, 2], gap="large")
 
     # ── Left column: form ──────────────────────────────────────────────────────
+    # All inputs are wrapped in st.form so that widget interactions (selectbox,
+    # checkbox) do not trigger reruns mid-entry. Data is committed atomically
+    # when the submit button is clicked.
     with col_form:
-        portfolio_name = st.text_input(
-            "Portfolio name (optional)",
-            value=st.session_state.get(SK_PORTFOLIO_NAME, ""),
-            placeholder="e.g. Tech Growth Portfolio",
-        )
-
-        st.markdown("##### Holdings")
-        st.caption(
-            f"Enter {_MIN_TICKERS}–{_MAX_TICKERS} tickers with USD dollar amounts. "
-            "Use the **+** icon to add rows."
-        )
-
-        edited_df = st.data_editor(
-            st.session_state[_KEY_PORTFOLIO_DF],
-            num_rows="dynamic",
-            use_container_width=True,
-            column_config={
-                "Ticker": st.column_config.TextColumn(
-                    "Ticker",
-                    help="Stock ticker symbol (e.g. AAPL, MSFT)",
-                    max_chars=10,
-                ),
-                "USD Amount ($)": st.column_config.NumberColumn(
-                    "USD Amount ($)",
-                    help="Current market value of this position in USD",
-                    min_value=0.0,
-                    format="$%g",
-                ),
-            },
-            hide_index=True,
-            key=_KEY_TICKER_EDITOR,
-        )
-        # Persist edits back to session state
-        st.session_state[_KEY_PORTFOLIO_DF] = edited_df
-
-        col_b, col_p = st.columns(2)
-        with col_b:
-            bench_keys   = list(BENCHMARK_OPTIONS.keys())
-            bench_vals   = list(BENCHMARK_OPTIONS.values())
-            stored_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
-            bench_idx    = bench_vals.index(stored_bench) if stored_bench in bench_vals else 0
-            benchmark_label = st.selectbox("Benchmark", options=bench_keys, index=bench_idx)
-            benchmark = BENCHMARK_OPTIONS[benchmark_label]
-
-        with col_p:
-            selectable_periods = {k: v for k, v in PERIOD_OPTIONS.items() if v != "custom"}
-            period_label = st.selectbox(
-                "Time period",
-                options=list(selectable_periods.keys()),
-                index=_period_index(st.session_state.get(SK_PERIOD, DEFAULT_PERIOD)),
+        with st.form("portfolio_form"):
+            portfolio_name = st.text_input(
+                "Portfolio name (optional)",
+                value=st.session_state.get(SK_PORTFOLIO_NAME, ""),
+                placeholder="e.g. Tech Growth Portfolio",
             )
-            period = selectable_periods[period_label]
 
-        with st.expander("Full disclaimer"):
-            st.markdown(DISCLAIMER_FULL)
+            st.markdown("##### Holdings")
+            st.caption(
+                f"Enter {_MIN_TICKERS}–{_MAX_TICKERS} tickers with USD dollar amounts. "
+                "Use the **+** icon to add rows."
+            )
 
-        agree = st.checkbox("I understand this analysis is not financial advice.")
+            edited_df = st.data_editor(
+                st.session_state[_KEY_PORTFOLIO_BASE],
+                num_rows="dynamic",
+                use_container_width=True,
+                column_config={
+                    "Ticker": st.column_config.TextColumn(
+                        "Ticker",
+                        help="Stock ticker symbol (e.g. AAPL, MSFT)",
+                        max_chars=10,
+                    ),
+                    "USD Amount ($)": st.column_config.NumberColumn(
+                        "USD Amount ($)",
+                        help="Current market value of this position in USD",
+                        min_value=0.0,
+                        format="$%g",
+                    ),
+                },
+                hide_index=True,
+                key=_KEY_TICKER_EDITOR,
+            )
 
-        submit_clicked = st.button(
-            "Analyse Portfolio →",
-            type="primary",
-            use_container_width=True,
-            disabled=not agree,
-        )
+            col_b, col_p = st.columns(2)
+            with col_b:
+                bench_keys   = list(BENCHMARK_OPTIONS.keys())
+                bench_vals   = list(BENCHMARK_OPTIONS.values())
+                stored_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
+                bench_idx    = bench_vals.index(stored_bench) if stored_bench in bench_vals else 0
+                benchmark_label = st.selectbox("Benchmark", options=bench_keys, index=bench_idx)
+                benchmark = BENCHMARK_OPTIONS[benchmark_label]
 
-    # ── Right column: live weight preview ─────────────────────────────────────
+            with col_p:
+                selectable_periods = {k: v for k, v in PERIOD_OPTIONS.items() if v != "custom"}
+                period_label = st.selectbox(
+                    "Time period",
+                    options=list(selectable_periods.keys()),
+                    index=_period_index(st.session_state.get(SK_PERIOD, DEFAULT_PERIOD)),
+                )
+                period = selectable_periods[period_label]
+
+            with st.expander("Full disclaimer"):
+                st.markdown(DISCLAIMER_FULL)
+
+            agree = st.checkbox("I understand this analysis is not financial advice.")
+
+            submit_clicked = st.form_submit_button(
+                "Analyse Portfolio →",
+                type="primary",
+                use_container_width=True,
+            )
+
+    # ── Right column: weight preview (reflects last submitted state) ───────────
     with col_preview:
         tickers, amounts = _parse_portfolio_df(edited_df)
         weight_min = st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)
@@ -366,7 +383,7 @@ def render() -> None:
         st.markdown("##### Weight Preview")
 
         if len(tickers) < _MIN_TICKERS:
-            st.info(f"Enter at least {_MIN_TICKERS} tickers with non-zero amounts to see weight preview.")
+            st.info(f"Enter at least {_MIN_TICKERS} tickers with non-zero amounts, then click Analyse to see preview.")
         elif len(tickers) > _MAX_TICKERS:
             st.warning(
                 f"Maximum {_MAX_TICKERS} tickers allowed. "
@@ -403,31 +420,40 @@ def render() -> None:
 
     # ── Submission handling ────────────────────────────────────────────────────
     if submit_clicked:
-        tickers, amounts = _parse_portfolio_df(edited_df)
-        weight_min = st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)
-        weight_max = st.session_state.get(SK_WEIGHT_MAX, DEFAULT_WEIGHT_MAX)
-
-        if len(tickers) < _MIN_TICKERS:
-            st.error(f"Enter at least {_MIN_TICKERS} holdings with non-zero amounts.")
-        elif len(tickers) > _MAX_TICKERS:
-            st.error(
-                f"Maximum {_MAX_TICKERS} tickers. "
-                f"Remove {len(tickers) - _MAX_TICKERS} row(s) and resubmit."
-            )
+        if not agree:
+            st.error("Please tick the disclaimer checkbox before submitting.")
         else:
-            weights = _compute_weights(tickers, amounts)
-            bound_errors = _weight_bound_errors(weights, weight_min, weight_max)
-            if bound_errors:
+            tickers, amounts = _parse_portfolio_df(edited_df)
+            weight_min = st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)
+            weight_max = st.session_state.get(SK_WEIGHT_MAX, DEFAULT_WEIGHT_MAX)
+
+            if len(tickers) < _MIN_TICKERS:
+                st.error(f"Enter at least {_MIN_TICKERS} holdings with non-zero amounts.")
+            elif len(tickers) > _MAX_TICKERS:
                 st.error(
-                    "Weight constraints not met. Adjust dollar amounts or update "
-                    "weight bounds in **Settings**."
+                    f"Maximum {_MAX_TICKERS} tickers. "
+                    f"Remove {len(tickers) - _MAX_TICKERS} row(s) and resubmit."
                 )
-                for err in bound_errors:
-                    st.warning(err)
             else:
-                st.markdown("---")
-                success = _run_pipeline(
-                    tickers, benchmark, period, weights, portfolio_name
-                )
-                if success:
-                    st.rerun()
+                weights = _compute_weights(tickers, amounts)
+                bound_errors = _weight_bound_errors(weights, weight_min, weight_max)
+                if bound_errors:
+                    st.error(
+                        "Weight constraints not met. Adjust dollar amounts or update "
+                        "weight bounds in **Settings**."
+                    )
+                    for err in bound_errors:
+                        st.warning(err)
+                else:
+                    # Persist the submitted DataFrame so navigating back to
+                    # INPUT pre-populates the form with the last portfolio.
+                    st.session_state[_KEY_LAST_SUBMITTED] = edited_df.copy()
+                    # Reset the base so _init_input_state picks it up fresh
+                    # on the next INPUT render (after navigation back).
+                    st.session_state.pop(_KEY_PORTFOLIO_BASE, None)
+                    st.markdown("---")
+                    success = _run_pipeline(
+                        tickers, benchmark, period, weights, portfolio_name
+                    )
+                    if success:
+                        st.rerun()
