@@ -66,3 +66,13 @@ Remaining open: TL-006 (weight preview liveness — deferred for discussion), TL
 New issues found: TL-014 (auto-redirect on re-analyse), TL-015 (settings slider format), TL-016 (holdings strip redesign to stacked bar). Also: ticker scroll speed halved (60s → 30s).
 Fixed: TL-014 (nav_radio key added to radio widget in app.py; st.session_state["nav_radio"]="DASHBOARD" set before rerun in input.py), TL-015 (sliders now use 0–100 int scale with format="%d%%", convert to decimal on save), TL-016 (holdings strip → full-width stacked segmented bar with color-coded per-ticker segments).
 Stage B planned: ? icon tooltips on all KPI metrics, remove Explain Numbers + All Metrics tables from details pages. Stage C: Guide page redesign.
+
+**2026-03-15 — Fix session 5 (Stage B + C)**
+New issue found: Two-click navigation lag introduced by TL-014 fix — without key= on radio, passing index= on every rerun caused Streamlit to reset widget position, requiring two clicks.
+Fixed: Two-click nav lag (app.py: index= now only passed when _nav_pending fires or on first load; omitted on normal reruns so radio tracks its own state).
+Fixed: More Details state persistence — _dashboard_details session key persisted when navigating away from Dashboard. Fixed by clearing it in INPUT/GUIDE/SETTINGS routing blocks in app.py.
+Stage B implemented (commit 33ab9a4): ? icon tooltips via st.metric(help=) on all 16 KPI tiles in dashboard quadrants (_build_q1/q2/q3/q4 in dashboard.py); removed Explain Numbers toggle button + explain panel from dashboard_quad.py; health bar reordered to: Market Stress → Return Quality → Volatility → Drawdown Risk → Diversification → Efficiency.
+Details Key Metrics + Q3 signals panel (commit 5de925f): Added st.metric(help=) grids to Key Metrics sections in details_q1/q2/q3 (replacing dataframe tables). Converted Q3 Risk Preparedness Panel from HTML card grid to st.metric() tiles with signal interpretation in help= tooltip.
+Stage C Guide redesign — TL-007 FIXED (commit a9fa5c9): guide.py completely rewritten — removed all 5 wide metric-table expanders (unreadable in st.dataframe), pivoted to 3-section how-to-use layout: Section 1 (4-step how-to-use flow), Section 2 (what each quadrant tells you — 4 paragraphs), Section 3 (key limitations — 4 points). Metric definitions now live in ? tooltips on each KPI tile. Version bumped to v1.1 — 2026-03.
+Commits this session: 3dc0dcc (T1 bug fixes), 33ab9a4 (Stage B), 5de925f (nav + details tooltips), a9fa5c9 (Stage C + TL-007).
+Remaining open: TL-006 (weight preview liveness — deferred), TL-013 (page transitions — open low priority), TL-010 (tech concentration — deferred/v2).

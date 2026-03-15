@@ -214,6 +214,8 @@ Issues found and fixed (see TESTING_LOG.md for full tracker):
 
 **Open items remaining:** TL-006 (weight preview liveness — deferred), TL-010 (tech concentration — DEFERRED/v2), TL-013 (page transitions — open). Testing phase substantially complete.
 
+**[Checkpoint — Project Status Check (2026-03-15)]**: Comprehensive tracking file audit and update. Updated: TESTING_LOG.md (added Fix Session 5 notes covering two-click nav fix, Stage B, details nav fix, Key Metrics tooltips, Q3 signals, Stage C), DECISIONS.md (D-02 updated — Python 3.12 confirmed working, not 3.11), README.md (Python version 3.11→3.12 ×3, yfinance 0.2.36→0.2.66, guide.py description updated, explain_panel.py noted as deprecated), project_session_plan.md memory (updated to reflect testing phase Stages A/B/C complete). All tracking files now current.
+
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 
 ---

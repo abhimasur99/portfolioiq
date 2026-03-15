@@ -28,15 +28,15 @@ _Run locally to see the full interface (dark cockpit theme, Plotly charts, anima
 
 ## Quickstart
 
-**Requirements:** Python 3.11, internet access for yfinance data.
+**Requirements:** Python 3.12, internet access for yfinance data.
 
 ```bash
 # 1. Clone the repo
 git clone <repo-url>
 cd portfolio-risk-v3
 
-# 2. Create and activate a virtual environment (Python 3.11 required)
-python3.11 -m venv .venv
+# 2. Create and activate a virtual environment (Python 3.12 required)
+python3.12 -m venv .venv
 source .venv/bin/activate        # macOS / Linux
 # .venv\Scripts\activate         # Windows
 
@@ -71,7 +71,7 @@ portfolio-risk-v3/
 ├── components/
 │   ├── charts.py               # 13 Plotly figure builders (no session state)
 │   ├── dashboard_quad.py       # Reusable quadrant layout component
-│   └── explain_panel.py        # Inline "Explain Numbers" overlay
+│   └── explain_panel.py        # Explain Numbers overlay (deprecated — superseded by st.metric help= tooltips)
 ├── pages/
 │   ├── input.py                # Screen 1: holdings entry, 7-step pipeline
 │   ├── dashboard.py            # Screen 2: 2×2 dashboard, health bar, ticker tape
@@ -79,7 +79,7 @@ portfolio-risk-v3/
 │   ├── details_q2.py           # Q2 Risk Factors Deep Dive
 │   ├── details_q3.py           # Q3 Risk Outlook Deep Dive + Preparedness Panel
 │   ├── details_q4.py           # Q4 Optimization Deep Dive
-│   ├── guide.py                # Methodology reference (49 metrics documented)
+│   ├── guide.py                # How-to-use guide: app flow, quadrant explanations, key limitations
 │   └── settings.py             # All configurable parameters, granular recompute
 └── tests/
     ├── conftest.py             # 800-day mock data fixtures (seed 42, 4 tickers)
@@ -175,7 +175,7 @@ PortfolioIQ is an educational and analytical tool. It is not a registered invest
 | Library | Version | Purpose |
 |---------|---------|---------|
 | Streamlit | 1.32.0 | Web UI framework |
-| yfinance | 0.2.36 | Market data |
+| yfinance | 0.2.66 | Market data |
 | pandas | 2.2.0 | DataFrames |
 | numpy | 1.26.0 | Numerical computation |
 | scipy | 1.12.0 | SLSQP optimization |
@@ -184,4 +184,4 @@ PortfolioIQ is an educational and analytical tool. It is not a registered invest
 | pytest | 8.0.0 | Test framework |
 | pytest-mock | 3.12.0 | Mock fixtures |
 
-Python 3.11 required (arch library compatibility).
+Python 3.12 (arch 6.3.0 confirmed working on 3.12).

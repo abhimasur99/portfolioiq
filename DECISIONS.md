@@ -35,10 +35,10 @@ Monte Carlo — requires a consistent return definition.
 
 ---
 
-## D-02: Python 3.11 Specifically
+## D-02: Python Version
 
 **Date:** 2026-03-13
-**Status:** LOCKED
+**Status:** UPDATED — Python 3.12 confirmed working (2026-03-13)
 
 **Context:** Python version selection affects the arch library for GARCH fitting.
 
@@ -46,16 +46,19 @@ Monte Carlo — requires a consistent return definition.
 1. Python 3.12 (latest stable)
 2. Python 3.11
 
-**Decision:** Python 3.11.
+**Original decision:** Python 3.11, due to documented arch library compatibility concerns with 3.12.
 
-**Rationale:**
-- arch library (GARCH) has documented dependency conflicts with Python 3.12 in some configurations.
-- Streamlit 1.32 fully supports 3.11.
-- All other dependencies (numpy 1.26, scipy 1.12, pandas 2.2) support 3.11.
+**Updated decision (2026-03-13):** Python 3.12 — arch 6.3.0 installs and runs cleanly on Python 3.12 with statsmodels 0.14.6 and patsy 1.0.2. No conflicts encountered.
+
+**Rationale for update:**
+- Only Python 3.12 was available on the development machine.
+- arch 6.3.0 tested successfully: all GARCH unit tests pass, stationarity check works.
+- No practical reason to install 3.11 separately given clean 3.12 operation.
 
 **Consequences:**
-- Virtual environment must be created with Python 3.11 explicitly.
-- Deployment environment must specify Python 3.11.
+- Virtual environment uses Python 3.12.
+- README and quickstart instructions reference Python 3.12.
+- If deploying elsewhere, Python 3.12 is the confirmed working version.
 
 ---
 
