@@ -104,21 +104,21 @@ st.session_state["_current_nav"] = selected_page
 # returning to DASHBOARD always lands on the main dashboard, not a details screen.
 if selected_page == "INPUT":
     st.session_state.pop("_dashboard_details", None)
-    from pages import input as _page
+    from screens import input as _page
     _page.render()
 
 elif selected_page == "DASHBOARD":
-    from pages import dashboard as _page
+    from screens import dashboard as _page
     _page.render()
 
 elif selected_page == "GUIDE":
     st.session_state.pop("_dashboard_details", None)
-    from pages import guide as _page
+    from screens import guide as _page
     _page.render()
 
 elif selected_page == "SETTINGS":
     st.session_state.pop("_dashboard_details", None)
-    from pages import settings as _page
+    from screens import settings as _page
     _page.render()
 
 # ── Footer disclaimer ──────────────────────────────────────────────────────────

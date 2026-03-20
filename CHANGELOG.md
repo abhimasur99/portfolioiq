@@ -5,6 +5,18 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.25.0] — 2026-03-20
+
+### Fixed
+- `pages/` → `screens/`: Renamed directory to prevent Streamlit from auto-discovering page files as native multi-page routes. Fixes blank sidebar routes, non-functional "Go to Input" guard button, and session state nav breakage after first analysis. Updated 8 import lines in `app.py` and `screens/dashboard.py`.
+- `assets/style.css`: Added `!important` to all Streamlit component override rules (buttons, metrics, inputs, selectbox, progress bar, headings) so cockpit dark theme applies correctly on Streamlit Cloud where framework CSS has higher specificity.
+- `analytics/risk_factors.py` `fetch_sector_weights()`: Added browser User-Agent `requests.Session` to `yf.Ticker()` calls to fix Yahoo Finance blocking on cloud IPs (Streamlit Community Cloud / AWS). Added all-Unknown fallback: returns `{}` when all tickers fail to resolve sector, showing "Sector data unavailable" gracefully instead of a misleading "Unknown 100%" bar.
+
+### Changed
+- `README.md`: Updated project structure diagram — `pages/` → `screens/`.
+
+---
+
 ## [0.24.0] — 2026-03-20
 
 ### Added

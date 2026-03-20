@@ -637,13 +637,13 @@ def _route_details(details_key: str) -> None:
                     st.rerun()
 
     if details_key == "q1":
-        from pages.details_q1 import render as render_details
+        from screens.details_q1 import render as render_details
     elif details_key == "q2":
-        from pages.details_q2 import render as render_details
+        from screens.details_q2 import render as render_details
     elif details_key == "q3":
-        from pages.details_q3 import render as render_details
+        from screens.details_q3 import render as render_details
     elif details_key == "q4":
-        from pages.details_q4 import render as render_details
+        from screens.details_q4 import render as render_details
     else:
         st.error(f"Unknown details page: {details_key}")
         return

@@ -92,7 +92,7 @@ portfolioiq/
 │   ├── charts.py               # 13 Plotly figure builders (no session state)
 │   ├── dashboard_quad.py       # Reusable quadrant layout component
 │   └── explain_panel.py        # Explain Numbers overlay (deprecated — superseded by st.metric help= tooltips)
-├── pages/
+├── screens/
 │   ├── input.py                # Screen 1: holdings entry, 7-step pipeline
 │   ├── dashboard.py            # Screen 2: 2×2 dashboard, health bar, ticker tape
 │   ├── details_q1.py           # Q1 Performance Deep Dive
