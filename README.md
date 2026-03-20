@@ -1,7 +1,11 @@
 # PortfolioIQ
 
+![Tests](https://github.com/USERNAME/portfolioiq/actions/workflows/tests.yml/badge.svg)
+
 Institutional-grade equity portfolio analytics in a Streamlit web application.
 Enter your holdings, get a full four-layer quantitative analysis in plain language.
+
+**[Live Demo →](https://portfolioiq.streamlit.app)** _(link updated after deployment)_
 
 ---
 
@@ -20,9 +24,25 @@ Everything is displayed in plain language with inline explanations — no financ
 
 ---
 
+## Try it — Demo Portfolio
+
+Not sure what to enter? Click **⚡ Try Demo Portfolio** on the Input screen — it fills in the following automatically:
+
+| Ticker | Amount | Notes |
+|--------|--------|-------|
+| AAPL | $30,000 | Apple |
+| MSFT | $25,000 | Microsoft |
+| GOOGL | $20,000 | Alphabet |
+| AMZN | $15,000 | Amazon |
+| NVDA | $10,000 | NVIDIA |
+
+Benchmark: SPY · Default window: 3Y (switch to 1Y/5Y/All on the Dashboard)
+
+---
+
 ## Screenshots
 
-_Run locally to see the full interface (dark cockpit theme, Plotly charts, animated ticker tape)._
+_Run locally or use the [Live Demo](https://portfolioiq.streamlit.app) to see the full interface (dark cockpit theme, Plotly charts, animated ticker tape)._
 
 ---
 
@@ -131,7 +151,7 @@ All three optimizers use `scipy.optimize.minimize` with SLSQP, equal-weight init
 pytest tests/ -v
 ```
 
-151 tests (150 passing, 1 known pre-existing test/implementation mismatch in validate_tickers network-failure behavior), 0 skipped. Coverage includes: log return formula, portfolio weighting, all performance ratio zero-guards, correlation identity/range, drawdown non-positivity, GARCH stationarity (α+β<1), EWMA fallback trigger, VaR ordering (CVaR < VaR), Monte Carlo shape and positivity, stress test structure, optimizer weight constraints (sum-to-one, non-negative, within bounds), frontier length and shape.
+151 tests, all passing. 0 skipped. Coverage includes: log return formula, portfolio weighting, all performance ratio zero-guards, correlation identity/range, drawdown non-positivity, GARCH stationarity (α+β<1), EWMA fallback trigger, VaR ordering (CVaR < VaR), Monte Carlo shape and positivity, stress test structure, optimizer weight constraints (sum-to-one, non-negative, within bounds), frontier length and shape.
 
 ---
 

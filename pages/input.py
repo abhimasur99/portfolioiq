@@ -313,6 +313,15 @@ def render() -> None:
         "to portfolio weights."
     )
 
+    # ── Demo portfolio shortcut ────────────────────────────────────────────────
+    if st.button("⚡ Try Demo Portfolio", type="secondary", help="Pre-fills a diversified 5-stock US large-cap portfolio so you can explore the app immediately."):
+        st.session_state[_KEY_PORTFOLIO_BASE] = pd.DataFrame({
+            "Ticker":         ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA"],
+            "USD Amount ($)": [30000.0, 25000.0, 20000.0, 15000.0, 10000.0],
+        })
+        st.session_state.pop(_KEY_TICKER_EDITOR, None)
+        st.rerun()
+
     col_form, col_preview = st.columns([3, 2], gap="large")
 
     # ── Left column: form ──────────────────────────────────────────────────────
