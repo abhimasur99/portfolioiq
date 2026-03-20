@@ -47,7 +47,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Open `http://localhost:8501` in your browser. Navigate to **INPUT**, enter 2–10 ticker symbols with dollar amounts, select a benchmark and period, and click **Analyse Portfolio →**.
+Open `http://localhost:8501` in your browser. Navigate to **INPUT**, enter 2–10 ticker symbols with dollar amounts, select a benchmark, and click **Analyse Portfolio →**. The analysis window (1Y/3Y/5Y/All/Custom) is selectable on the Dashboard after loading.
 
 ---
 
@@ -88,7 +88,8 @@ portfolio-risk-v3/
     ├── test_performance.py
     ├── test_risk_factors.py
     ├── test_risk_outlook.py
-    └── test_optimization.py
+    ├── test_optimization.py
+    └── test_market_signals.py
 ```
 
 ---
@@ -130,7 +131,7 @@ All three optimizers use `scipy.optimize.minimize` with SLSQP, equal-weight init
 pytest tests/ -v
 ```
 
-151 tests, 0 skipped. Coverage includes: log return formula, portfolio weighting, all performance ratio zero-guards, correlation identity/range, drawdown non-positivity, GARCH stationarity (α+β<1), EWMA fallback trigger, VaR ordering (CVaR < VaR), Monte Carlo shape and positivity, stress test structure, optimizer weight constraints (sum-to-one, non-negative, within bounds), frontier length and shape.
+151 tests (150 passing, 1 known pre-existing test/implementation mismatch in validate_tickers network-failure behavior), 0 skipped. Coverage includes: log return formula, portfolio weighting, all performance ratio zero-guards, correlation identity/range, drawdown non-positivity, GARCH stationarity (α+β<1), EWMA fallback trigger, VaR ordering (CVaR < VaR), Monte Carlo shape and positivity, stress test structure, optimizer weight constraints (sum-to-one, non-negative, within bounds), frontier length and shape.
 
 ---
 
@@ -141,16 +142,14 @@ All settings are adjustable at runtime via the **Settings** screen without resta
 | Setting | Default | Effect |
 |---------|---------|--------|
 | Benchmark | SPY | Alpha, beta, Info Ratio, Treynor benchmark |
-| Historical period | 3y | All historical analytics |
 | VaR confidence | 95% | VaR and CVaR threshold |
 | VaR method | Historical | Historical empirical vs GARCH-normal |
-| MC horizon | 10 years | Monte Carlo projection length |
+| MC horizon | 1 year | Monte Carlo projection length (options: 1, 2, 3, 5 years) |
 | MC paths | 1,000 | Simulation paths (10,000 for smoother bands) |
 | Weight min | 5% | Lower bound for all three optimizers |
-| Weight max | 50% | Upper bound for all three optimizers |
-| Drift threshold | 5% | Rebalancing flag threshold (display only) |
+| Weight max | 90% | Upper bound for all three optimizers |
 
-Changing VaR/MC/GARCH settings triggers targeted recomputation of the risk outlook layer only. Changing weight bounds triggers optimization only. Changing benchmark or period requires a full data re-fetch from the Input screen.
+Changing VaR/MC/GARCH settings triggers targeted recomputation of the risk outlook layer only. Changing weight bounds triggers optimization only. Changing benchmark requires a full data re-fetch from the Input screen. The analysis window (1Y/3Y/5Y/All/Custom) is selected on the Dashboard and does not require re-fetching data.
 
 ---
 

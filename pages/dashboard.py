@@ -373,7 +373,7 @@ def _build_q3(analytics: dict) -> tuple:
     mc_p10   = ro.get("mc_p10")
     mc_p50   = ro.get("mc_p50")
     mc_p90   = ro.get("mc_p90")
-    horizon  = st.session_state.get("mc_horizon", 10)
+    horizon  = st.session_state.get(SK_MC_HORIZON, DEFAULT_MC_HORIZON)
 
     if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
         chart = monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=horizon)

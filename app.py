@@ -24,14 +24,12 @@ from pathlib import Path
 from assets.config import (
     DISCLAIMER_SHORT,
     DEFAULT_BENCHMARK,
-    DEFAULT_PERIOD,
     DEFAULT_VAR_CONFIDENCE,
     DEFAULT_VAR_METHOD,
     DEFAULT_MC_HORIZON,
     DEFAULT_MC_PATHS,
     DEFAULT_WEIGHT_MIN,
     DEFAULT_WEIGHT_MAX,
-    DEFAULT_DRIFT_THRESHOLD,
     SK_BENCHMARK,
     SK_PERIOD,
     SK_VAR_CONFIDENCE,
@@ -40,7 +38,6 @@ from assets.config import (
     SK_MC_PATHS,
     SK_WEIGHT_MIN,
     SK_WEIGHT_MAX,
-    SK_DRIFT_THRESHOLD,
     SK_PORTFOLIO_LOADED,
     SK_ANALYTICS,
 )
@@ -61,14 +58,13 @@ with open(_css_path) as f:
 # ── Session state initialization ───────────────────────────────────────────────
 _defaults = {
     SK_BENCHMARK:        DEFAULT_BENCHMARK,
-    SK_PERIOD:           DEFAULT_PERIOD,
+    SK_PERIOD:           "3Y",   # default window label; overwritten by input.py after load
     SK_VAR_CONFIDENCE:   DEFAULT_VAR_CONFIDENCE,
     SK_VAR_METHOD:       DEFAULT_VAR_METHOD,
     SK_MC_HORIZON:       DEFAULT_MC_HORIZON,
     SK_MC_PATHS:         DEFAULT_MC_PATHS,
     SK_WEIGHT_MIN:       DEFAULT_WEIGHT_MIN,
     SK_WEIGHT_MAX:       DEFAULT_WEIGHT_MAX,
-    SK_DRIFT_THRESHOLD:  DEFAULT_DRIFT_THRESHOLD,
     SK_PORTFOLIO_LOADED: False,
     SK_ANALYTICS:        {},
 }

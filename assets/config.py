@@ -137,7 +137,6 @@ SK_MC_PATHS        = "mc_paths"         # int, 1000 or 10000
 SK_WEIGHT_MIN      = "weight_min"       # float, default 0.05
 SK_WEIGHT_MAX      = "weight_max"       # float, default 0.50
 SK_GARCH_REFIT     = "garch_refit"      # str, "each_load" | "daily"
-SK_DRIFT_THRESHOLD = "drift_threshold"  # float, rebalancing drift threshold
 
 # UI state
 SK_PORTFOLIO_LOADED = "portfolio_loaded"  # bool
@@ -145,14 +144,12 @@ SK_PORTFOLIO_LOADED = "portfolio_loaded"  # bool
 # ─── Application Defaults ─────────────────────────────────────────────────────
 
 DEFAULT_BENCHMARK        = "SPY"
-DEFAULT_PERIOD           = "3y"
 DEFAULT_VAR_CONFIDENCE   = 0.95
 DEFAULT_VAR_METHOD       = "historical"
 DEFAULT_MC_HORIZON       = 1        # years (1y projection most actionable for portfolio decisions)
 DEFAULT_MC_PATHS         = 1_000
 DEFAULT_WEIGHT_MIN       = 0.05     # 5%
 DEFAULT_WEIGHT_MAX       = 0.90     # 90%
-DEFAULT_DRIFT_THRESHOLD  = 0.05     # 5% drift before rebalance flag
 DEFAULT_EWMA_LAMBDA      = 0.94     # RiskMetrics standard
 DEFAULT_ROLLING_CORR     = 60       # days for rolling correlation
 DEFAULT_ROLLING_PERF     = 252      # days for rolling Sharpe / beta
