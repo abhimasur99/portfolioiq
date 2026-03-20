@@ -364,11 +364,13 @@ def _sig_rate_sensitivity(portfolio_returns: pd.Series, prices: dict) -> dict:
 
 
 def _sig_tech_concentration() -> dict:
-    # Requires sector_weights which are not passed into fetch_all_signals.
-    # Surface as unavailable; caller can inject sector data if needed.
-    return _unavailable(
-        "Tech concentration unavailable — sector weights not provided to signal layer."
-    )
+    # Requires enhanced sector data feed not available from yfinance. Deferred to v2.
+    return {
+        "value":          None,
+        "status":         "unavailable",
+        "interpretation": "Coming in v2 — tech sector concentration requires an enhanced sector data feed not available from yfinance.",
+        "raw":            None,
+    }
 
 
 # ── Public API ─────────────────────────────────────────────────────────────────

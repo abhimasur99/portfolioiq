@@ -67,6 +67,10 @@ New issues found: TL-014 (auto-redirect on re-analyse), TL-015 (settings slider 
 Fixed: TL-014 (nav_radio key added to radio widget in app.py; st.session_state["nav_radio"]="DASHBOARD" set before rerun in input.py), TL-015 (sliders now use 0–100 int scale with format="%d%%", convert to decimal on save), TL-016 (holdings strip → full-width stacked segmented bar with color-coded per-ticker segments).
 Stage B planned: ? icon tooltips on all KPI metrics, remove Explain Numbers + All Metrics tables from details pages. Stage C: Guide page redesign.
 
+**2026-03-19 — Stage D**
+Items implemented: (1) Cross-quadrant navigation in More Details — prev/next buttons in _route_details() in dashboard.py; (3) Tech Concentration shows "Coming Soon" instead of n/a — market_signals.py interpretation updated, details_q3.py special-case display added; (4) Historical stress tests (GFC/Dot-Com/COVID/Rate Shock) removed from UI — replaced with Signal-Based Sensitivity Analysis using GARCH vol × signal environment multipliers; signal_scenario_chart() added to charts.py; _compute_signal_scenarios() added to details_q3.py; environment badge (Calm/Elevated/Stressed/Severe) added to At a Glance; (5) DEFAULT_WEIGHT_MAX 0.50→0.90 in config.py; (6) Guide wording: "non-stationary"→"constantly evolving", "characterised"→"described", Q3 paragraph updated; (7) Data freshness caption added to dashboard; all user-facing "live" language removed (details_q3.py, guide.py, input.py). CHANGELOG [0.21.0].
+TL-010 status update: still DEFERRED/v2 for full implementation, but "Coming Soon" label added to panel.
+
 **2026-03-15 — Fix session 5 (Stage B + C)**
 New issue found: Two-click navigation lag introduced by TL-014 fix — without key= on radio, passing index= on every rerun caused Streamlit to reset widget position, requiring two clicks.
 Fixed: Two-click nav lag (app.py: index= now only passed when _nav_pending fires or on first load; omitted on normal reruns so radio tracks its own state).

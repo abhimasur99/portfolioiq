@@ -99,11 +99,12 @@ def render() -> None:
         "Historical VaR and CVaR measure tail risk from past returns. GARCH volatility "
         "is a forward-looking estimate that weights recent market moves more heavily. "
         "The Monte Carlo fan shows the spread of 1,000 simulated portfolio paths — "
-        "it is a range of possibilities, not a forecast. Stress tests apply your "
-        "portfolio's estimated beta to historical crisis returns (2000, 2008, 2020, 2022). "
-        "The Risk Preparedness Panel shows 11 live market signals (VIX, credit spreads, "
-        "yield curve, etc.) fetched fresh at load time — these are awareness indicators, "
-        "not buy or sell signals."
+        "it is a range of possibilities, not a forecast. The Signal-Based Sensitivity "
+        "Analysis shows estimated portfolio losses under three stress levels derived from "
+        "current GARCH volatility, calibrated to the current market signal environment. "
+        "The Market Environment Signals panel shows 11 indicators (VIX, credit spreads, "
+        "yield curve, etc.) fetched fresh at each session from end-of-day data — "
+        "these are awareness indicators, not buy or sell signals."
     )
 
     st.markdown("**Q4 — Optimization (Prescriptive)**")
@@ -128,9 +129,9 @@ def render() -> None:
 
     st.markdown(
         "**All metrics are historical.** Every statistic is computed from a finite "
-        "sample of past returns. Financial markets are non-stationary — distributions, "
-        "correlations, and volatility regimes change over time. A metric that accurately "
-        "characterised the portfolio over the past three years may not hold over the next three."
+        "sample of past returns. Financial markets are constantly evolving — distributions, "
+        "correlations, and volatility regimes shift over time. A metric that accurately "
+        "described the portfolio over the past three years may not hold over the next three."
     )
     st.markdown(
         "**Period and benchmark sensitivity.** CAGR, Sharpe, drawdown, beta, alpha, "

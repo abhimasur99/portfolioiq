@@ -254,7 +254,7 @@ def _run_pipeline(
         )
 
         # ── Step 7: Optimization + market signals (Layer 4) ───────────────────
-        _step(7, "Running optimizer and fetching live market signals…")
+        _step(7, "Running optimizer and fetching market signals…")
         optimization = compute_all_optimization(
             returns_df[available], weights_aligned,
             risk_free_rate, weight_min, weight_max

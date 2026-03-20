@@ -21,7 +21,8 @@ Chart inventory:
 - sector_weights_chart: horizontal bar chart by GICS sector.
 - garch_volatility_chart: historical vs EWMA vs GARCH conditional vol.
 - monte_carlo_fan_chart: p10/p50/p90 fan with shaded region.
-- stress_test_chart: grouped bar chart of scenario impacts.
+- stress_test_chart: grouped bar chart of scenario impacts (retained, not displayed in UI).
+- signal_scenario_chart: three GARCH-scaled scenarios highlighted by current signal environment.
 - efficient_frontier_chart: scatter with current portfolio dot, max Sharpe star, CML.
 - current_vs_optimal_chart: grouped bar chart, current vs three optimizer weights.
 
@@ -646,6 +647,75 @@ def stress_test_chart(stress_results: dict) -> go.Figure:
         barmode="group",
         bargap=0.20,
         bargroupgap=0.05,
+    )
+    return fig
+
+
+# ── Signal-based scenario chart ────────────────────────────────────────────────
+
+def signal_scenario_chart(scenario_data: dict) -> go.Figure:
+    """Bar chart of three GARCH-volatility-scaled stress scenarios.
+
+    The scenario matching the current market signal environment is highlighted.
+
+    Args:
+        scenario_data: dict from _compute_signal_scenarios in details_q3.py.
+            Keys: environment_level (str), n_red (int), n_amber (int),
+                  scenarios (dict of {name: {multiplier, var_day, var_month, highlighted}}).
+
+    Returns:
+        go.Figure with three vertical bars (1-month VaR 95% per scenario).
+    """
+    scenarios = scenario_data.get("scenarios", {})
+    env_level = scenario_data.get("environment_level", "")
+    n_red     = scenario_data.get("n_red", 0)
+    n_amber   = scenario_data.get("n_amber", 0)
+
+    names       = list(scenarios.keys())
+    var_month   = [abs(scenarios[n]["var_month"]) * 100 for n in names]
+    var_day     = [abs(scenarios[n]["var_day"])   * 100 for n in names]
+
+    # Color by severity: moderate=blue, significant=amber, severe=red
+    _SCENARIO_COLORS = [COLOR_BLUE, COLOR_AMBER, COLOR_RED]
+    bar_colors = [
+        _SCENARIO_COLORS[i] if not scenarios[names[i]]["highlighted"]
+        else _SCENARIO_COLORS[i]          # same color, distinguished by border
+        for i in range(len(names))
+    ]
+    border_colors = [
+        COLOR_TEXT if scenarios[n]["highlighted"] else "rgba(0,0,0,0)"
+        for n in names
+    ]
+    border_widths = [2 if scenarios[n]["highlighted"] else 0 for n in names]
+
+    signal_desc = f"Current environment: {env_level}"
+    if n_red > 0 or n_amber > 0:
+        signal_desc += f" ({n_red} red, {n_amber} amber signals)"
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        name="1-Month VaR 95%",
+        x=names,
+        y=var_month,
+        marker_color=bar_colors,
+        marker_line_color=border_colors,
+        marker_line_width=border_widths,
+        customdata=[[var_day[i]] for i in range(len(names))],
+        hovertemplate=(
+            "%{x}<br>"
+            "1-Month VaR: -%{y:.2f}%<br>"
+            "1-Day VaR: -%{customdata[0]:.2f}%"
+            "<extra></extra>"
+        ),
+    ))
+    fig.add_hline(y=0, line_color=COLOR_AXIS, line_width=1)
+    fig.update_layout(
+        template=PLOTLY_TEMPLATE_NAME,
+        title=f"Signal-Based Sensitivity Analysis<br><sup>{signal_desc} — highlighted bar = current environment</sup>",
+        xaxis_title=None,
+        yaxis_title="Estimated 1-Month Loss (%)",
+        yaxis_tickformat=".1f",
+        showlegend=False,
     )
     return fig
 

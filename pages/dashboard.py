@@ -464,11 +464,36 @@ def _build_q4(analytics: dict) -> tuple:
 
 def _route_details(details_key: str) -> None:
     """Render the requested details page within the DASHBOARD nav context."""
-    back_col, _ = st.columns([1, 5])
+    _ORDER  = ["q1", "q2", "q3", "q4"]
+    _LABELS = {
+        "q1": "Performance",
+        "q2": "Risk Factors",
+        "q3": "Risk Outlook",
+        "q4": "Optimization",
+    }
+
+    idx = _ORDER.index(details_key)
+    back_col, _, nav_col = st.columns([2, 3, 3])
+
     with back_col:
-        if st.button("← Back to Dashboard"):
+        if st.button("← Dashboard", key="_btn_back_dash"):
             del st.session_state[_SK_DETAILS]
             st.rerun()
+
+    with nav_col:
+        l_col, r_col = st.columns(2)
+        with l_col:
+            if idx > 0:
+                prev = _ORDER[idx - 1]
+                if st.button(f"← {_LABELS[prev]}", key="_btn_nav_prev", use_container_width=True):
+                    st.session_state[_SK_DETAILS] = prev
+                    st.rerun()
+        with r_col:
+            if idx < len(_ORDER) - 1:
+                nxt = _ORDER[idx + 1]
+                if st.button(f"{_LABELS[nxt]} →", key="_btn_nav_next", use_container_width=True):
+                    st.session_state[_SK_DETAILS] = nxt
+                    st.rerun()
 
     if details_key == "q1":
         from pages.details_q1 import render as render_details
@@ -514,6 +539,16 @@ def render() -> None:
     st.markdown("#### Portfolio Health")
     indicators = _health_indicators(analytics)
     _render_health_bar(indicators)
+
+    # Data freshness disclosure
+    port_ret = st.session_state.get(SK_PORT_RETURNS)
+    if port_ret is not None and not port_ret.empty:
+        last_date = port_ret.index[-1].strftime("%b %d, %Y")
+        st.caption(
+            f"Market data as of **{last_date}** — reflects previous market close. "
+            "Analytics do not update during trading hours."
+        )
+
     st.markdown("")
 
     # 2x2 quadrant grid

@@ -5,6 +5,23 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.21.0] — 2026-03-19
+
+### Added
+- `pages/dashboard.py` `_route_details()`: Cross-quadrant navigation — prev/next buttons alongside "← Dashboard" so users can move directly between Q1→Q2→Q3→Q4 More Details without returning to the dashboard.
+- `pages/dashboard.py` `render()`: Data freshness caption — "Market data as of [date] — reflects previous market close. Analytics do not update during trading hours."
+- `components/charts.py` `signal_scenario_chart()`: New chart replacing historical stress tests. Shows three GARCH-volatility-scaled scenarios (Moderate 1.5×, Significant 2.0×, Severe 3.0×) with the current-environment scenario highlighted based on live signal statuses.
+- `pages/details_q3.py` `_compute_signal_scenarios()`: Private helper computing signal-driven scenarios from GARCH vol + signal red/amber counts → environment level (Calm/Elevated/Stressed/Severe).
+
+### Changed
+- `pages/details_q3.py`: Replaced historical crisis stress test chart (GFC, Dot-Com, COVID, Rate Shock) with Signal-Based Sensitivity Analysis. Environment assessment badge added to At a Glance block.
+- `pages/details_q3.py` `_render_preparedness_panel()`: Tech Concentration now shows "⚪ Coming Soon" instead of "⚪ n/a". Panel caption updated — removed "live" language, now says "fetched fresh at portfolio analysis time using end-of-day data."
+- `analytics/market_signals.py` `_sig_tech_concentration()`: Updated interpretation to "Coming in v2 — tech sector concentration requires an enhanced sector data feed not available from yfinance."
+- `assets/config.py`: `DEFAULT_WEIGHT_MAX` raised from 0.50 to 0.90 — allows concentrated portfolios to express up to 90% single-position weight in optimizer output.
+- `pages/guide.py`: Minor wording improvements — "non-stationary" → "constantly evolving", "characterised" → "described", "11 live market signals" → "11 market environment signals fetched fresh at each session from end-of-day data."
+
+---
+
 ## [0.20.0] — 2026-03-15
 
 ### Changed

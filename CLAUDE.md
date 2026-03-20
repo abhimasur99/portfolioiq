@@ -212,9 +212,11 @@ Issues found and fixed (see TESTING_LOG.md for full tracker):
 
 **[Checkpoint — Stage C COMPLETE]**: Guide redesigned. All 5 metric tables removed. New 3-section layout: How to Use (4-step walkthrough) → What Each Quadrant Tells You (4 paragraphs) → Key Limitations. TL-007 FIXED. CHANGELOG [0.20.0]. Commit: see git log.
 
-**Open items remaining:** TL-006 (weight preview liveness — deferred), TL-010 (tech concentration — DEFERRED/v2), TL-013 (page transitions — open). Testing phase substantially complete.
+**Open items remaining:** TL-006 (weight preview liveness — deferred), TL-010 (tech concentration — DEFERRED/v2 but "Coming Soon" label added), TL-013 (page transitions — open). Testing phase substantially complete.
 
 **[Checkpoint — Project Status Check (2026-03-15)]**: Comprehensive tracking file audit and update. Updated: TESTING_LOG.md (added Fix Session 5 notes covering two-click nav fix, Stage B, details nav fix, Key Metrics tooltips, Q3 signals, Stage C), DECISIONS.md (D-02 updated — Python 3.12 confirmed working, not 3.11), README.md (Python version 3.11→3.12 ×3, yfinance 0.2.36→0.2.66, guide.py description updated, explain_panel.py noted as deprecated), project_session_plan.md memory (updated to reflect testing phase Stages A/B/C complete). All tracking files now current.
+
+**[Checkpoint — Stage D COMPLETE (2026-03-19)]**: 7-item improvement batch. Items: (1) cross-quadrant nav in _route_details() — prev/next buttons alongside back button; (3) Tech Concentration "Coming Soon" display; (4) historical stress tests REPLACED with Signal-Based Sensitivity Analysis — _compute_signal_scenarios() in details_q3.py, signal_scenario_chart() in charts.py, environment badge in At a Glance; (5) DEFAULT_WEIGHT_MAX 0.50→0.90; (6) guide wording improvements; (7) data freshness caption on dashboard, all user-facing "live" language removed (details_q3, guide, input.py step 7). CHANGELOG [0.21.0] added.
 
 **Session state keys to watch:** All defined in assets/config.py. SK_PORTFOLIO_LOADED gates dashboard access.
 

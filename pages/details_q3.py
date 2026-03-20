@@ -85,13 +85,74 @@ def _fmt_signal_value(val) -> str:
         return str(val)
 
 
+# ── Signal-driven scenario computation ──────────────────────────────────────────
+
+_ENV_EMOJI = {"Calm": "🟢", "Elevated": "🟡", "Stressed": "🟠", "Severe": "🔴"}
+
+
+def _compute_signal_scenarios(garch_vol: float, signals: dict) -> dict:
+    """Derive three stress scenarios from GARCH vol and current signal statuses.
+
+    Environment level is determined by counting red and amber signal statuses
+    (unavailable signals are excluded from the count).
+
+    Returns a dict with environment_level, n_red, n_amber, and three scenarios,
+    each containing var_day, var_month (both negative, i.e. loss estimates),
+    and a highlighted flag indicating which scenario matches the current environment.
+    """
+    n_red   = sum(1 for s in signals.values() if s.get("status") == "red")
+    n_amber = sum(1 for s in signals.values() if s.get("status") == "amber")
+
+    if n_red >= 4:
+        env_level = "Severe"
+    elif n_red >= 2:
+        env_level = "Stressed"
+    elif n_red == 1 or n_amber >= 3:
+        env_level = "Elevated"
+    else:
+        env_level = "Calm"
+
+    highlight_map = {
+        "Calm":     "Moderate Stress",
+        "Elevated": "Significant Stress",
+        "Stressed": "Significant Stress",
+        "Severe":   "Severe Stress",
+    }
+    highlighted = highlight_map[env_level]
+
+    daily_vol = garch_vol / (252 ** 0.5)
+
+    scenarios: dict = {}
+    for name, mult in [
+        ("Moderate Stress",    1.5),
+        ("Significant Stress", 2.0),
+        ("Severe Stress",      3.0),
+    ]:
+        s_daily_vol = daily_vol * mult
+        var_day     = -1.645 * s_daily_vol
+        var_month   = var_day * (21 ** 0.5)
+        scenarios[name] = {
+            "multiplier":  mult,
+            "var_day":     var_day,
+            "var_month":   var_month,
+            "highlighted": (name == highlighted),
+        }
+
+    return {
+        "environment_level": env_level,
+        "n_red":   n_red,
+        "n_amber": n_amber,
+        "scenarios": scenarios,
+    }
+
+
 # ── Risk Preparedness Panel ─────────────────────────────────────────────────────
 
 def _render_preparedness_panel(signals: dict) -> None:
     """Render the 11-signal risk preparedness grid using st.metric with ? tooltips."""
-    st.markdown("##### Live Risk Preparedness Panel")
+    st.markdown("##### Market Environment Signals")
     st.caption(
-        "Forward-looking market environment signals fetched live at portfolio load time. "
+        "Market environment signals fetched fresh at portfolio analysis time using end-of-day data. "
         "Hover the ? icon on each signal for its interpretation. "
         "These are awareness indicators, not predictions or investment advice."
     )
@@ -108,7 +169,12 @@ def _render_preparedness_panel(signals: dict) -> None:
             status = sig.get("status", "unavailable")
             interp = sig.get("interpretation", "No data available.")
             emoji  = _STATUS_EMOJI.get(status, "⚪")
-            display_val = f"{emoji} {_fmt_signal_value(val)}" if val is not None else f"{emoji} n/a"
+            if key == "tech_concentration" and status == "unavailable":
+                display_val = "⚪ Coming Soon"
+            elif val is not None:
+                display_val = f"{emoji} {_fmt_signal_value(val)}"
+            else:
+                display_val = f"{emoji} n/a"
 
             with col:
                 st.metric(label=label, value=display_val, help=interp)
@@ -153,12 +219,29 @@ def render() -> None:
     st.title("Risk Outlook — Deep Dive")
     st.caption("Predictive analytics: volatility forecasts, tail risk, and scenario stress tests.")
 
+    # ── Compute signal scenarios (used in insight block and charts) ────────────
+    scenario_data = None
+    if garch_vol is not None:
+        scenario_data = _compute_signal_scenarios(garch_vol, signals)
+
     # ── Insight block ──────────────────────────────────────────────────────────
     with st.container():
         left_col, right_col = st.columns([3, 2], gap="large")
         with left_col:
             st.markdown("##### At a Glance")
             insight_lines = []
+
+            # Environment assessment from signals
+            if scenario_data is not None:
+                env_level = scenario_data["environment_level"]
+                n_r = scenario_data["n_red"]
+                n_a = scenario_data["n_amber"]
+                emoji = _ENV_EMOJI.get(env_level, "⚪")
+                insight_lines.append(
+                    f"**Signal environment: {emoji} {env_level}** — "
+                    f"{n_r} red signal{'s' if n_r != 1 else ''}, "
+                    f"{n_a} amber signal{'s' if n_a != 1 else ''} across the 11 market indicators."
+                )
 
             if hist_vol is not None:
                 if hist_vol > 0.30:
@@ -263,7 +346,7 @@ def render() -> None:
     from components.charts import (
         garch_volatility_chart,
         monte_carlo_fan_chart,
-        stress_test_chart,
+        signal_scenario_chart,
     )
 
     # GARCH volatility vs historical (full width)
@@ -278,7 +361,7 @@ def render() -> None:
         key="_det_q3_garchvol",
     )
 
-    # Monte Carlo fan | Stress test
+    # Monte Carlo fan | Signal-based sensitivity analysis
     ch_left, ch_right = st.columns(2)
     with ch_left:
         if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
@@ -290,12 +373,19 @@ def render() -> None:
         else:
             st.info("Monte Carlo data not available.")
     with ch_right:
-        if stress_results:
+        if scenario_data is not None:
+            st.markdown("##### Signal-Based Sensitivity Analysis")
+            st.caption(
+                "Estimated 1-month portfolio loss under three stress levels, derived from "
+                "current GARCH-implied volatility scaled by signal environment severity. "
+                "The highlighted bar reflects the current signal environment. "
+                "These are model estimates, not forecasts."
+            )
             st.plotly_chart(
-                stress_test_chart(stress_results),
+                signal_scenario_chart(scenario_data),
                 use_container_width=True,
-                key="_det_q3_stress",
+                key="_det_q3_scenarios",
             )
         else:
-            st.info("Stress test data not available.")
+            st.info("Signal scenario data not available — GARCH volatility required.")
 
