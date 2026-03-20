@@ -5,6 +5,31 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.23.0] — 2026-03-20
+
+### Fixed
+- `components/charts.py` `rolling_sharpe_chart()`: `IndexError` crash when 1Y window selected — all-NaN rolling series after dropna produced empty Series; `s.iloc[-1]` raised `IndexError`. Fixed with empty-Series guard returning a placeholder figure.
+- `components/charts.py` `rolling_beta_chart()`: Same empty-Series guard added for consistency.
+- `pages/dashboard.py` `_render_holdings_strip()`: Holdings with weight < 8% showed no label — replaced threshold-based inline label with a persistent color-coded label row below the bar; all holdings always visible.
+
+### Added
+- `assets/config.py`: `SK_TOTAL_VALUE` session state key — total portfolio USD value entered by user.
+- `analytics/performance.py` `compute_all_performance()`: Adaptive rolling window — uses 252-day window when data ≥ 253 rows; falls back to `max(21, n // 3)` for shorter windows (e.g. ~83-day for 1Y). Stores `rolling_sharpe_window` and `rolling_beta_window` in output dict.
+- `pages/details_q1.py`: Disclosure caption shown below rolling charts when window < 252 days.
+
+### Changed
+- `assets/config.py` `BENCHMARK_OPTIONS`: Removed `"US Agg Bond (AGG)"` — equities-only app; bond benchmark produces conceptually meaningless alpha and beta. See D-12.
+- `pages/dashboard.py` `_WINDOW_OPTIONS`: Removed "All" and "Custom" — time frame selector now shows 1Y / 3Y / 5Y only. Custom deferred to v2.
+- `components/charts.py` `rolling_sharpe_chart()` and `rolling_beta_chart()`: Added `window` parameter (default 252); chart title reflects actual window used.
+- `components/charts.py` `monte_carlo_fan_chart()`: `yaxis_title` changed from verbose `"Portfolio Value (base = X)"` to `"Portfolio Value ($)"`. `initial_value` now passed from actual portfolio dollar value.
+- `components/charts.py` `signal_scenario_chart()`: Added `margin=dict(t=70)` to increase space between subtitle and bars.
+- `pages/input.py`: Stores `SK_TOTAL_VALUE` (total portfolio USD) in session state after pipeline completes.
+- `pages/dashboard.py` `_build_q3()`: Passes `SK_TOTAL_VALUE` as `initial_value` to `monte_carlo_fan_chart()`.
+- `pages/details_q3.py`: Swapped chart order — Signal-Based Sensitivity Analysis now appears before Monte Carlo fan. Passes `SK_TOTAL_VALUE` to `monte_carlo_fan_chart()`.
+- `DECISIONS.md`: Added D-12 — AGG removed from benchmark options.
+
+---
+
 ## [0.22.0] — 2026-03-20
 
 ### Added

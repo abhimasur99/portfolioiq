@@ -170,22 +170,36 @@ def return_distribution_chart(
 
 # ── Rolling Sharpe chart ───────────────────────────────────────────────────────
 
-def rolling_sharpe_chart(rolling_sharpe: pd.Series) -> go.Figure:
-    """Rolling 252-day Sharpe ratio line chart.
+def rolling_sharpe_chart(rolling_sharpe: pd.Series, window: int = 252) -> go.Figure:
+    """Rolling Sharpe ratio line chart.
 
     Args:
-        rolling_sharpe: pd.Series of rolling Sharpe values (NaN for first 251 days).
+        rolling_sharpe: pd.Series of rolling Sharpe values.
+        window: Rolling window in days (default 252; may be shorter for limited data).
 
     Returns:
         go.Figure with Sharpe line and horizontal reference at 0 and 1.
+        Returns a placeholder figure if series is empty after dropna.
     """
     s = rolling_sharpe.dropna()
+    if s.empty:
+        fig = go.Figure()
+        fig.update_layout(
+            template=PLOTLY_TEMPLATE_NAME,
+            title=f"Rolling Sharpe Ratio ({window}-day)",
+            annotations=[dict(
+                text="Insufficient data for rolling window",
+                x=0.5, y=0.5, xref="paper", yref="paper",
+                showarrow=False, font=dict(color=COLOR_TEXT_MUTED, size=13),
+            )],
+        )
+        return fig
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=s.index,
         y=s.values,
         mode="lines",
-        name="Rolling Sharpe (252d)",
+        name=f"Rolling Sharpe ({window}d)",
         line=dict(color=COLOR_PURPLE, width=2),
         fill="tozeroy",
         fillcolor=_AMBER_FILL if float(s.iloc[-1]) < 0 else _BLUE_FILL,
@@ -203,7 +217,7 @@ def rolling_sharpe_chart(rolling_sharpe: pd.Series) -> go.Figure:
     )
     fig.update_layout(
         template=PLOTLY_TEMPLATE_NAME,
-        title="Rolling Sharpe Ratio (252-day)",
+        title=f"Rolling Sharpe Ratio ({window}-day)",
         xaxis_title=None,
         yaxis_title="Sharpe Ratio",
     )
@@ -212,22 +226,36 @@ def rolling_sharpe_chart(rolling_sharpe: pd.Series) -> go.Figure:
 
 # ── Rolling Beta chart ─────────────────────────────────────────────────────────
 
-def rolling_beta_chart(rolling_beta: pd.Series) -> go.Figure:
-    """Rolling 252-day beta line chart.
+def rolling_beta_chart(rolling_beta: pd.Series, window: int = 252) -> go.Figure:
+    """Rolling beta line chart.
 
     Args:
-        rolling_beta: pd.Series of rolling beta values (NaN for first 251 days).
+        rolling_beta: pd.Series of rolling beta values.
+        window: Rolling window in days (default 252; may be shorter for limited data).
 
     Returns:
         go.Figure with beta line and horizontal reference at 1.
+        Returns a placeholder figure if series is empty after dropna.
     """
     s = rolling_beta.dropna()
+    if s.empty:
+        fig = go.Figure()
+        fig.update_layout(
+            template=PLOTLY_TEMPLATE_NAME,
+            title=f"Rolling Beta vs Benchmark ({window}-day)",
+            annotations=[dict(
+                text="Insufficient data for rolling window",
+                x=0.5, y=0.5, xref="paper", yref="paper",
+                showarrow=False, font=dict(color=COLOR_TEXT_MUTED, size=13),
+            )],
+        )
+        return fig
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=s.index,
         y=s.values,
         mode="lines",
-        name="Rolling Beta (252d)",
+        name=f"Rolling Beta ({window}d)",
         line=dict(color=COLOR_AMBER, width=2),
         hovertemplate="%{x|%Y-%m-%d}<br>Beta: %{y:.2f}<extra></extra>",
     ))
@@ -237,7 +265,7 @@ def rolling_beta_chart(rolling_beta: pd.Series) -> go.Figure:
     fig.add_hline(y=0, line_color=COLOR_AXIS, line_width=1)
     fig.update_layout(
         template=PLOTLY_TEMPLATE_NAME,
-        title="Rolling Beta vs Benchmark (252-day)",
+        title=f"Rolling Beta vs Benchmark ({window}-day)",
         xaxis_title=None,
         yaxis_title="Beta",
     )
@@ -593,7 +621,7 @@ def monte_carlo_fan_chart(
         template=PLOTLY_TEMPLATE_NAME,
         title=f"Monte Carlo Simulation ({horizon_years}-Year Horizon)",
         xaxis_title="Years",
-        yaxis_title=f"Portfolio Value (base = {initial_value:.0f})",
+        yaxis_title="Portfolio Value ($)",
         hovermode="x unified",
     )
     return fig
@@ -730,6 +758,7 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
         yaxis_title="Estimated Monthly Loss (%)",
         yaxis=dict(range=[min_val * 1.35, 0.5], tickformat=".1f"),
         showlegend=False,
+        margin=dict(t=70),
     )
     return fig
 

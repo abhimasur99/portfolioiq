@@ -271,6 +271,11 @@ def compute_all_performance(
     )
     periods = compute_best_worst_periods(portfolio_returns)
 
+    # Adaptive rolling window: standard 252-day when data allows; shorter otherwise.
+    # 253 rows needed so rolling(252) produces at least 2 non-NaN values.
+    n = len(portfolio_returns)
+    rolling_window = 252 if n >= 253 else max(21, n // 3)
+
     return {
         "cagr": compute_cagr(portfolio_returns),
         "volatility": float(portfolio_returns.std() * np.sqrt(252)),
@@ -281,7 +286,9 @@ def compute_all_performance(
         "alpha": alpha,
         "beta": beta,
         "r_squared": r_squared,
-        "rolling_sharpe": compute_rolling_sharpe(portfolio_returns, risk_free_rate),
-        "rolling_beta": compute_rolling_beta(portfolio_returns, benchmark_returns),
+        "rolling_sharpe": compute_rolling_sharpe(portfolio_returns, risk_free_rate, window=rolling_window),
+        "rolling_beta": compute_rolling_beta(portfolio_returns, benchmark_returns, window=rolling_window),
+        "rolling_sharpe_window": rolling_window,
+        "rolling_beta_window": rolling_window,
         **periods,
     }

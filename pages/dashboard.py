@@ -36,7 +36,7 @@ from assets.config import (
     SK_PORTFOLIO_LOADED, SK_PORTFOLIO_NAME, SK_PORT_RETURNS,
     SK_PRICE_DATA, SK_PRICE_DATA_FULL, SK_RETURNS_DF,
     SK_RISK_FACTORS, SK_RISK_FREE_RATE, SK_RISK_OUTLOOK,
-    SK_TICKERS, SK_VAR_CONFIDENCE, SK_WEIGHT_MAX, SK_WEIGHT_MIN, SK_WEIGHTS,
+    SK_TICKERS, SK_TOTAL_VALUE, SK_VAR_CONFIDENCE, SK_WEIGHT_MAX, SK_WEIGHT_MIN, SK_WEIGHTS,
 )
 
 # Routing key set by render_quadrant More Details button
@@ -141,7 +141,11 @@ def _render_ticker_tape() -> None:
 # ── Holdings strip ─────────────────────────────────────────────────────────────
 
 def _render_holdings_strip() -> None:
-    """Render a full-width stacked segmented bar showing each ticker's portfolio weight."""
+    """Render a full-width stacked segmented bar with a persistent label row below.
+
+    All holdings are always labeled — no threshold logic. Segments carry color only;
+    the label row below shows a color-coded dot + ticker + weight for every position.
+    """
     tickers: list      = st.session_state.get(SK_TICKERS, [])
     weights: pd.Series = st.session_state.get(SK_WEIGHTS, pd.Series(dtype=float))
 
@@ -149,27 +153,33 @@ def _render_holdings_strip() -> None:
         return
 
     segments = []
+    labels   = []
     for i, ticker in enumerate(tickers):
         w_pct = float(weights.get(ticker, 0.0)) * 100
         color = _HOLDING_COLORS[i % len(_HOLDING_COLORS)]
-        # Show label inside segment; skip text for very narrow segments (<8%)
-        label = f"{ticker} {w_pct:.0f}%" if w_pct >= 12 else (ticker if w_pct >= 8 else "")
         segments.append(
-            f'<div style="width:{w_pct:.2f}%;background:{color};display:flex;'
-            f'align-items:center;justify-content:center;overflow:hidden;'
-            f'white-space:nowrap;padding:0 4px;">'
-            f'<span style="font-size:0.78rem;font-weight:700;color:#000;letter-spacing:0.03em;">'
-            f'{label}</span>'
-            f'</div>'
+            f'<div style="width:{w_pct:.2f}%;background:{color};"></div>'
+        )
+        labels.append(
+            f'<span style="margin-right:14px;white-space:nowrap;">'
+            f'<span style="display:inline-block;width:10px;height:10px;'
+            f'border-radius:2px;background:{color};margin-right:4px;vertical-align:middle;"></span>'
+            f'<span style="font-size:0.78rem;font-weight:600;">{ticker} {w_pct:.0f}%</span>'
+            f'</span>'
         )
 
     bar_html = (
         '<div style="display:flex;width:100%;height:34px;border-radius:5px;'
-        'overflow:hidden;margin:4px 0 8px;">'
+        'overflow:hidden;margin:4px 0 4px;">'
         + "".join(segments)
         + "</div>"
     )
-    st.markdown(bar_html, unsafe_allow_html=True)
+    label_row = (
+        '<div style="display:flex;flex-wrap:wrap;margin:0 0 8px;">'
+        + "".join(labels)
+        + "</div>"
+    )
+    st.markdown(bar_html + label_row, unsafe_allow_html=True)
 
 
 # ── Health bar ─────────────────────────────────────────────────────────────────
@@ -376,7 +386,8 @@ def _build_q3(analytics: dict) -> tuple:
     horizon  = st.session_state.get(SK_MC_HORIZON, DEFAULT_MC_HORIZON)
 
     if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
-        chart = monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=horizon)
+        total_value = st.session_state.get(SK_TOTAL_VALUE, 100.0)
+        chart = monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=horizon, initial_value=total_value)
     else:
         import plotly.graph_objects as go
         chart = go.Figure().update_layout(title="Monte Carlo (no data)")
@@ -468,14 +479,12 @@ def _build_q4(analytics: dict) -> tuple:
 
 # ── Window labels and date offsets ─────────────────────────────────────────────
 
-_WINDOW_OPTIONS = ["1Y", "3Y", "5Y", "All", "Custom"]
-_WINDOW_OFFSETS = {"1Y": 1, "3Y": 3, "5Y": 5}  # years; "All" and "Custom" handled separately
+_WINDOW_OPTIONS = ["1Y", "3Y", "5Y"]
+_WINDOW_OFFSETS = {"1Y": 1, "3Y": 3, "5Y": 5}  # years
 
 
 def _window_start(label: str, end: pd.Timestamp, full_start: pd.Timestamp) -> pd.Timestamp:
     """Compute the start date for a given window label."""
-    if label == "All":
-        return full_start
     if label in _WINDOW_OFFSETS:
         candidate = end - pd.DateOffset(years=_WINDOW_OFFSETS[label])
         return max(candidate, full_start)
@@ -574,47 +583,15 @@ def _render_time_selector() -> None:
         label_visibility="collapsed",
     )
 
-    # Custom date pickers (shown only when Custom is selected)
-    if selected == "Custom":
-        col_s, col_e = st.columns(2)
-        with col_s:
-            default_start = (full_end - pd.DateOffset(years=3)).date()
-            custom_start  = st.date_input(
-                "From",
-                value=default_start,
-                min_value=full_start.date(),
-                max_value=full_end.date(),
-                key="_custom_start",
-            )
-        with col_e:
-            custom_end = st.date_input(
-                "To",
-                value=full_end.date(),
-                min_value=full_start.date(),
-                max_value=full_end.date(),
-                key="_custom_end",
-            )
-        if custom_start >= custom_end:
-            st.warning("Start date must be before end date.")
-            return
-        new_start = pd.Timestamp(custom_start)
-        new_end   = pd.Timestamp(custom_end)
-    else:
-        new_start = _window_start(selected, full_end, full_start)
-        new_end   = full_end
+    new_start = _window_start(selected, full_end, full_start)
+    new_end   = full_end
 
     # Recompute only when the selection has actually changed
-    if selected != current_label or selected == "Custom":
-        # For Custom, also check if dates changed
-        prev_start = st.session_state.get(SK_ANALYSIS_START, "")
-        prev_end   = st.session_state.get(SK_ANALYSIS_END, "")
-        new_start_str = str(new_start.date())
-        new_end_str   = str(new_end.date())
-        if selected != current_label or new_start_str != prev_start or new_end_str != prev_end:
-            with st.spinner(f"Computing {selected} analysis…"):
-                success = _recompute_for_window(selected, new_start, new_end)
-            if success:
-                st.rerun()
+    if selected != current_label:
+        with st.spinner(f"Computing {selected} analysis…"):
+            success = _recompute_for_window(selected, new_start, new_end)
+        if success:
+            st.rerun()
 
 
 # ── Details page routing ───────────────────────────────────────────────────────

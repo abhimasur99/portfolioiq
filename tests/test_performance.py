@@ -199,6 +199,7 @@ class TestComputeAllPerformance:
             "cagr", "volatility", "sharpe", "sortino", "treynor",
             "information_ratio", "alpha", "beta", "r_squared",
             "rolling_sharpe", "rolling_beta",
+            "rolling_sharpe_window", "rolling_beta_window",
             "best_month", "worst_month", "best_year", "worst_year",
         }
         assert expected_keys == set(result.keys())

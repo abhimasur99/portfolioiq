@@ -321,3 +321,30 @@ beta=1, and Information Ratio=0 — metrics that are arithmetically correct but 
 - Users who want 60/40 comparison can use AGG as an approximate fixed-income proxy.
 - v2 implementation: fetch additional_benchmark_tickers in data_fetcher.py; blend in
   compute_benchmark_returns() in returns.py using user-specified weights.
+
+---
+
+## D-12 — Remove AGG Bond ETF from Benchmark Options
+
+**Date:** 2026-03-20
+**Stage:** F3
+
+**Context:**
+AGG (iShares Core U.S. Aggregate Bond ETF) was included in BENCHMARK_OPTIONS alongside
+SPY, QQQ, and IWM. PortfolioIQ is an equities-only portfolio analytics tool.
+
+**Decision:** Remove `"US Agg Bond (AGG)": "AGG"` from BENCHMARK_OPTIONS. BENCHMARK_OPTIONS
+now contains exactly three options: SPY, QQQ, IWM.
+
+**Rationale:**
+- Comparing an equity portfolio to a bond benchmark produces conceptually meaningless
+  alpha and beta. Alpha reflects excess return over a benchmark with the same risk profile;
+  beta measures co-movement with the market. Neither is interpretable when the benchmark
+  is a fixed-income index.
+- The app targets equity portfolio analysis. Bond benchmarks are out of scope for v1.
+- D-11 already removed the 60/40 blended benchmark for the same reason.
+
+**Consequences:**
+- Settings → Benchmark dropdown shows exactly three options: S&P 500 (SPY),
+  Nasdaq 100 (QQQ), Russell 2000 (IWM).
+- Any user who had AGG selected will fall back to the default (SPY) on next session load.

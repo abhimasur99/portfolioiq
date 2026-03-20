@@ -57,6 +57,7 @@ from assets.config import (
     SK_RISK_OUTLOOK,
     SK_TICKERS,
     SK_VAR_CONFIDENCE,
+    SK_TOTAL_VALUE,
     SK_WEIGHT_MAX,
     SK_WEIGHT_MIN,
     SK_WEIGHTS,
@@ -454,6 +455,7 @@ def render() -> None:
                     # Reset the base so _init_input_state picks it up fresh
                     # on the next INPUT render (after navigation back).
                     st.session_state.pop(_KEY_PORTFOLIO_BASE, None)
+                    st.session_state[SK_TOTAL_VALUE] = float(sum(amounts))
                     st.markdown("---")
                     success = _run_pipeline(
                         tickers, benchmark, weights, portfolio_name

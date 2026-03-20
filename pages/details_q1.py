@@ -81,8 +81,10 @@ def render() -> None:
     calmar    = rf.get("calmar")
     var_95    = ro.get("var_95_hist")
     cvar_95   = ro.get("cvar_95_hist")
-    rolling_sharpe = perf.get("rolling_sharpe", pd.Series(dtype=float))
-    rolling_beta   = perf.get("rolling_beta", pd.Series(dtype=float))
+    rolling_sharpe        = perf.get("rolling_sharpe", pd.Series(dtype=float))
+    rolling_beta          = perf.get("rolling_beta", pd.Series(dtype=float))
+    rolling_sharpe_window = perf.get("rolling_sharpe_window", 252)
+    rolling_beta_window   = perf.get("rolling_beta_window", 252)
 
     # ── Title ──────────────────────────────────────────────────────────────────
     st.title("Performance — Deep Dive")
@@ -203,15 +205,25 @@ def render() -> None:
         )
     with ch_right:
         st.plotly_chart(
-            rolling_sharpe_chart(rolling_sharpe),
+            rolling_sharpe_chart(rolling_sharpe, window=rolling_sharpe_window),
             use_container_width=True,
             key="_det_q1_rsharpe",
         )
+        if rolling_sharpe_window < 252:
+            st.caption(
+                f"_Rolling window shortened to {rolling_sharpe_window} days — "
+                f"the selected time frame has insufficient data for the standard 252-day calculation._"
+            )
 
     # Row 3: rolling beta (full width)
     st.plotly_chart(
-        rolling_beta_chart(rolling_beta),
+        rolling_beta_chart(rolling_beta, window=rolling_beta_window),
         use_container_width=True,
         key="_det_q1_rbeta",
     )
+    if rolling_beta_window < 252:
+        st.caption(
+            f"_Rolling window shortened to {rolling_beta_window} days — "
+            f"the selected time frame has insufficient data for the standard 252-day calculation._"
+        )
 

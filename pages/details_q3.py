@@ -29,6 +29,7 @@ from assets.config import (
     SK_PERFORMANCE,
     SK_PORT_RETURNS,
     SK_RISK_OUTLOOK,
+    SK_TOTAL_VALUE,
 )
 
 # Signal display labels (key → human-readable name)
@@ -361,16 +362,6 @@ def render() -> None:
         key="_det_q3_garchvol",
     )
 
-    # Monte Carlo fan (full width)
-    if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
-        st.plotly_chart(
-            monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=mc_horizon),
-            use_container_width=True,
-            key="_det_q3_mc",
-        )
-    else:
-        st.info("Monte Carlo data not available.")
-
     # Signal-Based Sensitivity Analysis (full width)
     if scenario_data is not None:
         st.caption(
@@ -386,4 +377,17 @@ def render() -> None:
         )
     else:
         st.info("Signal scenario data not available — GARCH volatility required.")
+
+    st.markdown("---")
+
+    # Monte Carlo fan (full width)
+    total_value = st.session_state.get(SK_TOTAL_VALUE, 100.0)
+    if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
+        st.plotly_chart(
+            monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=mc_horizon, initial_value=total_value),
+            use_container_width=True,
+            key="_det_q3_mc",
+        )
+    else:
+        st.info("Monte Carlo data not available.")
 

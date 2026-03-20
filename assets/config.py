@@ -140,6 +140,7 @@ SK_GARCH_REFIT     = "garch_refit"      # str, "each_load" | "daily"
 
 # UI state
 SK_PORTFOLIO_LOADED = "portfolio_loaded"  # bool
+SK_TOTAL_VALUE      = "total_value"       # float, total portfolio USD entered by user
 
 # ─── Application Defaults ─────────────────────────────────────────────────────
 
@@ -164,7 +165,8 @@ BENCHMARK_OPTIONS = {
     "S&P 500 (SPY)":      "SPY",
     "Nasdaq 100 (QQQ)":   "QQQ",
     "Russell 2000 (IWM)": "IWM",
-    "US Agg Bond (AGG)":  "AGG",
+    # "US Agg Bond (AGG)": removed — equities-only app; bond benchmark produces
+    # meaningless alpha/beta for equity portfolios. See D-12.
     # "60/40 Blend (SPY+AGG)": removed — proper implementation requires blending
     # SPY+AGG returns. Current fallback produces alpha=0, beta=1 (misleading). See D-11.
 }

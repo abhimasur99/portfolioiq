@@ -207,9 +207,9 @@ class TestValidateTickers:
         assert valid == []
         assert invalid == []
 
-    def test_network_failure_marks_all_invalid(self, mocker):
-        """On network failure, all tickers marked invalid (conservative)."""
+    def test_network_failure_passes_through(self, mocker):
+        """On network failure, all tickers are passed through as valid — let the main fetch surface the real error."""
         mocker.patch("yfinance.download", side_effect=Exception("network error"))
         valid, invalid = validate_tickers(["AAPL", "MSFT"])
-        assert valid == []
-        assert set(invalid) == {"AAPL", "MSFT"}
+        assert set(valid) == {"AAPL", "MSFT"}
+        assert invalid == []
