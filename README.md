@@ -36,7 +36,7 @@ Not sure what to enter? Click **⚡ Try Demo Portfolio** on the Input screen —
 | AMZN | $15,000 | Amazon |
 | NVDA | $10,000 | NVIDIA |
 
-Benchmark: SPY · Default window: 3Y (switch to 1Y/5Y/All on the Dashboard)
+Benchmark: SPY · Default window: 3Y (switch to 1Y/3Y/5Y on the Dashboard)
 
 ---
 
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Open `http://localhost:8501` in your browser. Navigate to **INPUT**, enter 2–10 ticker symbols with dollar amounts, select a benchmark, and click **Analyse Portfolio →**. The analysis window (1Y/3Y/5Y/All/Custom) is selectable on the Dashboard after loading.
+Open `http://localhost:8501` in your browser. Navigate to **INPUT**, enter 2–10 ticker symbols with dollar amounts, select a benchmark, and click **Analyse Portfolio →**. The analysis window (1Y/3Y/5Y) is selectable on the Dashboard after loading.
 
 ---
 
@@ -130,7 +130,7 @@ Full and rolling 60-day correlation matrices, annualised covariance (PD-checked,
 - **VaR/CVaR:** Historical at 95% and 99%; GARCH-VaR (normal quantile); monthly scaling (×√21)
 - **Distribution:** skewness, excess kurtosis
 - **Monte Carlo:** 1,000 paths (configurable to 10,000), GARCH-driven dynamics, vectorised over paths, sequential loop over steps; 10th/50th/90th percentile fan
-- **Stress tests:** portfolio return = α + β × scenario index return for 4 historical crises (2008 GFC, 2020 COVID, 2000 Dot-Com, 2022 Rate Shock)
+- **Signal-Based Sensitivity Analysis:** Filtered Historical Simulation (FHS) — three stress scenarios (mild/moderate/severe) derived from live market signals (VIX, credit spreads, yield curve). Estimated loss = historical 5th-percentile return × (stressed vol / historical daily vol); preserves actual fat-tail and skew without a distribution assumption. Toggle between 1-day and 1-month estimates; labels show both % loss and dollar impact
 
 ### Optimization (Layer 4)
 All three optimizers use `scipy.optimize.minimize` with SLSQP, equal-weight initialisation, configurable weight bounds:
@@ -169,7 +169,7 @@ All settings are adjustable at runtime via the **Settings** screen without resta
 | Weight min | 5% | Lower bound for all three optimizers |
 | Weight max | 90% | Upper bound for all three optimizers |
 
-Changing VaR/MC/GARCH settings triggers targeted recomputation of the risk outlook layer only. Changing weight bounds triggers optimization only. Changing benchmark requires a full data re-fetch from the Input screen. The analysis window (1Y/3Y/5Y/All/Custom) is selected on the Dashboard and does not require re-fetching data.
+Changing VaR/MC/GARCH settings triggers targeted recomputation of the risk outlook layer only. Changing weight bounds triggers optimization only. Changing benchmark requires a full data re-fetch from the Input screen. The analysis window (1Y/3Y/5Y) is selected on the Dashboard and does not require re-fetching data.
 
 ---
 
