@@ -25,12 +25,18 @@ import pandas as pd
 import streamlit as st
 
 from assets.config import (
+    BENCHMARK_OPTIONS,
     COLOR_BLUE, COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED,
-    SK_ANALYTICS, SK_BENCH_RETURNS, SK_BENCHMARK, SK_PERFORMANCE,
+    DEFAULT_MC_HORIZON, DEFAULT_MC_PATHS, DEFAULT_VAR_CONFIDENCE,
+    DEFAULT_WEIGHT_MIN, DEFAULT_WEIGHT_MAX,
+    SK_ANALYSIS_END, SK_ANALYSIS_START,
+    SK_ANALYTICS, SK_BENCH_RETURNS, SK_BENCHMARK,
+    SK_MARKET_SIGNALS, SK_MC_HORIZON, SK_MC_PATHS,
+    SK_OPTIMIZATION, SK_PERFORMANCE, SK_PERIOD,
     SK_PORTFOLIO_LOADED, SK_PORTFOLIO_NAME, SK_PORT_RETURNS,
-    SK_PRICE_DATA, SK_RISK_FACTORS, SK_RISK_OUTLOOK,
-    SK_OPTIMIZATION, SK_MARKET_SIGNALS, SK_TICKERS, SK_WEIGHTS,
-    SK_RISK_FREE_RATE,
+    SK_PRICE_DATA, SK_PRICE_DATA_FULL, SK_RETURNS_DF,
+    SK_RISK_FACTORS, SK_RISK_FREE_RATE, SK_RISK_OUTLOOK,
+    SK_TICKERS, SK_VAR_CONFIDENCE, SK_WEIGHT_MAX, SK_WEIGHT_MIN, SK_WEIGHTS,
 )
 
 # Routing key set by render_quadrant More Details button
@@ -460,6 +466,157 @@ def _build_q4(analytics: dict) -> tuple:
     return chart, kpis, flag
 
 
+# ── Window labels and date offsets ─────────────────────────────────────────────
+
+_WINDOW_OPTIONS = ["1Y", "3Y", "5Y", "All", "Custom"]
+_WINDOW_OFFSETS = {"1Y": 1, "3Y": 3, "5Y": 5}  # years; "All" and "Custom" handled separately
+
+
+def _window_start(label: str, end: pd.Timestamp, full_start: pd.Timestamp) -> pd.Timestamp:
+    """Compute the start date for a given window label."""
+    if label == "All":
+        return full_start
+    if label in _WINDOW_OFFSETS:
+        candidate = end - pd.DateOffset(years=_WINDOW_OFFSETS[label])
+        return max(candidate, full_start)
+    return full_start
+
+
+def _recompute_for_window(label: str, start: pd.Timestamp, end: pd.Timestamp) -> bool:
+    """Slice the stored 5y prices to (start, end) and recompute all analytics layers.
+
+    Updates SK_ANALYTICS, SK_PRICE_DATA, SK_RETURNS_DF, SK_PORT_RETURNS,
+    SK_BENCH_RETURNS, SK_ANALYSIS_START, SK_ANALYSIS_END, SK_PERIOD in session state.
+
+    Returns True on success, False on failure.
+    """
+    from analytics.returns import compute_log_returns, compute_portfolio_returns
+    from analytics.performance import compute_all_performance
+    from analytics.risk_factors import compute_all_risk_factors
+    from analytics.risk_outlook import compute_all_risk_outlook
+    from analytics.optimization import compute_all_optimization
+
+    full_prices = st.session_state.get(SK_PRICE_DATA_FULL)
+    tickers     = st.session_state.get(SK_TICKERS, [])
+    weights     = st.session_state.get(SK_WEIGHTS)
+    benchmark   = st.session_state.get(SK_BENCHMARK, "SPY")
+    rf          = st.session_state.get(SK_RISK_FREE_RATE, 0.0)
+    weight_min  = st.session_state.get(SK_WEIGHT_MIN, DEFAULT_WEIGHT_MIN)
+    weight_max  = st.session_state.get(SK_WEIGHT_MAX, DEFAULT_WEIGHT_MAX)
+
+    if full_prices is None or weights is None:
+        return False
+
+    prices_window = full_prices.loc[start:end]
+    if len(prices_window) < 60:
+        st.warning("Selected window has too few trading days. Expand the date range.")
+        return False
+
+    settings = {
+        "var_confidence": st.session_state.get(SK_VAR_CONFIDENCE, DEFAULT_VAR_CONFIDENCE),
+        "mc_horizon":     st.session_state.get(SK_MC_HORIZON, DEFAULT_MC_HORIZON),
+        "mc_paths":       st.session_state.get(SK_MC_PATHS, DEFAULT_MC_PATHS),
+    }
+
+    try:
+        returns_df        = compute_log_returns(prices_window)
+        available         = [t for t in tickers if t in returns_df.columns]
+        weights_aligned   = weights.reindex(available).dropna()
+        weights_aligned   = weights_aligned / weights_aligned.sum()
+        portfolio_returns = compute_portfolio_returns(returns_df[available], weights_aligned)
+        benchmark_returns = (
+            returns_df[benchmark] if benchmark in returns_df.columns
+            else portfolio_returns.copy()
+        )
+        performance  = compute_all_performance(portfolio_returns, benchmark_returns, rf)
+        risk_factors = compute_all_risk_factors(returns_df[available], weights_aligned, portfolio_returns)
+        risk_outlook = compute_all_risk_outlook(portfolio_returns, benchmark_returns, weights_aligned, performance, settings)
+        optimization = compute_all_optimization(returns_df[available], weights_aligned, rf, weight_min, weight_max)
+
+        # Update session state — preserve market_signals (time-independent)
+        analytics = st.session_state.get(SK_ANALYTICS, {})
+        analytics[SK_PERFORMANCE]  = performance
+        analytics[SK_RISK_FACTORS] = risk_factors
+        analytics[SK_RISK_OUTLOOK] = risk_outlook
+        analytics[SK_OPTIMIZATION] = optimization
+        st.session_state[SK_ANALYTICS]       = analytics
+        st.session_state[SK_PRICE_DATA]      = prices_window
+        st.session_state[SK_RETURNS_DF]      = returns_df
+        st.session_state[SK_PORT_RETURNS]    = portfolio_returns
+        st.session_state[SK_BENCH_RETURNS]   = benchmark_returns
+        st.session_state[SK_ANALYSIS_START]  = str(start.date())
+        st.session_state[SK_ANALYSIS_END]    = str(end.date())
+        st.session_state[SK_PERIOD]          = label
+        return True
+    except Exception as exc:
+        st.error(f"Window recompute failed: {exc}")
+        return False
+
+
+def _render_time_selector() -> None:
+    """Render the analysis window selector bar and handle window changes."""
+    full_prices = st.session_state.get(SK_PRICE_DATA_FULL)
+    if full_prices is None or full_prices.empty:
+        return
+
+    full_start = full_prices.index[0]
+    full_end   = full_prices.index[-1]
+    current_label = st.session_state.get(SK_PERIOD, "3Y")
+    if current_label not in _WINDOW_OPTIONS:
+        current_label = "3Y"
+    current_idx = _WINDOW_OPTIONS.index(current_label)
+
+    selected = st.radio(
+        "Analysis window",
+        options=_WINDOW_OPTIONS,
+        index=current_idx,
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    # Custom date pickers (shown only when Custom is selected)
+    if selected == "Custom":
+        col_s, col_e = st.columns(2)
+        with col_s:
+            default_start = (full_end - pd.DateOffset(years=3)).date()
+            custom_start  = st.date_input(
+                "From",
+                value=default_start,
+                min_value=full_start.date(),
+                max_value=full_end.date(),
+                key="_custom_start",
+            )
+        with col_e:
+            custom_end = st.date_input(
+                "To",
+                value=full_end.date(),
+                min_value=full_start.date(),
+                max_value=full_end.date(),
+                key="_custom_end",
+            )
+        if custom_start >= custom_end:
+            st.warning("Start date must be before end date.")
+            return
+        new_start = pd.Timestamp(custom_start)
+        new_end   = pd.Timestamp(custom_end)
+    else:
+        new_start = _window_start(selected, full_end, full_start)
+        new_end   = full_end
+
+    # Recompute only when the selection has actually changed
+    if selected != current_label or selected == "Custom":
+        # For Custom, also check if dates changed
+        prev_start = st.session_state.get(SK_ANALYSIS_START, "")
+        prev_end   = st.session_state.get(SK_ANALYSIS_END, "")
+        new_start_str = str(new_start.date())
+        new_end_str   = str(new_end.date())
+        if selected != current_label or new_start_str != prev_start or new_end_str != prev_end:
+            with st.spinner(f"Computing {selected} analysis…"):
+                success = _recompute_for_window(selected, new_start, new_end)
+            if success:
+                st.rerun()
+
+
 # ── Details page routing ───────────────────────────────────────────────────────
 
 def _route_details(details_key: str) -> None:
@@ -535,19 +692,24 @@ def render() -> None:
     _render_holdings_strip()
     st.markdown("")
 
+    # Context badge + time frame selector (before health bar)
+    port_ret = st.session_state.get(SK_PORT_RETURNS)
+    window_label = st.session_state.get(SK_PERIOD, "3Y")
+    benchmark = st.session_state.get(SK_BENCHMARK, "SPY")
+    bench_label = next((k for k, v in BENCHMARK_OPTIONS.items() if v == benchmark), benchmark)
+    if port_ret is not None and not port_ret.empty:
+        last_date = port_ret.index[-1].strftime("%b %d, %Y")
+        st.caption(
+            f"**{window_label} Analysis** | Benchmark: {bench_label} | "
+            f"Data as of {last_date} — reflects previous market close"
+        )
+
+    _render_time_selector()
+
     # Health bar
     st.markdown("#### Portfolio Health")
     indicators = _health_indicators(analytics)
     _render_health_bar(indicators)
-
-    # Data freshness disclosure
-    port_ret = st.session_state.get(SK_PORT_RETURNS)
-    if port_ret is not None and not port_ret.empty:
-        last_date = port_ret.index[-1].strftime("%b %d, %Y")
-        st.caption(
-            f"Market data as of **{last_date}** — reflects previous market close. "
-            "Analytics do not update during trading hours."
-        )
 
     st.markdown("")
 

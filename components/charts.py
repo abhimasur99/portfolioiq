@@ -672,21 +672,20 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
     n_amber   = scenario_data.get("n_amber", 0)
 
     names       = list(scenarios.keys())
-    var_month   = [abs(scenarios[n]["var_month"]) * 100 for n in names]
-    var_day     = [abs(scenarios[n]["var_day"])   * 100 for n in names]
+    # Negative values — losses hang downward from zero
+    var_month   = [scenarios[n]["var_month"] * 100 for n in names]   # already negative
+    var_day     = [scenarios[n]["var_day"]   * 100 for n in names]   # already negative
+    multipliers = [scenarios[n]["multiplier"] for n in names]
 
     # Color by severity: moderate=blue, significant=amber, severe=red
     _SCENARIO_COLORS = [COLOR_BLUE, COLOR_AMBER, COLOR_RED]
-    bar_colors = [
-        _SCENARIO_COLORS[i] if not scenarios[names[i]]["highlighted"]
-        else _SCENARIO_COLORS[i]          # same color, distinguished by border
-        for i in range(len(names))
-    ]
+    bar_colors = [_SCENARIO_COLORS[i] for i in range(len(names))]
     border_colors = [
         COLOR_TEXT if scenarios[n]["highlighted"] else "rgba(0,0,0,0)"
         for n in names
     ]
     border_widths = [2 if scenarios[n]["highlighted"] else 0 for n in names]
+    text_labels   = [f"{v:.1f}%" for v in var_month]
 
     signal_desc = f"Current environment: {env_level}"
     if n_red > 0 or n_amber > 0:
@@ -697,24 +696,39 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
         name="1-Month VaR 95%",
         x=names,
         y=var_month,
+        text=text_labels,
+        textposition="outside",
         marker_color=bar_colors,
         marker_line_color=border_colors,
         marker_line_width=border_widths,
-        customdata=[[var_day[i]] for i in range(len(names))],
+        customdata=[[var_day[i], multipliers[i]] for i in range(len(names))],
         hovertemplate=(
             "%{x}<br>"
-            "1-Month VaR: -%{y:.2f}%<br>"
-            "1-Day VaR: -%{customdata[0]:.2f}%"
+            "1-Month VaR: %{y:.2f}%<br>"
+            "1-Day VaR: %{customdata[0]:.2f}%<br>"
+            "Vol multiplier: %{customdata[1]:.1f}×"
             "<extra></extra>"
         ),
     ))
+    # Add multiplier annotations above each bar (inside chart area)
+    for i, (name, mult) in enumerate(zip(names, multipliers)):
+        fig.add_annotation(
+            x=name,
+            y=0,
+            text=f"{mult:.1f}× vol",
+            showarrow=False,
+            yanchor="bottom",
+            font=dict(size=10),
+            yshift=4,
+        )
     fig.add_hline(y=0, line_color=COLOR_AXIS, line_width=1)
+    min_val = min(var_month) if var_month else -10
     fig.update_layout(
         template=PLOTLY_TEMPLATE_NAME,
         title=f"Signal-Based Sensitivity Analysis<br><sup>{signal_desc} — highlighted bar = current environment</sup>",
         xaxis_title=None,
-        yaxis_title="Estimated 1-Month Loss (%)",
-        yaxis_tickformat=".1f",
+        yaxis_title="Estimated Monthly Loss (%)",
+        yaxis=dict(range=[min_val * 1.35, 0.5], tickformat=".1f"),
         showlegend=False,
     )
     return fig

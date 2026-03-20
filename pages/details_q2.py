@@ -21,7 +21,6 @@ import streamlit as st
 
 from assets.config import (
     SK_ANALYTICS,
-    SK_PERFORMANCE,
     SK_RISK_FACTORS,
     SK_TICKERS,
     SK_WEIGHTS,
@@ -54,7 +53,6 @@ def _fmt(val, decimals: int = 2) -> str:
 def render() -> None:
     """Render the Q2 (Risk Factors) More Details screen."""
     analytics = st.session_state.get(SK_ANALYTICS, {})
-    perf      = analytics.get(SK_PERFORMANCE, {})
     rf        = analytics.get(SK_RISK_FACTORS, {})
     tickers   = st.session_state.get(SK_TICKERS, [])
 
@@ -70,8 +68,6 @@ def render() -> None:
     calmar         = rf.get("calmar")
     recovery_days  = rf.get("recovery_days")
     ulcer_index    = rf.get("ulcer_index")
-    beta           = perf.get("beta")
-    r_squared      = perf.get("r_squared")
 
     # ── Title ──────────────────────────────────────────────────────────────────
     st.title("Risk Factors — Deep Dive")
@@ -127,22 +123,6 @@ def render() -> None:
                     f"The portfolio experienced a maximum drawdown of **{_pct(max_dd)}**."
                     + (f" Recovery took **{recovery_days} trading days**." if recovery_days else "")
                 )
-
-            if beta is not None:
-                if beta > 1.1:
-                    insight_lines.append(
-                        f"**Beta of {_fmt(beta)}** — the portfolio amplifies benchmark moves. "
-                        "It tends to rise more in up markets and fall more in down markets."
-                    )
-                elif beta < 0.9:
-                    insight_lines.append(
-                        f"**Beta of {_fmt(beta)}** — the portfolio is less sensitive to benchmark "
-                        "swings, acting as a partial buffer during market declines."
-                    )
-                else:
-                    insight_lines.append(
-                        f"**Beta of {_fmt(beta)}** — the portfolio tracks the benchmark closely."
-                    )
 
             for line in insight_lines:
                 st.markdown(f"- {line}")

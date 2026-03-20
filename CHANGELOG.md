@@ -5,6 +5,30 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.22.0] — 2026-03-20
+
+### Added
+- `pages/dashboard.py` `_recompute_for_window()`: Full analytics recompute when user changes analysis window. Slices the stored 5-year price data to the selected window and re-runs all four analytics layers.
+- `pages/dashboard.py` `_render_time_selector()`: Analysis window selector bar — 1Y / 3Y / 5Y / All / Custom. Custom selection shows inline date pickers. Triggers `_recompute_for_window()` on change. Replaces period selection in Input and Settings.
+- `assets/config.py`: Three new session state keys — `SK_ANALYSIS_START`, `SK_ANALYSIS_END` (active window boundaries as date strings), `SK_PRICE_DATA_FULL` (full 5y prices stored at analysis time).
+
+### Changed
+- `analytics/data_fetcher.py` `fetch_price_data()`: Removed `period` parameter. Always fetches `period="5y"`. Cache key is tickers only.
+- `pages/input.py`: Removed period selectbox. Pipeline stores full 5y prices in `SK_PRICE_DATA_FULL`, computes analytics on 3y default window, sets `SK_ANALYSIS_START`/`SK_ANALYSIS_END`.
+- `pages/dashboard.py` `render()`: Added context badge above health bar — "3-Year Analysis | Benchmark: SPY | Data as of [date]". Replaces Stage D data freshness caption. Added time frame selector bar below context badge.
+- `pages/settings.py`: Removed Period section (period now controlled on dashboard). Removed Rebalancing section (drift threshold deferred to v2). Settings now has 4 sections: Portfolio (benchmark only), Risk, Monte Carlo, Weight Bounds. MC horizon options updated to `[1, 2, 3, 5]` years.
+- `assets/config.py`: `DEFAULT_MC_HORIZON` changed from 10 to 1. Removed `"60/40 Blend (SPY+AGG)"` from `BENCHMARK_OPTIONS` (misleading fallback — deferred to v2, see D-11). Removed `PERIOD_OPTIONS` (no longer used in UI).
+- `pages/details_q2.py`: Removed Beta insight block from At a Glance — Beta is a Q1 performance metric, not a Q2 structural diagnostic.
+- `pages/details_q3.py`: Stacked GARCH vol, Monte Carlo fan, and Signal Sensitivity charts full-width vertically (was side-by-side 50/50 columns). Updated MC caption to reflect 1-year default. Charts are now visually balanced.
+- `components/charts.py` `signal_scenario_chart()`: Bars now show losses as downward from zero. Y-axis inverted (losses go below zero), consistent with loss convention. Bar annotations show multiplier labels and exact monthly VaR % on each bar.
+- `DECISIONS.md`: Added D-11 — 60/40 composite benchmark deferred to v2.
+
+### Removed
+- `pages/settings.py`: Period section and Rebalancing (drift threshold) section removed.
+- `assets/config.py`: `PERIOD_OPTIONS` removed.
+
+---
+
 ## [0.21.0] — 2026-03-19
 
 ### Added

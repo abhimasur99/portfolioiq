@@ -271,26 +271,29 @@ def validate_tickers(tickers: list[str]) -> tuple[list[str], list[str]]:
 # ── Public cached API ─────────────────────────────────────────────────────────
 
 @st.cache_data(ttl=3600)
-def fetch_price_data(tickers: tuple[str, ...], period: str) -> pd.DataFrame:
-    """Fetch adjusted close prices for a portfolio of tickers.
+def fetch_price_data(tickers: tuple[str, ...]) -> pd.DataFrame:
+    """Fetch adjusted close prices for a portfolio of tickers (5-year history).
 
-    Cached with a 1-hour TTL. Takes a tuple (not list) so Streamlit can
-    hash the argument for cache keying.
+    Always fetches the maximum 5-year window. The analysis window (1y/3y/custom)
+    is applied by the caller when slicing the returned DataFrame — it is NOT
+    applied here. This allows instant window switching on the dashboard without
+    re-fetching from yfinance.
+
+    Cached with a 1-hour TTL. Cache key is the tickers tuple only.
 
     Args:
         tickers: Tuple of ticker symbols (e.g. ("AAPL", "MSFT", "SPY")).
                  Use tuple not list — lists are not hashable for cache keys.
-        period: yfinance period string (e.g. "1y", "3y", "5y").
 
     Returns:
         pd.DataFrame with dates as index and tickers as columns.
-        Adjusted close prices (total return). No NaN rows.
+        Adjusted close prices (total return). No NaN rows. Up to 5 years.
 
     Raises:
         ValueError: If any ticker is invalid or returns no data.
         RuntimeError: On persistent network failure after backoff retries.
     """
-    return _fetch_price_data_impl(list(tickers), period)
+    return _fetch_price_data_impl(list(tickers), "5y")
 
 
 def fetch_risk_free_rate() -> float:

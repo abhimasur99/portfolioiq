@@ -361,31 +361,29 @@ def render() -> None:
         key="_det_q3_garchvol",
     )
 
-    # Monte Carlo fan | Signal-based sensitivity analysis
-    ch_left, ch_right = st.columns(2)
-    with ch_left:
-        if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
-            st.plotly_chart(
-                monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=mc_horizon),
-                use_container_width=True,
-                key="_det_q3_mc",
-            )
-        else:
-            st.info("Monte Carlo data not available.")
-    with ch_right:
-        if scenario_data is not None:
-            st.markdown("##### Signal-Based Sensitivity Analysis")
-            st.caption(
-                "Estimated 1-month portfolio loss under three stress levels, derived from "
-                "current GARCH-implied volatility scaled by signal environment severity. "
-                "The highlighted bar reflects the current signal environment. "
-                "These are model estimates, not forecasts."
-            )
-            st.plotly_chart(
-                signal_scenario_chart(scenario_data),
-                use_container_width=True,
-                key="_det_q3_scenarios",
-            )
-        else:
-            st.info("Signal scenario data not available — GARCH volatility required.")
+    # Monte Carlo fan (full width)
+    if mc_p10 is not None and mc_p50 is not None and mc_p90 is not None:
+        st.plotly_chart(
+            monte_carlo_fan_chart(mc_p10, mc_p50, mc_p90, horizon_years=mc_horizon),
+            use_container_width=True,
+            key="_det_q3_mc",
+        )
+    else:
+        st.info("Monte Carlo data not available.")
+
+    # Signal-Based Sensitivity Analysis (full width)
+    if scenario_data is not None:
+        st.caption(
+            "Estimated 1-month portfolio loss under three stress levels, derived from "
+            "current GARCH-implied volatility scaled by signal environment severity. "
+            "The highlighted bar reflects the current signal environment. "
+            "These are model estimates, not forecasts."
+        )
+        st.plotly_chart(
+            signal_scenario_chart(scenario_data),
+            use_container_width=True,
+            key="_det_q3_scenarios",
+        )
+    else:
+        st.info("Signal scenario data not available — GARCH volatility required.")
 

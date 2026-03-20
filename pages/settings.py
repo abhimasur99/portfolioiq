@@ -4,17 +4,15 @@ Screen 5 — Settings.
 
 Responsibilities:
 - Benchmark selection (BENCHMARK_OPTIONS).
-- Time period selection (PERIOD_OPTIONS).
 - VaR confidence level (slider).
 - VaR method (historical | garch).
 - GARCH refit frequency.
 - Optimization weight bounds (min/max sliders).
-- Monte Carlo horizon (5, 10, 20, 30 years).
+- Monte Carlo horizon (1, 2, 3, 5 years).
 - Monte Carlo paths (1,000 or 10,000).
-- Rebalancing drift threshold.
 - Save and Recompute button: triggers granular recomputation of only the
   analytics affected by the changed setting.
-  - Benchmark / period change → informs user that a price re-fetch is required
+  - Benchmark change → informs user that a price re-fetch is required
     and prompts them to return to Input.
   - VaR confidence / method / GARCH refit → recompute risk_outlook only.
   - Weight bounds change → recompute optimization only.
@@ -31,30 +29,23 @@ import streamlit as st
 from assets.config import (
     BENCHMARK_OPTIONS,
     DEFAULT_BENCHMARK,
-    DEFAULT_DRIFT_THRESHOLD,
     DEFAULT_MC_HORIZON,
     DEFAULT_MC_PATHS,
-    DEFAULT_PERIOD,
     DEFAULT_VAR_CONFIDENCE,
     DEFAULT_VAR_METHOD,
     DEFAULT_WEIGHT_MAX,
     DEFAULT_WEIGHT_MIN,
-    PERIOD_OPTIONS,
     SK_ANALYTICS,
     SK_BENCH_RETURNS,
     SK_BENCHMARK,
-    SK_DRIFT_THRESHOLD,
     SK_GARCH_REFIT,
-    SK_MARKET_SIGNALS,
     SK_MC_HORIZON,
     SK_MC_PATHS,
     SK_OPTIMIZATION,
-    SK_PERIOD,
     SK_PERFORMANCE,
     SK_PORTFOLIO_LOADED,
     SK_PORT_RETURNS,
     SK_RETURNS_DF,
-    SK_RISK_FACTORS,
     SK_RISK_FREE_RATE,
     SK_RISK_OUTLOOK,
     SK_VAR_CONFIDENCE,
@@ -69,31 +60,27 @@ from assets.config import (
 def _snapshot() -> dict:
     """Capture the current values of all configurable settings."""
     return {
-        SK_BENCHMARK:       st.session_state.get(SK_BENCHMARK,       DEFAULT_BENCHMARK),
-        SK_PERIOD:          st.session_state.get(SK_PERIOD,          DEFAULT_PERIOD),
-        SK_VAR_CONFIDENCE:  st.session_state.get(SK_VAR_CONFIDENCE,  DEFAULT_VAR_CONFIDENCE),
-        SK_VAR_METHOD:      st.session_state.get(SK_VAR_METHOD,      DEFAULT_VAR_METHOD),
-        SK_GARCH_REFIT:     st.session_state.get(SK_GARCH_REFIT,     "each_load"),
-        SK_MC_HORIZON:      st.session_state.get(SK_MC_HORIZON,      DEFAULT_MC_HORIZON),
-        SK_MC_PATHS:        st.session_state.get(SK_MC_PATHS,        DEFAULT_MC_PATHS),
-        SK_WEIGHT_MIN:      st.session_state.get(SK_WEIGHT_MIN,      DEFAULT_WEIGHT_MIN),
-        SK_WEIGHT_MAX:      st.session_state.get(SK_WEIGHT_MAX,      DEFAULT_WEIGHT_MAX),
-        SK_DRIFT_THRESHOLD: st.session_state.get(SK_DRIFT_THRESHOLD, DEFAULT_DRIFT_THRESHOLD),
+        SK_BENCHMARK:      st.session_state.get(SK_BENCHMARK,      DEFAULT_BENCHMARK),
+        SK_VAR_CONFIDENCE: st.session_state.get(SK_VAR_CONFIDENCE, DEFAULT_VAR_CONFIDENCE),
+        SK_VAR_METHOD:     st.session_state.get(SK_VAR_METHOD,     DEFAULT_VAR_METHOD),
+        SK_GARCH_REFIT:    st.session_state.get(SK_GARCH_REFIT,    "each_load"),
+        SK_MC_HORIZON:     st.session_state.get(SK_MC_HORIZON,     DEFAULT_MC_HORIZON),
+        SK_MC_PATHS:       st.session_state.get(SK_MC_PATHS,       DEFAULT_MC_PATHS),
+        SK_WEIGHT_MIN:     st.session_state.get(SK_WEIGHT_MIN,     DEFAULT_WEIGHT_MIN),
+        SK_WEIGHT_MAX:     st.session_state.get(SK_WEIGHT_MAX,     DEFAULT_WEIGHT_MAX),
     }
 
 
 def _restore_defaults() -> None:
     """Reset all settings to their default values."""
-    st.session_state[SK_BENCHMARK]       = DEFAULT_BENCHMARK
-    st.session_state[SK_PERIOD]          = DEFAULT_PERIOD
-    st.session_state[SK_VAR_CONFIDENCE]  = DEFAULT_VAR_CONFIDENCE
-    st.session_state[SK_VAR_METHOD]      = DEFAULT_VAR_METHOD
-    st.session_state[SK_GARCH_REFIT]     = "each_load"
-    st.session_state[SK_MC_HORIZON]      = DEFAULT_MC_HORIZON
-    st.session_state[SK_MC_PATHS]        = DEFAULT_MC_PATHS
-    st.session_state[SK_WEIGHT_MIN]      = DEFAULT_WEIGHT_MIN
-    st.session_state[SK_WEIGHT_MAX]      = DEFAULT_WEIGHT_MAX
-    st.session_state[SK_DRIFT_THRESHOLD] = DEFAULT_DRIFT_THRESHOLD
+    st.session_state[SK_BENCHMARK]      = DEFAULT_BENCHMARK
+    st.session_state[SK_VAR_CONFIDENCE] = DEFAULT_VAR_CONFIDENCE
+    st.session_state[SK_VAR_METHOD]     = DEFAULT_VAR_METHOD
+    st.session_state[SK_GARCH_REFIT]    = "each_load"
+    st.session_state[SK_MC_HORIZON]     = DEFAULT_MC_HORIZON
+    st.session_state[SK_MC_PATHS]       = DEFAULT_MC_PATHS
+    st.session_state[SK_WEIGHT_MIN]     = DEFAULT_WEIGHT_MIN
+    st.session_state[SK_WEIGHT_MAX]     = DEFAULT_WEIGHT_MAX
 
 
 # ── Granular recompute ──────────────────────────────────────────────────────────
@@ -182,53 +169,32 @@ def render() -> None:
                 (k for k, v in BENCHMARK_OPTIONS.items()
                  if v == before[SK_BENCHMARK]), before[SK_BENCHMARK]
             )
-            period_label = next(
-                (k for k, v in PERIOD_OPTIONS.items()
-                 if v == before[SK_PERIOD]), before[SK_PERIOD]
-            )
-            col1, col2, col3, col4, col5 = st.columns(5)
+            col1, col2, col3, col4 = st.columns(4)
             col1.metric("Benchmark", bench_label)
-            col2.metric("Period", period_label)
-            col3.metric("VaR Conf.", f"{before[SK_VAR_CONFIDENCE]*100:.0f}%")
-            col4.metric("MC Horizon", f"{before[SK_MC_HORIZON]}y")
-            col5.metric("Paths", f"{before[SK_MC_PATHS]:,}")
+            col2.metric("VaR Conf.", f"{before[SK_VAR_CONFIDENCE]*100:.0f}%")
+            col3.metric("MC Horizon", f"{before[SK_MC_HORIZON]}y")
+            col4.metric("Paths", f"{before[SK_MC_PATHS]:,}")
 
     st.markdown("---")
 
     # ── Section 1: Portfolio ───────────────────────────────────────────────────
     st.markdown("#### Portfolio")
     st.caption(
-        "Changing benchmark or period requires a full data re-fetch. "
-        "After saving, return to **Input** and re-analyse your portfolio."
+        "Changing benchmark requires re-analysing your portfolio. "
+        "After saving, return to **Input** and click **Analyse Portfolio →**."
     )
 
-    col_b, col_p = st.columns(2)
-    with col_b:
-        bench_keys = list(BENCHMARK_OPTIONS.keys())
-        bench_vals = list(BENCHMARK_OPTIONS.values())
-        current_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
-        bench_idx = bench_vals.index(current_bench) if current_bench in bench_vals else 0
-        new_bench_label = st.selectbox(
-            "Benchmark",
-            options=bench_keys,
-            index=bench_idx,
-            help="The benchmark used for alpha, beta, Sharpe, and Information Ratio calculations.",
-        )
-        new_benchmark = BENCHMARK_OPTIONS[new_bench_label]
-
-    with col_p:
-        selectable_periods = {k: v for k, v in PERIOD_OPTIONS.items() if v != "custom"}
-        period_keys = list(selectable_periods.keys())
-        period_vals = list(selectable_periods.values())
-        current_period = st.session_state.get(SK_PERIOD, DEFAULT_PERIOD)
-        period_idx = period_vals.index(current_period) if current_period in period_vals else 1
-        new_period_label = st.selectbox(
-            "Historical period",
-            options=period_keys,
-            index=period_idx,
-            help="The look-back window for all historical analytics. All metrics change with this setting.",
-        )
-        new_period = selectable_periods[new_period_label]
+    bench_keys = list(BENCHMARK_OPTIONS.keys())
+    bench_vals = list(BENCHMARK_OPTIONS.values())
+    current_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
+    bench_idx = bench_vals.index(current_bench) if current_bench in bench_vals else 0
+    new_bench_label = st.selectbox(
+        "Benchmark",
+        options=bench_keys,
+        index=bench_idx,
+        help="The benchmark used for alpha, beta, Sharpe, and Information Ratio calculations.",
+    )
+    new_benchmark = BENCHMARK_OPTIONS[new_bench_label]
 
     st.markdown("---")
 
@@ -279,9 +245,9 @@ def render() -> None:
 
     col_h, col_np = st.columns(2)
     with col_h:
-        mc_horizon_options = [5, 10, 20, 30]
+        mc_horizon_options = [1, 2, 3, 5]
         current_mc_horizon = st.session_state.get(SK_MC_HORIZON, DEFAULT_MC_HORIZON)
-        mc_horizon_idx = mc_horizon_options.index(current_mc_horizon) if current_mc_horizon in mc_horizon_options else 1
+        mc_horizon_idx = mc_horizon_options.index(current_mc_horizon) if current_mc_horizon in mc_horizon_options else 0
         new_mc_horizon = st.selectbox(
             "Simulation horizon (years)",
             options=mc_horizon_options,
@@ -341,26 +307,6 @@ def render() -> None:
 
     st.markdown("---")
 
-    # ── Section 5: Rebalancing ─────────────────────────────────────────────────
-    st.markdown("#### Rebalancing Drift Threshold")
-    st.caption(
-        "This threshold is used to flag positions that have drifted from their target weight. "
-        "It is a display setting — no recomputation is needed."
-    )
-
-    new_drift_threshold_pct = st.slider(
-        "Drift threshold",
-        min_value=1,
-        max_value=20,
-        value=int(round(float(st.session_state.get(SK_DRIFT_THRESHOLD, DEFAULT_DRIFT_THRESHOLD)) * 100)),
-        step=1,
-        format="%d%%",
-        help="A position is flagged for rebalancing if its weight has drifted by more than this amount.",
-    )
-    new_drift_threshold = new_drift_threshold_pct / 100
-
-    st.markdown("---")
-
     # ── Action buttons ─────────────────────────────────────────────────────────
     btn_save, btn_reset = st.columns([3, 1])
 
@@ -380,22 +326,19 @@ def render() -> None:
         ):
             # Collect new values
             new_settings = {
-                SK_BENCHMARK:       new_benchmark,
-                SK_PERIOD:          new_period,
-                SK_VAR_CONFIDENCE:  new_var_confidence,
-                SK_VAR_METHOD:      new_var_method,
-                SK_GARCH_REFIT:     new_garch_refit,
-                SK_MC_HORIZON:      new_mc_horizon,
-                SK_MC_PATHS:        new_mc_paths,
-                SK_WEIGHT_MIN:      new_weight_min,
-                SK_WEIGHT_MAX:      new_weight_max,
-                SK_DRIFT_THRESHOLD: new_drift_threshold,
+                SK_BENCHMARK:      new_benchmark,
+                SK_VAR_CONFIDENCE: new_var_confidence,
+                SK_VAR_METHOD:     new_var_method,
+                SK_GARCH_REFIT:    new_garch_refit,
+                SK_MC_HORIZON:     new_mc_horizon,
+                SK_MC_PATHS:       new_mc_paths,
+                SK_WEIGHT_MIN:     new_weight_min,
+                SK_WEIGHT_MAX:     new_weight_max,
             }
 
             # Detect what changed
             portfolio_changed = (
                 new_settings[SK_BENCHMARK] != before[SK_BENCHMARK]
-                or new_settings[SK_PERIOD] != before[SK_PERIOD]
             )
             risk_outlook_changed = (
                 new_settings[SK_VAR_CONFIDENCE] != before[SK_VAR_CONFIDENCE]
@@ -419,9 +362,9 @@ def render() -> None:
 
             elif portfolio_changed:
                 st.info(
-                    "**Benchmark or period changed.** These settings require a full data "
-                    "re-fetch to take effect. Please go to **Input**, confirm your holdings, "
-                    "and click **Analyse Portfolio →** to apply the new settings."
+                    "**Benchmark changed.** This setting requires a full data re-fetch to take "
+                    "effect. Please go to **Input**, confirm your holdings, and click "
+                    "**Analyse Portfolio →** to apply the new benchmark."
                 )
 
             else:

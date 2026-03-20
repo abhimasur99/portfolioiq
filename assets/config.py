@@ -104,11 +104,16 @@ pio.templates.default = PLOTLY_TEMPLATE_NAME
 SK_TICKERS        = "tickers"           # list[str]
 SK_WEIGHTS        = "weights"           # pd.Series, index=tickers
 SK_BENCHMARK      = "benchmark"         # str, e.g. "SPY"
-SK_PERIOD         = "period"            # str, e.g. "3y"
+SK_PERIOD         = "period"            # str, window label e.g. "1Y", "3Y", "5Y", "All", "Custom"
 SK_PORTFOLIO_NAME = "portfolio_name"    # str (optional user label)
 
+# Analysis window (set by dashboard time frame selector; initial default = 3Y)
+SK_ANALYSIS_START  = "analysis_start"   # str, "YYYY-MM-DD" — start of active analytics window
+SK_ANALYSIS_END    = "analysis_end"     # str, "YYYY-MM-DD" — end of active analytics window
+
 # Fetched market data
-SK_PRICE_DATA     = "price_data"        # pd.DataFrame, MultiIndex cols
+SK_PRICE_DATA_FULL = "price_data_full"  # pd.DataFrame, full 5y prices stored once at analysis time
+SK_PRICE_DATA      = "price_data"       # pd.DataFrame, prices for the active analysis window
 SK_RETURNS_DF     = "returns_df"        # pd.DataFrame, log returns per ticker
 SK_PORT_RETURNS   = "portfolio_returns" # pd.Series, weighted portfolio log returns
 SK_BENCH_RETURNS  = "benchmark_returns" # pd.Series, benchmark log returns
@@ -143,7 +148,7 @@ DEFAULT_BENCHMARK        = "SPY"
 DEFAULT_PERIOD           = "3y"
 DEFAULT_VAR_CONFIDENCE   = 0.95
 DEFAULT_VAR_METHOD       = "historical"
-DEFAULT_MC_HORIZON       = 10       # years
+DEFAULT_MC_HORIZON       = 1        # years (1y projection most actionable for portfolio decisions)
 DEFAULT_MC_PATHS         = 1_000
 DEFAULT_WEIGHT_MIN       = 0.05     # 5%
 DEFAULT_WEIGHT_MAX       = 0.90     # 90%
@@ -159,20 +164,12 @@ DEFAULT_COV_COND_THRESH  = 1e10     # condition number threshold for regularizat
 # ─── Benchmark Options ────────────────────────────────────────────────────────
 
 BENCHMARK_OPTIONS = {
-    "S&P 500 (SPY)":          "SPY",
-    "Nasdaq 100 (QQQ)":       "QQQ",
-    "Russell 2000 (IWM)":     "IWM",
-    "US Agg Bond (AGG)":      "AGG",
-    "60/40 Blend (SPY+AGG)":  "60_40",
-}
-
-# ─── Period Options ───────────────────────────────────────────────────────────
-
-PERIOD_OPTIONS = {
-    "1 Year":  "1y",
-    "3 Years": "3y",
-    "5 Years": "5y",
-    "Custom":  "custom",
+    "S&P 500 (SPY)":      "SPY",
+    "Nasdaq 100 (QQQ)":   "QQQ",
+    "Russell 2000 (IWM)": "IWM",
+    "US Agg Bond (AGG)":  "AGG",
+    # "60/40 Blend (SPY+AGG)": removed — proper implementation requires blending
+    # SPY+AGG returns. Current fallback produces alpha=0, beta=1 (misleading). See D-11.
 }
 
 # ─── Tickers for Data Fetching ────────────────────────────────────────────────

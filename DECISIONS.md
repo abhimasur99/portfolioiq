@@ -290,3 +290,34 @@ Display label in UI: "Yield Curve (10yr - 30yr spread)" to be transparent.
 - The spread will typically be negative (10yr < 30yr) — this is normal term premium direction.
 - Inversion signals are calibrated to this spread, not the classic 10yr-2yr recession indicator.
 - Documented here so the discrepancy is not forgotten.
+
+---
+
+## D-11: 60/40 Composite Benchmark Deferred to v2
+
+**Date:** 2026-03-20
+**Status:** DEFERRED — revisit in v2
+
+**Context:** A 60/40 blended benchmark (60% SPY, 40% AGG) was originally listed in BENCHMARK_OPTIONS.
+The current implementation would use portfolio_returns as its own benchmark, producing alpha=0,
+beta=1, and Information Ratio=0 — metrics that are arithmetically correct but completely meaningless.
+
+**Options considered:**
+1. Keep 60/40 in the list with current fallback (silently produces misleading numbers)
+2. Remove from benchmark options until properly implemented
+3. Implement blend: 0.6 × log(SPY returns) + 0.4 × log(AGG returns), fetching both separately
+
+**Decision:** Remove 60/40 from BENCHMARK_OPTIONS. Defer to v2.
+
+**Rationale:**
+- Shipping a benchmark option that produces alpha=0, beta=1 is actively misleading.
+- Proper implementation requires fetching SPY and AGG as separate tickers, computing
+  weighted log returns, and storing the blended series as the benchmark return series.
+- This requires non-trivial changes to the data fetching pipeline and session state structure.
+- The four remaining benchmarks (SPY, QQQ, IWM, AGG) cover the most common use cases.
+
+**Consequences:**
+- BENCHMARK_OPTIONS now has 4 entries: SPY, QQQ, IWM, AGG.
+- Users who want 60/40 comparison can use AGG as an approximate fixed-income proxy.
+- v2 implementation: fetch additional_benchmark_tickers in data_fetcher.py; blend in
+  compute_benchmark_returns() in returns.py using user-specified weights.

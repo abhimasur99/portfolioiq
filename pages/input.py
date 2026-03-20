@@ -6,18 +6,18 @@ Responsibilities:
 - Ticker entry with inline validation (before computation).
 - Dollar amount input with automatic weight calculation and live recalculation.
 - Benchmark selection from BENCHMARK_OPTIONS.
-- Time period selection from PERIOD_OPTIONS.
 - Full disclaimer display.
 - Loading screen with seven-step progress bar on submit.
 - On successful load, sets SK_PORTFOLIO_LOADED = True and routes to dashboard.
 
-Does NOT compute any analytics — delegates to analytics/ modules via the
-staged pipeline triggered on submit.
+Note: Time period is NOT selected here. The app always fetches 5 years of
+price data. The analysis window (1Y/3Y/5Y/custom) is selected on the dashboard
+via the time frame selector bar, allowing instant window switching.
 
 7-step pipeline:
   1. Validate tickers (live yfinance check)
-  2. Fetch price data + risk-free rate
-  3. Compute log returns + portfolio returns
+  2. Fetch 5y price data + risk-free rate (stores full history in SK_PRICE_DATA_FULL)
+  3. Compute log returns + portfolio returns (on default 3Y window)
   4. Compute performance metrics (Layer 1)
   5. Compute risk factors (Layer 2)
   6. Compute risk outlook — GARCH, VaR, Monte Carlo (Layer 3)
@@ -32,11 +32,11 @@ import streamlit as st
 from assets.config import (
     BENCHMARK_OPTIONS,
     DEFAULT_BENCHMARK,
-    DEFAULT_PERIOD,
     DEFAULT_WEIGHT_MIN,
     DEFAULT_WEIGHT_MAX,
     DISCLAIMER_FULL,
-    PERIOD_OPTIONS,
+    SK_ANALYSIS_END,
+    SK_ANALYSIS_START,
     SK_ANALYTICS,
     SK_BENCH_RETURNS,
     SK_BENCHMARK,
@@ -50,6 +50,7 @@ from assets.config import (
     SK_PORTFOLIO_NAME,
     SK_PORT_RETURNS,
     SK_PRICE_DATA,
+    SK_PRICE_DATA_FULL,
     SK_RETURNS_DF,
     SK_RISK_FACTORS,
     SK_RISK_FREE_RATE,
@@ -145,22 +146,19 @@ def _weight_bound_errors(
     return errors
 
 
-def _period_index(stored_period: str) -> int:
-    """Return the selectbox index for the stored period string."""
-    selectable = [v for v in PERIOD_OPTIONS.values() if v != "custom"]
-    return selectable.index(stored_period) if stored_period in selectable else 1
-
-
 # ── 7-step analytics pipeline ──────────────────────────────────────────────────
 
 def _run_pipeline(
     tickers: list,
     benchmark: str,
-    period: str,
     weights: pd.Series,
     portfolio_name: str,
 ) -> bool:
     """Execute all seven analytics pipeline steps with progress display.
+
+    Fetches 5 years of price data (stored in SK_PRICE_DATA_FULL). Analytics
+    are computed on the default 3-year window, which can be changed via the
+    dashboard time frame selector without re-fetching.
 
     Stores all results in st.session_state on success and sets
     SK_PORTFOLIO_LOADED = True.
@@ -207,10 +205,17 @@ def _run_pipeline(
             )
             return False
 
-        # ── Step 2: Fetch price data + risk-free rate ─────────────────────────
-        _step(2, "Fetching price data from yfinance…")
-        prices          = fetch_price_data(tuple(all_tickers), period)
-        risk_free_rate  = fetch_risk_free_rate()
+        # ── Step 2: Fetch 5y price data + risk-free rate ──────────────────────
+        _step(2, "Fetching 5-year price history from yfinance…")
+        full_prices    = fetch_price_data(tuple(all_tickers))
+        risk_free_rate = fetch_risk_free_rate()
+
+        # Default analysis window: last 3 years (or max available if < 3y)
+        end_date      = full_prices.index[-1]
+        start_target  = end_date - pd.DateOffset(years=3)
+        prices        = full_prices[full_prices.index >= start_target]
+        if len(prices) < 60:  # fallback to full data if window is unexpectedly short
+            prices = full_prices
 
         # ── Step 3: Log returns + portfolio / benchmark series ────────────────
         _step(3, "Computing log returns…")
@@ -262,16 +267,19 @@ def _run_pipeline(
         market_signals = fetch_all_signals(portfolio_returns)
 
         # ── Persist all results in session state ──────────────────────────────
-        st.session_state[SK_TICKERS]       = available
-        st.session_state[SK_WEIGHTS]       = weights_aligned
-        st.session_state[SK_BENCHMARK]     = benchmark
-        st.session_state[SK_PERIOD]        = period
-        st.session_state[SK_PORTFOLIO_NAME]= portfolio_name
-        st.session_state[SK_PRICE_DATA]    = prices
-        st.session_state[SK_RETURNS_DF]    = returns_df
-        st.session_state[SK_PORT_RETURNS]  = portfolio_returns
-        st.session_state[SK_BENCH_RETURNS] = benchmark_returns
-        st.session_state[SK_RISK_FREE_RATE]= risk_free_rate
+        st.session_state[SK_TICKERS]         = available
+        st.session_state[SK_WEIGHTS]         = weights_aligned
+        st.session_state[SK_BENCHMARK]       = benchmark
+        st.session_state[SK_PERIOD]          = "3Y"   # initial window label
+        st.session_state[SK_ANALYSIS_START]  = str(prices.index[0].date())
+        st.session_state[SK_ANALYSIS_END]    = str(prices.index[-1].date())
+        st.session_state[SK_PORTFOLIO_NAME]  = portfolio_name
+        st.session_state[SK_PRICE_DATA_FULL] = full_prices   # full 5y, for window switching
+        st.session_state[SK_PRICE_DATA]      = prices        # active window prices
+        st.session_state[SK_RETURNS_DF]      = returns_df
+        st.session_state[SK_PORT_RETURNS]    = portfolio_returns
+        st.session_state[SK_BENCH_RETURNS]   = benchmark_returns
+        st.session_state[SK_RISK_FREE_RATE]  = risk_free_rate
         st.session_state[SK_ANALYTICS] = {
             SK_PERFORMANCE:    performance,
             SK_RISK_FACTORS:   risk_factors,
@@ -345,23 +353,18 @@ def render() -> None:
                 key=_KEY_TICKER_EDITOR,
             )
 
-            col_b, col_p = st.columns(2)
-            with col_b:
-                bench_keys   = list(BENCHMARK_OPTIONS.keys())
-                bench_vals   = list(BENCHMARK_OPTIONS.values())
-                stored_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
-                bench_idx    = bench_vals.index(stored_bench) if stored_bench in bench_vals else 0
-                benchmark_label = st.selectbox("Benchmark", options=bench_keys, index=bench_idx)
-                benchmark = BENCHMARK_OPTIONS[benchmark_label]
-
-            with col_p:
-                selectable_periods = {k: v for k, v in PERIOD_OPTIONS.items() if v != "custom"}
-                period_label = st.selectbox(
-                    "Time period",
-                    options=list(selectable_periods.keys()),
-                    index=_period_index(st.session_state.get(SK_PERIOD, DEFAULT_PERIOD)),
-                )
-                period = selectable_periods[period_label]
+            bench_keys   = list(BENCHMARK_OPTIONS.keys())
+            bench_vals   = list(BENCHMARK_OPTIONS.values())
+            stored_bench = st.session_state.get(SK_BENCHMARK, DEFAULT_BENCHMARK)
+            bench_idx    = bench_vals.index(stored_bench) if stored_bench in bench_vals else 0
+            benchmark_label = st.selectbox(
+                "Benchmark",
+                options=bench_keys,
+                index=bench_idx,
+                help="Used for alpha, beta, Sharpe, and Information Ratio calculations. "
+                     "Analysis window (1Y/3Y/5Y/Custom) is set on the Dashboard.",
+            )
+            benchmark = BENCHMARK_OPTIONS[benchmark_label]
 
             with st.expander("Full disclaimer"):
                 st.markdown(DISCLAIMER_FULL)
@@ -453,7 +456,7 @@ def render() -> None:
                     st.session_state.pop(_KEY_PORTFOLIO_BASE, None)
                     st.markdown("---")
                     success = _run_pipeline(
-                        tickers, benchmark, period, weights, portfolio_name
+                        tickers, benchmark, weights, portfolio_name
                     )
                     if success:
                         st.session_state["_nav_pending"] = "DASHBOARD"
