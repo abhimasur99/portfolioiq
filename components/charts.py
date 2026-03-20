@@ -381,36 +381,53 @@ def rolling_correlation_chart(rolling_corr: pd.DataFrame) -> go.Figure:
 
 # ── Drawdown chart ─────────────────────────────────────────────────────────────
 
-def drawdown_chart(drawdown_series: pd.Series) -> go.Figure:
-    """Underwater equity curve showing portfolio drawdown.
+def drawdown_chart(
+    drawdown_series: pd.Series,
+    benchmark_drawdown: "pd.Series | None" = None,
+    benchmark_label: str = "Benchmark",
+) -> go.Figure:
+    """Underwater equity curve showing portfolio drawdown, optionally vs benchmark.
 
     Args:
-        drawdown_series: pd.Series of drawdown values (non-positive, from compute_drawdown_series).
+        drawdown_series: pd.Series of drawdown values (non-positive).
+        benchmark_drawdown: Optional pd.Series of benchmark drawdown values.
+        benchmark_label: Display name for the benchmark trace.
 
     Returns:
-        go.Figure with filled drawdown area (red fill below zero).
+        go.Figure with filled portfolio drawdown area and optional benchmark line.
     """
     dd_pct = drawdown_series * 100
+    has_bench = benchmark_drawdown is not None and not benchmark_drawdown.empty
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=dd_pct.index,
         y=dd_pct.values,
         mode="lines",
-        name="Drawdown",
+        name="Portfolio",
         line=dict(color=COLOR_RED, width=1.5),
         fill="tozeroy",
         fillcolor=_RED_FILL,
-        hovertemplate="%{x|%Y-%m-%d}<br>Drawdown: %{y:.1f}%<extra></extra>",
+        hovertemplate="%{x|%Y-%m-%d}<br>Portfolio: %{y:.1f}%<extra></extra>",
     ))
+    if has_bench:
+        bench_pct = benchmark_drawdown * 100
+        fig.add_trace(go.Scatter(
+            x=bench_pct.index,
+            y=bench_pct.values,
+            mode="lines",
+            name=benchmark_label,
+            line=dict(color=COLOR_TEXT_MUTED, width=1.5, dash="dot"),
+            hovertemplate=f"%{{x|%Y-%m-%d}}<br>{benchmark_label}: %{{y:.1f}}%<extra></extra>",
+        ))
     fig.add_hline(y=0, line_color=COLOR_AXIS, line_width=1)
     fig.update_layout(
         template=PLOTLY_TEMPLATE_NAME,
-        title="Portfolio Drawdown",
+        title="Portfolio Drawdown vs Benchmark" if has_bench else "Portfolio Drawdown",
         xaxis_title=None,
         yaxis_title="Drawdown (%)",
         yaxis_tickformat=".1f",
-        showlegend=False,
+        showlegend=has_bench,
     )
     return fig
 
@@ -479,6 +496,7 @@ def garch_volatility_chart(
     ewma_vol: float,
     garch_result: object,
     is_fallback: bool,
+    ewma_series: "np.ndarray | None" = None,
 ) -> go.Figure:
     """Historical rolling vol vs EWMA reference vs GARCH conditional vol.
 
@@ -487,10 +505,12 @@ def garch_volatility_chart(
         ewma_vol: Annualized EWMA volatility (scalar, shown as horizontal reference).
         garch_result: arch model result object (has .conditional_volatility) or None.
         is_fallback: True if GARCH fell back to EWMA (affects label).
+        ewma_series: Optional np.ndarray of rolling EWMA vol in pct units (daily).
+            Used as a purple fallback trace when garch_result is None (1Y window case).
 
     Returns:
-        go.Figure with three traces: rolling 21-day hist vol, EWMA ref line,
-        GARCH conditional vol (if available).
+        go.Figure with rolling 21-day hist vol, EWMA ref line, and either the GARCH
+        conditional vol trace (blue, 3Y/5Y) or the EWMA rolling series (purple, 1Y fallback).
     """
     # Rolling 21-day historical vol (annualized)
     rolling_vol = portfolio_returns.rolling(21).std() * np.sqrt(252) * 100
@@ -519,6 +539,18 @@ def garch_volatility_chart(
             name=label,
             line=dict(color=COLOR_BLUE, width=2),
             hovertemplate="%{x|%Y-%m-%d}<br>" + label + ": %{y:.1f}%<extra></extra>",
+        ))
+
+    # EWMA fallback series — shown in purple when garch_result is None (1Y window)
+    if garch_result is None and ewma_series is not None:
+        ewma_ann = ewma_series * np.sqrt(252)   # daily pct → annualized pct
+        fig.add_trace(go.Scatter(
+            x=portfolio_returns.index,
+            y=ewma_ann,
+            mode="lines",
+            name="EWMA Cond. Vol (fallback)",
+            line=dict(color=COLOR_PURPLE, width=2),
+            hovertemplate="%{x|%Y-%m-%d}<br>EWMA Cond. Vol: %{y:.1f}%<extra></extra>",
         ))
 
     # EWMA reference line
@@ -681,18 +713,22 @@ def stress_test_chart(stress_results: dict) -> go.Figure:
 
 # ── Signal-based scenario chart ────────────────────────────────────────────────
 
-def signal_scenario_chart(scenario_data: dict) -> go.Figure:
-    """Bar chart of three GARCH-volatility-scaled stress scenarios.
+def signal_scenario_chart(
+    scenario_data: dict,
+    total_value: float = 0.0,
+    use_monthly: bool = True,
+) -> go.Figure:
+    """Bar chart of three stress scenarios (Filtered Historical Simulation).
 
     The scenario matching the current market signal environment is highlighted.
 
     Args:
         scenario_data: dict from _compute_signal_scenarios in details_q3.py.
-            Keys: environment_level (str), n_red (int), n_amber (int),
-                  scenarios (dict of {name: {multiplier, var_day, var_month, highlighted}}).
+        total_value: Portfolio dollar value for combined % / $ bar labels (0 = % only).
+        use_monthly: True = 1-Month VaR bars; False = 1-Day VaR bars.
 
     Returns:
-        go.Figure with three vertical bars (1-month VaR 95% per scenario).
+        go.Figure with three vertical bars per the selected horizon.
     """
     scenarios = scenario_data.get("scenarios", {})
     env_level = scenario_data.get("environment_level", "")
@@ -700,10 +736,14 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
     n_amber   = scenario_data.get("n_amber", 0)
 
     names       = list(scenarios.keys())
-    # Negative values — losses hang downward from zero
-    var_month   = [scenarios[n]["var_month"] * 100 for n in names]   # already negative
-    var_day     = [scenarios[n]["var_day"]   * 100 for n in names]   # already negative
+    var_month   = [scenarios[n]["var_month"] * 100 for n in names]   # negative
+    var_day     = [scenarios[n]["var_day"]   * 100 for n in names]   # negative
     multipliers = [scenarios[n]["multiplier"] for n in names]
+
+    bar_vals   = var_month if use_monthly else var_day
+    other_vals = var_day   if use_monthly else var_month
+    axis_lbl   = "Estimated Monthly Loss (%)" if use_monthly else "Estimated Daily Loss (%)"
+    other_lbl  = "1-Day" if use_monthly else "1-Month"
 
     # Color by severity: moderate=blue, significant=amber, severe=red
     _SCENARIO_COLORS = [COLOR_BLUE, COLOR_AMBER, COLOR_RED]
@@ -713,7 +753,14 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
         for n in names
     ]
     border_widths = [2 if scenarios[n]["highlighted"] else 0 for n in names]
-    text_labels   = [f"{v:.1f}%" for v in var_month]
+
+    if total_value > 0:
+        text_labels = [
+            f"{v:.1f}%  −${abs(v / 100 * total_value):,.0f}"
+            for v in bar_vals
+        ]
+    else:
+        text_labels = [f"{v:.1f}%" for v in bar_vals]
 
     signal_desc = f"Current environment: {env_level}"
     if n_red > 0 or n_amber > 0:
@@ -721,19 +768,19 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        name="1-Month VaR 95%",
+        name="VaR 95%",
         x=names,
-        y=var_month,
+        y=bar_vals,
         text=text_labels,
         textposition="outside",
         marker_color=bar_colors,
         marker_line_color=border_colors,
         marker_line_width=border_widths,
-        customdata=[[var_day[i], multipliers[i]] for i in range(len(names))],
+        customdata=[[other_vals[i], multipliers[i]] for i in range(len(names))],
         hovertemplate=(
             "%{x}<br>"
-            "1-Month VaR: %{y:.2f}%<br>"
-            "1-Day VaR: %{customdata[0]:.2f}%<br>"
+            "VaR 95%: %{y:.2f}%<br>"
+            f"{other_lbl} VaR: %{{customdata[0]:.2f}}%<br>"
             "Vol multiplier: %{customdata[1]:.1f}×"
             "<extra></extra>"
         ),
@@ -750,12 +797,12 @@ def signal_scenario_chart(scenario_data: dict) -> go.Figure:
             yshift=4,
         )
     fig.add_hline(y=0, line_color=COLOR_AXIS, line_width=1)
-    min_val = min(var_month) if var_month else -10
+    min_val = min(bar_vals) if bar_vals else -10
     fig.update_layout(
         template=PLOTLY_TEMPLATE_NAME,
         title=f"Signal-Based Sensitivity Analysis<br><sup>{signal_desc} — highlighted bar = current environment</sup>",
         xaxis_title=None,
-        yaxis_title="Estimated Monthly Loss (%)",
+        yaxis_title=axis_lbl,
         yaxis=dict(range=[min_val * 1.35, 0.5], tickformat=".1f"),
         showlegend=False,
         margin=dict(t=70),

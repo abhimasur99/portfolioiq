@@ -30,6 +30,8 @@ from assets.config import (
     SK_PORT_RETURNS,
     SK_RISK_OUTLOOK,
     SK_TOTAL_VALUE,
+    SK_VAR_METHOD,
+    DEFAULT_VAR_METHOD,
 )
 
 # Signal display labels (key → human-readable name)
@@ -91,8 +93,21 @@ def _fmt_signal_value(val) -> str:
 _ENV_EMOJI = {"Calm": "🟢", "Elevated": "🟡", "Stressed": "🟠", "Severe": "🔴"}
 
 
-def _compute_signal_scenarios(garch_vol: float, signals: dict) -> dict:
+def _compute_signal_scenarios(
+    garch_vol: float,
+    signals: dict,
+    hist_vol: float | None = None,
+    var_95_hist: float | None = None,
+) -> dict:
     """Derive three stress scenarios from GARCH vol and current signal statuses.
+
+    Uses Filtered Historical Simulation (FHS) when hist_vol and var_95_hist are
+    provided: scales the actual empirical 5th-percentile daily return by the
+    volatility ratio (σ_stressed / σ_hist_daily). This preserves the portfolio's
+    fat-tail and skew properties without a distribution assumption.
+
+    Falls back to the normal-distribution approximation (-1.645 × σ_stressed) when
+    hist_vol or var_95_hist are unavailable.
 
     Environment level is determined by counting red and amber signal statuses
     (unavailable signals are excluded from the count).
@@ -121,7 +136,9 @@ def _compute_signal_scenarios(garch_vol: float, signals: dict) -> dict:
     }
     highlighted = highlight_map[env_level]
 
-    daily_vol = garch_vol / (252 ** 0.5)
+    daily_vol     = garch_vol / (252 ** 0.5)
+    use_fhs       = hist_vol is not None and var_95_hist is not None and hist_vol > 0
+    hist_daily_vol = hist_vol / (252 ** 0.5) if use_fhs else None
 
     scenarios: dict = {}
     for name, mult in [
@@ -130,7 +147,12 @@ def _compute_signal_scenarios(garch_vol: float, signals: dict) -> dict:
         ("Severe Stress",      3.0),
     ]:
         s_daily_vol = daily_vol * mult
-        var_day     = -1.645 * s_daily_vol
+        if use_fhs:
+            # Filtered Historical Simulation: scale empirical 5th percentile by vol ratio
+            var_day = var_95_hist * (s_daily_vol / hist_daily_vol)
+        else:
+            # Normal distribution fallback (used when hist_vol / var_95_hist unavailable)
+            var_day = -1.645 * s_daily_vol
         var_month   = var_day * (21 ** 0.5)
         scenarios[name] = {
             "multiplier":  mult,
@@ -221,9 +243,15 @@ def render() -> None:
     st.caption("Predictive analytics: volatility forecasts, tail risk, and scenario stress tests.")
 
     # ── Compute signal scenarios (used in insight block and charts) ────────────
+    ewma_series   = ro.get("ewma_series")
+    var_method    = st.session_state.get(SK_VAR_METHOD, DEFAULT_VAR_METHOD)
     scenario_data = None
     if garch_vol is not None:
-        scenario_data = _compute_signal_scenarios(garch_vol, signals)
+        scenario_data = _compute_signal_scenarios(
+            garch_vol, signals,
+            hist_vol=hist_vol,
+            var_95_hist=var_95_hist,
+        )
 
     # ── Insight block ──────────────────────────────────────────────────────────
     with st.container():
@@ -318,10 +346,12 @@ def render() -> None:
                  "Full-period annualised volatility from historical daily returns. Constant-weight estimate over the selected period."),
                 ("GARCH Vol",      _pct(garch_vol, sign=False),
                  "Forward-looking volatility from GARCH(1,1) — weights recent moves more heavily. Falls back to EWMA if data is insufficient or fit is non-stationary."),
-                ("VaR 95% (day)",  _pct(var_95_hist),
-                 "Worst daily loss in 95% of trading days (historical). On roughly 1 in 20 days, losses exceeded this threshold."),
+                ("VaR 95% (day)",
+                 _pct(var_95_garch if var_method == "garch" and var_95_garch is not None else var_95_hist),
+                 "Worst daily loss in 95% of trading days. "
+                 + ("GARCH-implied: −1.645 × GARCH daily vol (normal distribution)." if var_method == "garch" else "Historical: empirical 5th-percentile of realized returns.")),
                 ("CVaR 95% (day)", _pct(cvar_95_hist),
-                 "Average loss on the worst 5% of days (Expected Shortfall). More severe than VaR and better captures tail risk."),
+                 "Average loss on the worst 5% of days (Expected Shortfall). Always uses historical distribution. More severe than VaR and better captures tail risk."),
                 ("VaR 95% (mo.)",  _pct(var_monthly),
                  "Daily VaR 95% scaled to a monthly horizon using the i.i.d. approximation (×√21). Directional estimate only."),
                 ("Skewness",       _fmt(skewness),
@@ -354,9 +384,10 @@ def render() -> None:
     st.plotly_chart(
         garch_volatility_chart(
             portfolio_returns=port_ret,
-            ewma_vol=ewma_vol if ewma_vol is not None else pd.Series(dtype=float),
+            ewma_vol=ewma_vol if ewma_vol is not None else 0.0,
             garch_result=garch_result,
             is_fallback=is_fallback,
+            ewma_series=ewma_series,
         ),
         use_container_width=True,
         key="_det_q3_garchvol",
@@ -364,14 +395,29 @@ def render() -> None:
 
     # Signal-Based Sensitivity Analysis (full width)
     if scenario_data is not None:
-        st.caption(
-            "Estimated 1-month portfolio loss under three stress levels, derived from "
-            "current GARCH-implied volatility scaled by signal environment severity. "
-            "The highlighted bar reflects the current signal environment. "
+        _fhs_note = (
+            "Filtered Historical Simulation — estimated portfolio loss under three "
+            "volatility stress levels. Scenario VaR scales the empirical 5th-percentile "
+            "daily return by the ratio of stressed vol to historical daily vol, preserving "
+            "actual fat-tail and skew properties. Highlighted bar = current signal environment. "
             "These are model estimates, not forecasts."
         )
+        total_value = st.session_state.get(SK_TOTAL_VALUE, 100.0)
+        st.caption(_fhs_note)
+        scenario_horizon = st.radio(
+            "Horizon",
+            options=["1-Day VaR", "1-Month VaR"],
+            index=1,
+            horizontal=True,
+            key="_det_q3_scenario_horizon",
+        )
+        use_monthly = (scenario_horizon == "1-Month VaR")
         st.plotly_chart(
-            signal_scenario_chart(scenario_data),
+            signal_scenario_chart(
+                scenario_data,
+                total_value=total_value,
+                use_monthly=use_monthly,
+            ),
             use_container_width=True,
             key="_det_q3_scenarios",
         )

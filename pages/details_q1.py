@@ -27,6 +27,8 @@ from assets.config import (
     SK_PORT_RETURNS,
     SK_RISK_FACTORS,
     SK_RISK_OUTLOOK,
+    SK_VAR_METHOD,
+    DEFAULT_VAR_METHOD,
 )
 
 
@@ -79,8 +81,11 @@ def render() -> None:
     worst_yr  = perf.get("worst_year")
     max_dd    = rf.get("max_drawdown")
     calmar    = rf.get("calmar")
-    var_95    = ro.get("var_95_hist")
-    cvar_95   = ro.get("cvar_95_hist")
+    var_method   = st.session_state.get(SK_VAR_METHOD, DEFAULT_VAR_METHOD)
+    var_95_hist  = ro.get("var_95_hist")
+    var_95_garch = ro.get("var_95_garch")
+    var_95       = var_95_garch if var_method == "garch" and var_95_garch is not None else var_95_hist
+    cvar_95      = ro.get("cvar_95_hist")
     rolling_sharpe        = perf.get("rolling_sharpe", pd.Series(dtype=float))
     rolling_beta          = perf.get("rolling_beta", pd.Series(dtype=float))
     rolling_sharpe_window = perf.get("rolling_sharpe_window", 252)

@@ -5,6 +5,25 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.24.0] — 2026-03-20
+
+### Added
+- `components/charts.py` `drawdown_chart()`: Optional `benchmark_drawdown` + `benchmark_label` params — renders portfolio drawdown (red/filled) and benchmark drawdown (gray dotted) on the same chart when benchmark data is provided.
+- `pages/details_q2.py`: Benchmark drawdown overlay — reads `SK_BENCH_RETURNS`, computes benchmark drawdown series, passes to `drawdown_chart()`.
+- `analytics/risk_outlook.py`: `_compute_ewma_series_pct()` — computes rolling EWMA conditional vol series (pct units) for use as a fallback trace in the GARCH chart. Stored as `ewma_series` in the risk outlook output dict.
+- `components/charts.py` `garch_volatility_chart()`: Optional `ewma_series` param — when GARCH falls back due to insufficient data (`garch_result = None`), plots EWMA rolling series in `COLOR_PURPLE` labeled "EWMA Cond. Vol (fallback)", distinguishing it from the blue GARCH trace shown on 3Y/5Y.
+- `components/charts.py` `signal_scenario_chart()`: `total_value` param — bars show combined "% / −$" labels when portfolio dollar value is available. `use_monthly` param — toggles between 1-Day and 1-Month VaR display.
+- `pages/details_q3.py`: Daily/Monthly horizon toggle (radio) above the Signal Sensitivity chart.
+
+### Changed
+- `pages/details_q3.py` `_compute_signal_scenarios()`: Upgraded from normal-distribution VaR (`-1.645 × σ`) to **Filtered Historical Simulation (FHS)** — scales the actual empirical 5th-percentile daily return by the vol ratio (`σ_stressed / σ_hist_daily`). Preserves portfolio fat-tail and skew properties without distribution assumptions. Falls back to normal VaR if `hist_vol` or `var_95_hist` are unavailable.
+- `pages/dashboard.py` `_build_q3()`: Reads `SK_VAR_METHOD` — shows `var_95_garch` when GARCH method selected, else `var_95_hist` (historical).
+- `pages/details_q3.py` Key Metrics panel: VaR 95% label switches between Historical and GARCH based on `SK_VAR_METHOD`. CVaR always uses historical (noted in help text).
+- `pages/details_q1.py` Return Distribution chart: VaR marker line uses `var_95_garch` when GARCH method selected, else `var_95_hist`.
+- `pages/settings.py` VaR method selector: Expanded help text explaining the practical difference between historical and GARCH VaR, noting CVaR always uses historical.
+
+---
+
 ## [0.23.0] — 2026-03-20
 
 ### Fixed

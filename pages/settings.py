@@ -222,7 +222,13 @@ def render() -> None:
             "VaR method",
             options=var_method_options,
             index=var_method_idx,
-            help="Historical: empirical percentile. GARCH: normal quantile × GARCH-implied vol.",
+            help=(
+                "Historical: 5th-percentile of realized returns — stable, backward-looking, "
+                "captures actual fat tails and skew. "
+                "GARCH: −1.645 × GARCH-implied daily vol — more reactive to current market "
+                "conditions; assumes normal distribution and may diverge from historical in "
+                "volatile periods. CVaR always uses the historical method regardless of this setting."
+            ),
         )
 
     garch_refit_options = ["each_load", "daily"]

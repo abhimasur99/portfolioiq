@@ -77,6 +77,33 @@ def compute_ewma_vol(portfolio_returns: pd.Series, lambda_: float = 0.94) -> flo
     return float(np.sqrt(var) * np.sqrt(252))
 
 
+def _compute_ewma_series_pct(
+    portfolio_returns: pd.Series,
+    lambda_: float = 0.94,
+) -> "np.ndarray":
+    """Compute rolling EWMA conditional volatility as a series in percentage units.
+
+    Matches the format of arch's .conditional_volatility (pct units) so the
+    result can be plotted alongside the GARCH trace in garch_volatility_chart().
+    Used as a fallback when GARCH cannot be fitted (< 252 obs).
+
+    Args:
+        portfolio_returns: pd.Series of daily log returns.
+        lambda_: EWMA decay factor (default 0.94, RiskMetrics standard).
+
+    Returns:
+        np.ndarray of EWMA daily conditional vol in percentage units (same
+        length as portfolio_returns).
+    """
+    r = portfolio_returns.values * 100.0   # pct units, matches arch convention
+    var = float(np.var(r, ddof=1))
+    out = []
+    for ret in r:
+        var = lambda_ * var + (1.0 - lambda_) * ret ** 2
+        out.append(np.sqrt(var))
+    return np.array(out)
+
+
 # ── GARCH(1,1) ────────────────────────────────────────────────────────────────
 
 def fit_garch(
@@ -392,6 +419,14 @@ def compute_all_risk_outlook(
     garch_result, garch_vol_daily, is_fallback = fit_garch(portfolio_returns)
     garch_vol = garch_vol_daily * np.sqrt(252)
 
+    # EWMA series for the GARCH chart — only computed when GARCH falls back due to
+    # insufficient data (result is None). Used as a purple fallback trace on 1Y window.
+    ewma_series = (
+        _compute_ewma_series_pct(portfolio_returns)
+        if is_fallback and garch_result is None
+        else None
+    )
+
     var_95_hist, cvar_95_hist = compute_var_cvar_historical(portfolio_returns, 0.95)
     var_99_hist, cvar_99_hist = compute_var_cvar_historical(portfolio_returns, 0.99)
     var_95_garch = compute_garch_var(portfolio_returns, garch_vol_daily, 0.95)
@@ -422,4 +457,5 @@ def compute_all_risk_outlook(
         "skewness": skewness,
         "excess_kurtosis": excess_kurtosis,
         "garch_fallback": is_fallback,
+        "ewma_series":    ewma_series,
     }

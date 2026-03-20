@@ -36,7 +36,9 @@ from assets.config import (
     SK_PORTFOLIO_LOADED, SK_PORTFOLIO_NAME, SK_PORT_RETURNS,
     SK_PRICE_DATA, SK_PRICE_DATA_FULL, SK_RETURNS_DF,
     SK_RISK_FACTORS, SK_RISK_FREE_RATE, SK_RISK_OUTLOOK,
-    SK_TICKERS, SK_TOTAL_VALUE, SK_VAR_CONFIDENCE, SK_WEIGHT_MAX, SK_WEIGHT_MIN, SK_WEIGHTS,
+    SK_TICKERS, SK_TOTAL_VALUE, SK_VAR_CONFIDENCE, SK_VAR_METHOD,
+    SK_WEIGHT_MAX, SK_WEIGHT_MIN, SK_WEIGHTS,
+    DEFAULT_VAR_METHOD,
 )
 
 # Routing key set by render_quadrant More Details button
@@ -392,8 +394,13 @@ def _build_q3(analytics: dict) -> tuple:
         import plotly.graph_objects as go
         chart = go.Figure().update_layout(title="Monte Carlo (no data)")
 
-    var95  = ro.get("var_95_hist")
-    cvar95 = ro.get("cvar_95_hist")
+    var_method = st.session_state.get(SK_VAR_METHOD, DEFAULT_VAR_METHOD)
+    if var_method == "garch" and ro.get("var_95_garch") is not None:
+        var95  = ro.get("var_95_garch")
+        cvar95 = ro.get("cvar_95_hist")   # no GARCH CVaR; use historical
+    else:
+        var95  = ro.get("var_95_hist")
+        cvar95 = ro.get("cvar_95_hist")
     hvol   = ro.get("hist_vol")
     gvol   = ro.get("garch_vol")
 

@@ -19,8 +19,11 @@ Implemented in: Session 11.
 import pandas as pd
 import streamlit as st
 
+from analytics.risk_factors import compute_drawdown_series
 from assets.config import (
     SK_ANALYTICS,
+    SK_BENCH_RETURNS,
+    SK_BENCHMARK,
     SK_RISK_FACTORS,
     SK_TICKERS,
     SK_WEIGHTS,
@@ -52,9 +55,11 @@ def _fmt(val, decimals: int = 2) -> str:
 
 def render() -> None:
     """Render the Q2 (Risk Factors) More Details screen."""
-    analytics = st.session_state.get(SK_ANALYTICS, {})
-    rf        = analytics.get(SK_RISK_FACTORS, {})
-    tickers   = st.session_state.get(SK_TICKERS, [])
+    analytics  = st.session_state.get(SK_ANALYTICS, {})
+    rf         = analytics.get(SK_RISK_FACTORS, {})
+    tickers    = st.session_state.get(SK_TICKERS, [])
+    bench_ret  = st.session_state.get(SK_BENCH_RETURNS, pd.Series(dtype=float))
+    benchmark  = st.session_state.get(SK_BENCHMARK, "Benchmark")
 
     # Pull values used throughout
     corr_matrix    = rf.get("corr_matrix")
@@ -190,11 +195,20 @@ def render() -> None:
             st.info("Rolling correlation data not available.")
 
     # Row 2: drawdown | sector weights
+    bench_drawdown = (
+        compute_drawdown_series(bench_ret)
+        if not bench_ret.empty
+        else None
+    )
     ch_left2, ch_right2 = st.columns(2)
     with ch_left2:
         if not drawdown_series.empty:
             st.plotly_chart(
-                drawdown_chart(drawdown_series),
+                drawdown_chart(
+                    drawdown_series,
+                    benchmark_drawdown=bench_drawdown,
+                    benchmark_label=benchmark,
+                ),
                 use_container_width=True,
                 key="_det_q2_drawdown",
             )
