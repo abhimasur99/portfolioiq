@@ -1,6 +1,6 @@
 # PortfolioIQ
 
-![Tests](https://github.com/USERNAME/portfolioiq/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/abhimasur99/portfolioiq/actions/workflows/tests.yml/badge.svg)
 
 Institutional-grade equity portfolio analytics in a Streamlit web application.
 Enter your holdings, get a full four-layer quantitative analysis in plain language.
@@ -52,8 +52,8 @@ _Run locally or use the [Live Demo](https://portfolioiq.streamlit.app) to see th
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url>
-cd portfolio-risk-v3
+git clone https://github.com/abhimasur99/portfolioiq.git
+cd portfolioiq
 
 # 2. Create and activate a virtual environment (Python 3.12 required)
 python3.12 -m venv .venv
@@ -74,7 +74,7 @@ Open `http://localhost:8501` in your browser. Navigate to **INPUT**, enter 2–1
 ## Project structure
 
 ```
-portfolio-risk-v3/
+portfolioiq/
 ├── app.py                      # Entry point: nav bar, routing, CSS injection
 ├── requirements.txt
 ├── assets/
