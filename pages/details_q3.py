@@ -407,7 +407,7 @@ def render() -> None:
         scenario_horizon = st.radio(
             "Horizon",
             options=["1-Day VaR", "1-Month VaR"],
-            index=1,
+            index=0,
             horizontal=True,
             key="_det_q3_scenario_horizon",
         )
