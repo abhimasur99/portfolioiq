@@ -73,13 +73,11 @@ for key, value in _defaults.items():
         st.session_state[key] = value
 
 # ── Navigation ─────────────────────────────────────────────────────────────────
-# Four permanent items only. Order matters for display.
+# Programmatic navigation: pages set st.session_state["_nav_pending"] = "<PAGE>"
+# and call st.rerun(). On the next run we pop it and write to _nav_radio before
+# the sidebar renders so the correct page is selected.
 _NAV_ITEMS = ["INPUT", "DASHBOARD", "GUIDE", "SETTINGS"]
 
-# Programmatic navigation: pages set st.session_state["_nav_pending"] = "<PAGE>"
-# and call st.rerun(). On the next run we pop it and write directly to the
-# radio's session state key BEFORE the widget renders. Streamlit's key= binding
-# guarantees the widget picks it up — no index= hackery needed.
 _nav_pending = st.session_state.pop("_nav_pending", None)
 if _nav_pending and _nav_pending in _NAV_ITEMS:
     st.session_state["_nav_radio"] = _nav_pending
@@ -88,34 +86,35 @@ elif "_nav_radio" not in st.session_state:
         "DASHBOARD" if st.session_state[SK_PORTFOLIO_LOADED] else "INPUT"
     )
 
-selected_page = st.sidebar.radio(
-    "Navigation",
-    options=_NAV_ITEMS,
-    label_visibility="collapsed",
-    key="_nav_radio",
-)
+selected_page = st.session_state["_nav_radio"]
 
-# ── Sidebar sub-navigation (details pages, shown only when portfolio is loaded) ─
-if st.session_state.get(SK_PORTFOLIO_LOADED):
-    st.sidebar.markdown(
-        '<p style="font-size:9px; color:#5a7a9a; text-transform:uppercase; '
-        'letter-spacing:0.12em; font-family:\'Share Tech Mono\',monospace; '
-        'margin:6px 0 2px 4px; padding-top:8px; border-top:1px solid #1a3a5c;">'
-        "Dashboard</p>",
-        unsafe_allow_html=True,
-    )
-    _DETAIL_ITEMS = [
-        ("q1", "Performance"),
-        ("q2", "Risk Factors"),
-        ("q3", "Risk Outlook"),
-        ("q4", "Optimization"),
-    ]
-    for _dk, _dlabel in _DETAIL_ITEMS:
-        _, _dcol = st.sidebar.columns([0.08, 0.92])
-        if _dcol.button(_dlabel, key=f"_subnav_{_dk}"):
-            st.session_state["_dashboard_details"] = _dk
-            st.session_state["_nav_radio"] = "DASHBOARD"
-            st.rerun()
+# ── Sidebar buttons (replaces radio for visual consistency) ────────────────────
+_DETAIL_ITEMS = [
+    ("q1", "Performance"),
+    ("q2", "Risk Factors"),
+    ("q3", "Risk Outlook"),
+    ("q4", "Optimization"),
+]
+
+for _page in _NAV_ITEMS:
+    if st.sidebar.button(_page, key=f"_mainav_{_page}", use_container_width=True):
+        st.session_state["_nav_radio"] = _page
+        st.rerun()
+
+    # Sub-navigation: indented detail-page shortcuts, only when portfolio loaded
+    if _page == "DASHBOARD" and st.session_state.get(SK_PORTFOLIO_LOADED):
+        st.sidebar.markdown(
+            '<p style="font-size:9px; color:#5a7a9a; text-transform:uppercase; '
+            'letter-spacing:0.12em; font-family:\'Share Tech Mono\',monospace; '
+            'margin:4px 0 2px 4px;">Details</p>',
+            unsafe_allow_html=True,
+        )
+        for _dk, _dlabel in _DETAIL_ITEMS:
+            _, _dcol = st.sidebar.columns([0.08, 0.92])
+            if _dcol.button(_dlabel, key=f"_subnav_{_dk}"):
+                st.session_state["_dashboard_details"] = _dk
+                st.session_state["_nav_radio"] = "DASHBOARD"
+                st.rerun()
 
 # ── Page routing ───────────────────────────────────────────────────────────────
 # Navigating away from DASHBOARD clears any active More Details sub-page so that
