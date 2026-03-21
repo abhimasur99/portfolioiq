@@ -613,28 +613,30 @@ def _route_details(details_key: str) -> None:
         "q4": "Optimization",
     }
 
-    idx = _ORDER.index(details_key)
-    back_col, _, nav_col = st.columns([2, 3, 3])
+    def _nav_bar(suffix: str) -> None:
+        """Render back + prev/next buttons. suffix ensures unique widget keys."""
+        idx = _ORDER.index(details_key)
+        back_col, _, nav_col = st.columns([2, 3, 3])
+        with back_col:
+            if st.button("← Dashboard", key=f"_btn_back_{suffix}"):
+                del st.session_state[_SK_DETAILS]
+                st.rerun()
+        with nav_col:
+            l_col, r_col = st.columns(2)
+            with l_col:
+                if idx > 0:
+                    prev = _ORDER[idx - 1]
+                    if st.button(f"← {_LABELS[prev]}", key=f"_btn_prev_{suffix}", use_container_width=True):
+                        st.session_state[_SK_DETAILS] = prev
+                        st.rerun()
+            with r_col:
+                if idx < len(_ORDER) - 1:
+                    nxt = _ORDER[idx + 1]
+                    if st.button(f"{_LABELS[nxt]} →", key=f"_btn_next_{suffix}", use_container_width=True):
+                        st.session_state[_SK_DETAILS] = nxt
+                        st.rerun()
 
-    with back_col:
-        if st.button("← Dashboard", key="_btn_back_dash"):
-            del st.session_state[_SK_DETAILS]
-            st.rerun()
-
-    with nav_col:
-        l_col, r_col = st.columns(2)
-        with l_col:
-            if idx > 0:
-                prev = _ORDER[idx - 1]
-                if st.button(f"← {_LABELS[prev]}", key="_btn_nav_prev", use_container_width=True):
-                    st.session_state[_SK_DETAILS] = prev
-                    st.rerun()
-        with r_col:
-            if idx < len(_ORDER) - 1:
-                nxt = _ORDER[idx + 1]
-                if st.button(f"{_LABELS[nxt]} →", key="_btn_nav_next", use_container_width=True):
-                    st.session_state[_SK_DETAILS] = nxt
-                    st.rerun()
+    _nav_bar("top")
 
     if details_key == "q1":
         from screens.details_q1 import render as render_details
@@ -649,6 +651,9 @@ def _route_details(details_key: str) -> None:
         return
 
     render_details()
+
+    st.markdown("---")
+    _nav_bar("bot")
 
 
 # ── Main render ────────────────────────────────────────────────────────────────
@@ -706,16 +711,16 @@ def render() -> None:
 
     with top_left:
         chart, kpis, flag = _build_q1(analytics)
-        render_quadrant("q1", "Q1 — Performance", chart, kpis, flag, "q1")
+        render_quadrant("q1", "PERFORMANCE", chart, kpis, flag, "q1")
 
     with top_right:
         chart, kpis, flag = _build_q2(analytics)
-        render_quadrant("q2", "Q2 — Risk Factors", chart, kpis, flag, "q2")
+        render_quadrant("q2", "RISK FACTORS", chart, kpis, flag, "q2")
 
     with bot_left:
         chart, kpis, flag = _build_q3(analytics)
-        render_quadrant("q3", "Q3 — Risk Outlook", chart, kpis, flag, "q3")
+        render_quadrant("q3", "RISK OUTLOOK", chart, kpis, flag, "q3")
 
     with bot_right:
         chart, kpis, flag = _build_q4(analytics)
-        render_quadrant("q4", "Q4 — Optimization", chart, kpis, flag, "q4")
+        render_quadrant("q4", "OPTIMIZATION", chart, kpis, flag, "q4")

@@ -95,6 +95,21 @@ selected_page = st.sidebar.radio(
     key="_nav_radio",
 )
 
+# ── Sidebar sub-navigation (details pages, shown only when portfolio is loaded) ─
+if st.session_state.get(SK_PORTFOLIO_LOADED):
+    _DETAIL_ITEMS = [
+        ("q1", "Performance"),
+        ("q2", "Risk Factors"),
+        ("q3", "Risk Outlook"),
+        ("q4", "Optimization"),
+    ]
+    for _dk, _dlabel in _DETAIL_ITEMS:
+        _, _dcol = st.sidebar.columns([0.08, 0.92])
+        if _dcol.button(_dlabel, key=f"_subnav_{_dk}"):
+            st.session_state["_dashboard_details"] = _dk
+            st.session_state["_nav_radio"] = "DASHBOARD"
+            st.rerun()
+
 # ── Page routing ───────────────────────────────────────────────────────────────
 # Navigating away from DASHBOARD clears any active More Details sub-page so that
 # returning to DASHBOARD always lands on the main dashboard, not a details screen.

@@ -70,7 +70,7 @@ def render() -> None:
     # ── Section 2: What Each Quadrant Tells You ────────────────────────────────
     st.markdown("#### 2 — What Each Quadrant Tells You")
 
-    st.markdown("**Q1 — Performance (Descriptive)**")
+    st.markdown("**Performance (Descriptive)**")
     st.markdown(
         "Answers: *what has this portfolio actually done?* "
         "CAGR measures the smoothed annual growth rate. Sharpe ratio measures return "
@@ -81,7 +81,7 @@ def render() -> None:
         "All statistics are backward-looking and sensitive to the period chosen."
     )
 
-    st.markdown("**Q2 — Risk Factors (Diagnostic)**")
+    st.markdown("**Risk Factors (Diagnostic)**")
     st.markdown(
         "Answers: *why did the portfolio behave that way?* "
         "The correlation heatmap shows how much holdings move together — high "
@@ -94,7 +94,7 @@ def render() -> None:
         "precisely when diversification is most needed."
     )
 
-    st.markdown("**Q3 — Risk Outlook (Predictive)**")
+    st.markdown("**Risk Outlook (Predictive)**")
     st.markdown(
         "Answers: *what could happen from here?* "
         "Historical VaR and CVaR measure tail risk from past returns. GARCH(1,1) volatility "
@@ -115,7 +115,7 @@ def render() -> None:
         "these are awareness indicators, not buy or sell signals."
     )
 
-    st.markdown("**Q4 — Optimization (Prescriptive)**")
+    st.markdown("**Optimization (Prescriptive)**")
     st.markdown(
         "Answers: *what does the model suggest as an alternative allocation?* "
         "The efficient frontier shows portfolios offering the highest return for each "
@@ -152,14 +152,14 @@ def render() -> None:
         "**Optimizer estimation error.** Mean-variance optimization amplifies errors "
         "in expected return inputs. Small changes in return estimates can shift the "
         "efficient frontier dramatically and produce corner-weight solutions. "
-        "The optimizer outputs on Q4 should be interpreted as structural insights "
+        "The optimizer outputs in the Optimization section should be interpreted as structural insights "
         "(risk-return trade-offs, diversification potential) rather than prescriptions."
     )
     st.markdown(
         "**Correlation instability.** Pairwise correlations are estimated from the "
         "selected historical period. During market stress, correlations typically spike "
         "toward 1.0 — diversification benefits collapse when they are most needed. "
-        "The rolling correlation chart on Q2 details shows how correlations have shifted "
+        "The rolling correlation chart in Risk Factors details shows how correlations have shifted "
         "over time."
     )
 
