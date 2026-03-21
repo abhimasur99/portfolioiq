@@ -919,7 +919,7 @@ def efficient_frontier_chart(
         yaxis_title="Annualized Return (%)",
         xaxis_tickformat=".1f",
         yaxis_tickformat="+.1f",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        legend=dict(orientation="v", yanchor="top", y=0.99, xanchor="left", x=0.01),
     )
     return fig
 

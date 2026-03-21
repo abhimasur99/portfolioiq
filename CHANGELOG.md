@@ -5,6 +5,19 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.26.0] — 2026-03-21
+
+### Fixed
+- `app.py`: Replaced `_nav_pending` / `index=` programmatic nav pattern with `st.sidebar.radio(key="_nav_radio")` binding. Writing directly to `st.session_state["_nav_radio"]` before the widget renders guarantees Streamlit picks it up; fixes "Go to Input" guard button and post-analysis GUIDE/SETTINGS routing on both localhost and deployed.
+- `analytics/risk_factors.py`: Reverted `yf.Ticker(session=session)` — the custom `requests.Session` bypassed yfinance's internal cookie handling, breaking sector fetch on localhost. All-Unknown → `{}` fallback retained for graceful cloud degradation.
+- `assets/style.css`: Added `.stFormSubmitButton > button` rules so "Analyse Portfolio →" button matches cockpit theme on Streamlit Cloud (newer Streamlit renders form submit buttons under a separate CSS class from `.stButton`).
+- `components/charts.py` `efficient_frontier_chart()`: Moved legend to upper-left inside the plot area (`x=0.01, y=0.99`) — prevents overlap with frontier curve and optimizer markers which cluster in the upper-right.
+
+### Changed
+- `app.py`: `initial_sidebar_state` changed from `"collapsed"` to `"expanded"` so the navigation sidebar is visible on first load.
+
+---
+
 ## [0.25.0] — 2026-03-20
 
 ### Fixed
