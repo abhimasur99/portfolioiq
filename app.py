@@ -99,6 +99,7 @@ _DETAIL_ITEMS = [
 for _page in _NAV_ITEMS:
     if st.sidebar.button(_page, key=f"_mainav_{_page}", use_container_width=True):
         st.session_state["_nav_radio"] = _page
+        st.session_state.pop("_dashboard_details", None)
         st.rerun()
 
     # Sub-navigation: indented detail-page shortcuts, only when portfolio loaded
@@ -111,7 +112,7 @@ for _page in _NAV_ITEMS:
         )
         for _dk, _dlabel in _DETAIL_ITEMS:
             _, _dcol = st.sidebar.columns([0.08, 0.92])
-            if _dcol.button(_dlabel, key=f"_subnav_{_dk}"):
+            if _dcol.button(_dlabel, key=f"_subnav_{_dk}", use_container_width=True):
                 st.session_state["_dashboard_details"] = _dk
                 st.session_state["_nav_radio"] = "DASHBOARD"
                 st.rerun()

@@ -603,30 +603,8 @@ def _render_time_selector() -> None:
 
 # ── Details page routing ───────────────────────────────────────────────────────
 
-def _scroll_to_top() -> None:
-    """Inject a minimal component that scrolls the Streamlit main container to top."""
-    import streamlit.components.v1 as components
-    components.html(
-        """<script>
-        var els = [
-            window.parent.document.querySelector('[data-testid="stMain"]'),
-            window.parent.document.querySelector('[data-testid="stAppViewContainer"]'),
-            window.parent.document.body,
-        ];
-        for (var i = 0; i < els.length; i++) {
-            if (els[i]) { els[i].scrollTop = 0; }
-        }
-        window.parent.scrollTo(0, 0);
-        </script>""",
-        height=1,
-        scrolling=False,
-    )
-
-
 def _route_details(details_key: str) -> None:
     """Render the requested details page within the DASHBOARD nav context."""
-    _scroll_to_top()
-
     _ORDER  = ["q1", "q2", "q3", "q4"]
     _LABELS = {
         "q1": "Performance",
