@@ -1,4 +1,4 @@
-"""pages/details_q2.py
+"""screens/details_q2.py
 
 Screen 3b — Q2 More Details: Risk Factors (Diagnostic).
 

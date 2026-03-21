@@ -1,4 +1,4 @@
-"""pages/guide.py
+"""screens/guide.py
 
 Screen 4 — Guide.
 

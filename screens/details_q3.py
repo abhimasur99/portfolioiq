@@ -1,4 +1,4 @@
-"""pages/details_q3.py
+"""screens/details_q3.py
 
 Screen 3c — Q3 More Details: Risk Outlook (Predictive).
 

@@ -15,10 +15,10 @@ PortfolioIQ analyses an equity portfolio across four analytical layers:
 
 | Layer | Quadrant | What it answers |
 |-------|----------|-----------------|
-| Descriptive | Q1 — Performance | What has this portfolio returned, and at what risk? |
-| Diagnostic | Q2 — Risk Factors | Why did it behave this way? Concentration, correlation, drawdown. |
-| Predictive | Q3 — Risk Outlook | What could happen? GARCH volatility, VaR, Monte Carlo, stress tests. |
-| Prescriptive | Q4 — Optimization | What would a model-optimal allocation look like? |
+| Descriptive | Performance | What has this portfolio returned, and at what risk? |
+| Diagnostic | Risk Factors | Why did it behave this way? Concentration, correlation, drawdown. |
+| Predictive | Risk Outlook | What could happen? GARCH volatility, VaR, Monte Carlo, signal scenarios. |
+| Prescriptive | Optimization | What would a model-optimal allocation look like? |
 
 Everything is displayed in plain language with inline explanations — no finance background required to read the dashboard, but the methodology is rigorous enough to demonstrate FRM/CFA-level quantitative implementation.
 
@@ -85,20 +85,19 @@ portfolioiq/
 │   ├── returns.py              # Log returns, portfolio aggregation
 │   ├── performance.py          # CAGR, Sharpe, Sortino, Treynor, alpha/beta, rolling
 │   ├── risk_factors.py         # Correlation, drawdown, HHI, Effective N, sector weights
-│   ├── risk_outlook.py         # GARCH(1,1), EWMA, VaR/CVaR, Monte Carlo, stress tests
+│   ├── risk_outlook.py         # GARCH(1,1), EWMA, VaR/CVaR, Monte Carlo, signal-based sensitivity analysis
 │   ├── optimization.py         # Efficient frontier, Max Sharpe, Min Var, Risk Parity
-│   └── market_signals.py       # 11 live forward-looking signals via yfinance
+│   └── market_signals.py       # 11 end-of-day market signals via yfinance
 ├── components/
 │   ├── charts.py               # 13 Plotly figure builders (no session state)
-│   ├── dashboard_quad.py       # Reusable quadrant layout component
-│   └── explain_panel.py        # Explain Numbers overlay (deprecated — superseded by st.metric help= tooltips)
+│   └── dashboard_quad.py       # Reusable quadrant layout component
 ├── screens/
 │   ├── input.py                # Screen 1: holdings entry, 7-step pipeline
 │   ├── dashboard.py            # Screen 2: 2×2 dashboard, health bar, ticker tape
-│   ├── details_q1.py           # Q1 Performance Deep Dive
-│   ├── details_q2.py           # Q2 Risk Factors Deep Dive
-│   ├── details_q3.py           # Q3 Risk Outlook Deep Dive + Preparedness Panel
-│   ├── details_q4.py           # Q4 Optimization Deep Dive
+│   ├── details_q1.py           # Performance Deep Dive
+│   ├── details_q2.py           # Risk Factors Deep Dive
+│   ├── details_q3.py           # Risk Outlook Deep Dive + Preparedness Panel
+│   ├── details_q4.py           # Optimization Deep Dive
 │   ├── guide.py                # How-to-use guide: app flow, quadrant explanations, key limitations
 │   └── settings.py             # All configurable parameters, granular recompute
 └── tests/
@@ -130,7 +129,7 @@ Full and rolling 60-day correlation matrices, annualised covariance (PD-checked,
 - **VaR/CVaR:** Historical at 95% and 99%; GARCH-VaR (normal quantile); monthly scaling (×√21)
 - **Distribution:** skewness, excess kurtosis
 - **Monte Carlo:** 1,000 paths (configurable to 10,000), GARCH-driven dynamics, vectorised over paths, sequential loop over steps; 10th/50th/90th percentile fan
-- **Signal-Based Sensitivity Analysis:** Filtered Historical Simulation (FHS) — three stress scenarios (mild/moderate/severe) derived from live market signals (VIX, credit spreads, yield curve). Estimated loss = historical 5th-percentile return × (stressed vol / historical daily vol); preserves actual fat-tail and skew without a distribution assumption. Toggle between 1-day and 1-month estimates; labels show both % loss and dollar impact
+- **Signal-Based Sensitivity Analysis:** Filtered Historical Simulation (FHS) — three stress scenarios (mild/moderate/severe) derived from end-of-day market signals (VIX, credit spreads, yield curve). Estimated loss = historical 5th-percentile return × (stressed vol / historical daily vol); preserves actual fat-tail and skew without a distribution assumption. Toggle between 1-day and 1-month estimates; labels show both % loss and dollar impact
 
 ### Optimization (Layer 4)
 All three optimizers use `scipy.optimize.minimize` with SLSQP, equal-weight initialisation, configurable weight bounds:
@@ -141,7 +140,7 @@ All three optimizers use `scipy.optimize.minimize` with SLSQP, equal-weight init
 - Expected returns and covariance annualised from daily log returns (μ×252, Σ×252)
 
 ### Market Signals (Layer 4)
-11 live signals fetched fresh on each portfolio load (no cache): VIX level/trend/term structure, MOVE index, yield curve (10yr−30yr), credit spreads (HYG/IEF proxy), copper/gold ratio, dollar index, oil sensitivity, rate sensitivity, tech concentration (unavailable — no reliable sector feed in yfinance).
+11 end-of-day signals fetched on each portfolio load (no cache): VIX level/trend/term structure, MOVE index, yield curve (10yr−30yr), credit spreads (HYG/IEF proxy), copper/gold ratio, dollar index, oil sensitivity, rate sensitivity, tech concentration (unavailable — no reliable sector feed in yfinance).
 
 ---
 

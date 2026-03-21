@@ -41,7 +41,7 @@ import plotly.graph_objects as go
 from assets.config import (
     PLOTLY_TEMPLATE_NAME,
     COLOR_BLUE, COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_PURPLE,
-    COLOR_TEXT, COLOR_TEXT_MUTED, COLOR_AXIS, COLOR_BG_SECONDARY,
+    COLOR_TEXT, COLOR_TEXT_MUTED, COLOR_AXIS, COLOR_BG_SECONDARY, COLOR_WHITE,
     FONT_MONO,
 )
 
@@ -317,7 +317,7 @@ def correlation_heatmap(corr_matrix: pd.DataFrame) -> go.Figure:
 
     colorscale = [
         [0.0, COLOR_BLUE],
-        [0.5, "#ffffff"],
+        [0.5, COLOR_WHITE],
         [1.0, COLOR_RED],
     ]
 

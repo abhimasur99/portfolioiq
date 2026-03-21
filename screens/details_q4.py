@@ -1,4 +1,4 @@
-"""pages/details_q4.py
+"""screens/details_q4.py
 
 Screen 3d — Q4 More Details: Optimization (Prescriptive).
 

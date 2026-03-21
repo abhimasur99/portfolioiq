@@ -10,7 +10,7 @@ Responsibilities:
 - Render the persistent footer disclaimer on every screen.
 
 This file does NOT contain any analytics logic or chart rendering.
-All page content is delegated to the pages/ modules.
+All page content is delegated to the screens/ modules.
 
 Navigation rules (locked):
 - Nav bar has exactly four items: INPUT, DASHBOARD, GUIDE, SETTINGS.

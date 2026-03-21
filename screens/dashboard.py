@@ -1,4 +1,4 @@
-"""pages/dashboard.py
+"""screens/dashboard.py
 
 Screen 2 — Main Dashboard.
 
@@ -13,7 +13,7 @@ Responsibilities:
     Q4 -- Optimization (Prescriptive)
 - Each quadrant: primary chart, 3-4 KPIs, Explain Numbers button,
   More Details button, one contextual flag.
-- More Details buttons route to pages/details_q{n}.py.
+- More Details buttons route to screens/details_q{n}.py.
 
 Does NOT recompute analytics -- reads from st.session_state[SK_ANALYTICS].
 

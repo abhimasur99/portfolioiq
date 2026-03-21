@@ -1,4 +1,4 @@
-"""pages/details_q1.py
+"""screens/details_q1.py
 
 Screen 3a — Q1 More Details: Performance (Descriptive).
 

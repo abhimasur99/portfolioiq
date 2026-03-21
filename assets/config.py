@@ -36,6 +36,7 @@ COLOR_GRID       = "#0d2137"  # subtle grid lines
 COLOR_AXIS       = "#1a3a5c"  # axis lines
 COLOR_TEXT       = "#c8d8e8"  # primary text on dark background
 COLOR_TEXT_MUTED = "#5a7a9a"  # muted / secondary text
+COLOR_WHITE      = "#ffffff"  # white — heatmap midpoint
 
 # ─── Typography ───────────────────────────────────────────────────────────────
 
@@ -135,7 +136,7 @@ SK_VAR_METHOD      = "var_method"       # str, "historical" | "garch"
 SK_MC_HORIZON      = "mc_horizon"       # int, years
 SK_MC_PATHS        = "mc_paths"         # int, 1000 or 10000
 SK_WEIGHT_MIN      = "weight_min"       # float, default 0.05
-SK_WEIGHT_MAX      = "weight_max"       # float, default 0.50
+SK_WEIGHT_MAX      = "weight_max"       # float, default 0.90
 SK_GARCH_REFIT     = "garch_refit"      # str, "each_load" | "daily"
 
 # UI state

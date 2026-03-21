@@ -1,4 +1,4 @@
-"""pages/settings.py
+"""screens/settings.py
 
 Screen 5 — Settings.
 

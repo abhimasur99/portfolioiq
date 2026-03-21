@@ -1,4 +1,4 @@
-"""pages/input.py
+"""screens/input.py
 
 Screen 1 — Portfolio Input.
 

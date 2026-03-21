@@ -5,6 +5,23 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.28.0] — 2026-03-21
+
+### Changed
+- `assets/config.py`: Added `COLOR_WHITE = "#ffffff"` to color palette; fixed `SK_WEIGHT_MAX` inline comment (`default 0.50` → `default 0.90`).
+- `components/charts.py`: Correlation heatmap midpoint now uses `COLOR_WHITE` constant instead of hardcoded `"#ffffff"` — restores compliance with locked decision 11 (all chart colors from config.py).
+- `README.md`: Removed Q1/Q2/Q3/Q4 prefixes from quadrant table and details screen descriptions; updated `risk_outlook.py` description (`stress tests` → `signal-based sensitivity analysis`); updated market signals description (`11 live` → `11 end-of-day`); signal sensitivity line (`live market signals` → `end-of-day market signals`).
+- `CLAUDE.md`: Updated Module Responsibilities table (removed `explain_panel.py` row, updated `risk_outlook.py` and `market_signals.py` descriptions); added deferred issues TL-006/010/013/020 to Known Issues; added protocol Rules 4–8 (pre-push checklist, post-push verification, deployed-only test protocol, memory sync, plan mode trigger).
+- All `screens/` docstrings and `app.py` updated: `pages/` → `screens/` path references.
+- `screens/__init__.py` comment corrected: `# pages/__init__.py` → `# screens/__init__.py`.
+- `memory/project_locked_decisions.md`: Corrected MC horizon (10-year → 1-year default); updated weight max (50% → 90%); added D-11/D-12 (benchmark options scope, AGG/60-40 removal).
+- `memory/project_overview.md`: Updated Layer 3 description (stress tests → Signal-Based Sensitivity Analysis FHS; live → end-of-day market signals).
+
+### Removed
+- `components/explain_panel.py`: Deleted — fully deprecated since Stage B (v0.18.0); no imports or references anywhere in the codebase.
+
+---
+
 ## [0.27.0] — 2026-03-21
 
 ### Added
