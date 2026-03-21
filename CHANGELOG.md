@@ -5,6 +5,27 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.27.0] — 2026-03-21
+
+### Added
+- `screens/dashboard.py` `_route_details()`: Bottom navigation bar mirrored at foot of every More Details screen — back/prev/next buttons rendered at both top and bottom for accessibility on long pages. `_nav_bar(suffix)` inner helper generates unique Streamlit widget keys for top (`"top"`) and bottom (`"bot"`) instances.
+- `app.py`: Sidebar sub-navigation under DASHBOARD — when a portfolio is loaded, four indented shortcut buttons (Performance, Risk Factors, Risk Outlook, Optimization) appear below the DASHBOARD nav item for direct access to More Details screens without opening the main dashboard first.
+
+### Changed
+- `app.py`: Replaced `st.sidebar.radio()` navigation with `st.sidebar.button()` calls — four `INPUT / DASHBOARD / GUIDE / SETTINGS` buttons with `use_container_width=True` for visual consistency with all other sidebar buttons.
+- `screens/dashboard.py`: Quadrant titles renamed — `"Q1 — PERFORMANCE"` → `"PERFORMANCE"`, `"Q2 — RISK FACTORS"` → `"RISK FACTORS"`, `"Q3 — RISK OUTLOOK"` → `"RISK OUTLOOK"`, `"Q4 — OPTIMIZATION"` → `"OPTIMIZATION"`.
+- `screens/guide.py`: Removed `"Q1 —"` / `"Q2 —"` / `"Q3 —"` / `"Q4 —"` prefixes from section headings; updated inline references (`"Q4 outputs"` → `"Optimization section outputs"`, `"Q2 details"` → `"Risk Factors details"`).
+
+### Fixed
+- `app.py`: Main nav button handler now pops `_dashboard_details` on every click — previously clicking DASHBOARD from a More Details page re-routed back into the same details page instead of the main dashboard.
+- `app.py`: Sub-nav buttons use `use_container_width=True` — text was previously left-aligned and the button undersized within its indented column.
+- Ghost button artifact eliminated — `components.html(height=1)` injected before page routing caused Streamlit's component reconciler to surface the previous render's `st.button` above the new page content; resolved by removing the scroll injection block entirely (see Removed).
+
+### Removed
+- Scroll-to-top mechanism — `_scroll_to_top()` helper, all `"_scroll_to_top"` session state flag references in `app.py` nav handlers, `_route_details()` back/prev/next buttons, and `dashboard.render()` flag check removed. The `components.html` approach is unreliable in Streamlit: injecting before page routing causes ghost-button reconciler artifacts; injecting inside render() with `setTimeout` is fragile across machine speeds. Deferred to v2 (TL-020).
+
+---
+
 ## [0.26.0] — 2026-03-21
 
 ### Fixed
