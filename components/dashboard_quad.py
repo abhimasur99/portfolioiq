@@ -19,10 +19,11 @@ Implemented in: Session 10. Updated Stage B: ? tooltips, removed Explain Numbers
 import streamlit as st
 import plotly.graph_objects as go
 
-from assets.config import COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED
+from assets.config import COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED, SK_COMPACT_MODE
 
 _SK_DETAILS = "_dashboard_details"
-_CHART_HEIGHT = 260
+_CHART_HEIGHT_NORMAL  = 260
+_CHART_HEIGHT_COMPACT = 180
 _FLAG_COLOR = {"green": COLOR_GREEN, "amber": COLOR_AMBER, "red": COLOR_RED}
 _FLAG_EMOJI = {"green": "🟢", "amber": "🟡", "red": "🔴"}
 
@@ -50,7 +51,12 @@ def render_quadrant(
                 unsafe_allow_html=True,
             )
 
-    chart_fig.update_layout(height=_CHART_HEIGHT, margin=dict(l=40, r=20, t=30, b=30))
+    chart_h = (
+        _CHART_HEIGHT_COMPACT
+        if st.session_state.get(SK_COMPACT_MODE, False)
+        else _CHART_HEIGHT_NORMAL
+    )
+    chart_fig.update_layout(height=chart_h, margin=dict(l=40, r=20, t=30, b=30))
     st.plotly_chart(chart_fig, use_container_width=True, key=f"_chart_{quadrant_id}")
 
     if kpis:

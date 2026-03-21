@@ -224,3 +224,48 @@ h4, h5, h6 {
 .signal-badge-amber  { background-color: rgba(239, 159, 39, 0.15);  color: #ef9f27; border: 1px solid #ef9f27; }
 .signal-badge-red    { background-color: rgba(226, 75, 74, 0.15);   color: #e24b4a; border: 1px solid #e24b4a; }
 .signal-badge-blue   { background-color: rgba(0, 212, 255, 0.10);   color: #00d4ff; border: 1px solid #00d4ff; }
+
+/* ─── Responsive / Narrow-screen ─────────────────────────────────────────── */
+/* Targets Streamlit 1.32 DOM structure. Verify after any Streamlit upgrade.  */
+
+@media (max-width: 768px) {
+
+    /* Stack all st.columns() groups vertically.
+       Streamlit sets column widths via inline styles (e.g. style="flex: 0 0 50%").
+       !important in an external stylesheet overrides inline styles. */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+    [data-testid="stColumn"] {
+        flex: 0 0 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* Reduce metric tile sizes */
+    [data-testid="stMetric"] {
+        padding: 8px 10px !important;
+    }
+    [data-testid="stMetricValue"] > div {
+        font-size: 18px !important;
+    }
+    [data-testid="stMetricLabel"] > div {
+        font-size: 9px !important;
+    }
+
+    /* Hide ticker tape (too cramped on narrow screens) */
+    .ticker-wrapper {
+        display: none !important;
+    }
+
+    /* Shrink signal badges */
+    .signal-badge {
+        padding: 2px 6px !important;
+        font-size: 10px !important;
+    }
+
+    /* Reduce button padding */
+    .stButton > button {
+        padding: 4px 10px !important;
+        font-size: 11px !important;
+    }
+}

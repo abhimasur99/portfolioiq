@@ -53,6 +53,7 @@ from assets.config import (
     SK_WEIGHT_MAX,
     SK_WEIGHT_MIN,
     SK_WEIGHTS,
+    SK_COMPACT_MODE,
 )
 
 # ── Helpers ─────────────────────────────────────────────────────────────────────
@@ -313,6 +314,20 @@ def render() -> None:
 
     st.markdown("---")
 
+    # ── Section 5: Display ─────────────────────────────────────────────────────
+    st.subheader("Display")
+    new_compact = st.checkbox(
+        "Compact layout",
+        value=st.session_state.get(SK_COMPACT_MODE, False),
+        help=(
+            "Reduces dashboard chart heights (260px → 180px). "
+            "Useful on smaller laptop screens (~900–1100px). "
+            "Takes effect immediately on save."
+        ),
+    )
+
+    st.markdown("---")
+
     # ── Action buttons ─────────────────────────────────────────────────────────
     btn_save, btn_reset = st.columns([3, 1])
 
@@ -361,6 +376,7 @@ def render() -> None:
             # Always save all settings
             for key, val in new_settings.items():
                 st.session_state[key] = val
+            st.session_state[SK_COMPACT_MODE] = new_compact
 
             # Granular recompute
             if not portfolio_loaded:

@@ -5,6 +5,16 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.29.0] — 2026-03-21
+
+### Added
+- `assets/style.css`: `@media (max-width: 768px)` block — at narrow viewport widths all `st.columns()` groups stack vertically (CSS `!important` overrides Streamlit inline flex styles), metric tiles shrink, ticker tape hides, signal badges and buttons reduce padding.
+- `assets/config.py`: `SK_COMPACT_MODE = "compact_mode"` session state key.
+- `screens/settings.py`: "Display" section with "Compact layout" checkbox — reduces dashboard quadrant chart heights from 260px to 180px; persisted on Save.
+- `components/dashboard_quad.py`: `_CHART_HEIGHT_NORMAL = 260` / `_CHART_HEIGHT_COMPACT = 180`; quadrant charts read `SK_COMPACT_MODE` from session state to pick height.
+
+---
+
 ## [0.28.0] — 2026-03-21
 
 ### Changed

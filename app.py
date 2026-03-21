@@ -40,6 +40,7 @@ from assets.config import (
     SK_WEIGHT_MAX,
     SK_PORTFOLIO_LOADED,
     SK_ANALYTICS,
+    SK_COMPACT_MODE,
 )
 
 # ── Page config (must be first Streamlit call) ─────────────────────────────────
@@ -67,6 +68,7 @@ _defaults = {
     SK_WEIGHT_MAX:       DEFAULT_WEIGHT_MAX,
     SK_PORTFOLIO_LOADED: False,
     SK_ANALYTICS:        {},
+    SK_COMPACT_MODE:     False,
 }
 for key, value in _defaults.items():
     if key not in st.session_state:
