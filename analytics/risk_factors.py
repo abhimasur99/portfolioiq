@@ -296,22 +296,12 @@ def fetch_sector_weights(weights: pd.Series) -> dict:
         logger.warning("yfinance not available — sector weights skipped.")
         return {}
 
-    import requests
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
-        )
-    })
-
     _ETF_QUOTE_TYPES = {"etf", "mutualfund"}
 
     sector_weights: dict[str, float] = {}
     for ticker, weight in weights.items():
         try:
-            info = yf.Ticker(ticker, session=session).info
+            info = yf.Ticker(ticker).info
             sector = info.get("sector") or ""
             if not sector:
                 quote_type = (info.get("quoteType") or "").lower()

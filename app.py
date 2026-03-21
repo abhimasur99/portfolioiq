@@ -76,28 +76,24 @@ for key, value in _defaults.items():
 # Four permanent items only. Order matters for display.
 _NAV_ITEMS = ["INPUT", "DASHBOARD", "GUIDE", "SETTINGS"]
 
-# Navigation state is tracked in _current_nav (a plain session state key, not
-# widget-bound). Pages request navigation by setting _nav_pending; this block
-# resolves it before the radio is rendered, avoiding widget-state restrictions.
-#
-# index= is only passed when a programmatic override is needed (_nav_pending fired
-# or first load). On normal reruns it is omitted so Streamlit tracks the radio's
-# own state by position — passing index= every run causes a two-click lag.
-_nav_target = st.session_state.pop("_nav_pending", None)
-if _nav_target and _nav_target in _NAV_ITEMS:
-    _nav_index = _NAV_ITEMS.index(_nav_target)
-elif "_current_nav" not in st.session_state:
-    _nav_index = 1 if st.session_state[SK_PORTFOLIO_LOADED] else 0
-else:
-    _nav_index = None  # normal rerun — let radio track its own state
+# Programmatic navigation: pages set st.session_state["_nav_pending"] = "<PAGE>"
+# and call st.rerun(). On the next run we pop it and write directly to the
+# radio's session state key BEFORE the widget renders. Streamlit's key= binding
+# guarantees the widget picks it up — no index= hackery needed.
+_nav_pending = st.session_state.pop("_nav_pending", None)
+if _nav_pending and _nav_pending in _NAV_ITEMS:
+    st.session_state["_nav_radio"] = _nav_pending
+elif "_nav_radio" not in st.session_state:
+    st.session_state["_nav_radio"] = (
+        "DASHBOARD" if st.session_state[SK_PORTFOLIO_LOADED] else "INPUT"
+    )
 
-_radio_kwargs: dict = dict(label="Navigation", options=_NAV_ITEMS, label_visibility="collapsed")
-if _nav_index is not None:
-    _radio_kwargs["index"] = _nav_index
-
-selected_page = st.sidebar.radio(**_radio_kwargs)
-# Sync user's manual nav click back to our state variable
-st.session_state["_current_nav"] = selected_page
+selected_page = st.sidebar.radio(
+    "Navigation",
+    options=_NAV_ITEMS,
+    label_visibility="collapsed",
+    key="_nav_radio",
+)
 
 # ── Page routing ───────────────────────────────────────────────────────────────
 # Navigating away from DASHBOARD clears any active More Details sub-page so that

@@ -87,6 +87,25 @@
     border-color: #00d4ff !important;
 }
 
+/* ── Form submit buttons (st.form_submit_button) ────────────────────────────── */
+.stFormSubmitButton > button {
+    background-color: #030f1c !important;
+    color: #00d4ff !important;
+    border: 1px solid #00d4ff !important;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 6px 16px;
+    transition: background-color 0.15s ease;
+}
+
+.stFormSubmitButton > button:hover {
+    background-color: #071a2e !important;
+    color: #00d4ff !important;
+    border-color: #00d4ff !important;
+}
+
 /* ── Input fields ──────────────────────────────────────────────────────────── */
 .stTextInput > div > div > input,
 .stNumberInput > div > div > input {
