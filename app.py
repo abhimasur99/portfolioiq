@@ -97,6 +97,13 @@ selected_page = st.sidebar.radio(
 
 # ── Sidebar sub-navigation (details pages, shown only when portfolio is loaded) ─
 if st.session_state.get(SK_PORTFOLIO_LOADED):
+    st.sidebar.markdown(
+        '<p style="font-size:9px; color:#5a7a9a; text-transform:uppercase; '
+        'letter-spacing:0.12em; font-family:\'Share Tech Mono\',monospace; '
+        'margin:6px 0 2px 4px; padding-top:8px; border-top:1px solid #1a3a5c;">'
+        "Dashboard</p>",
+        unsafe_allow_html=True,
+    )
     _DETAIL_ITEMS = [
         ("q1", "Performance"),
         ("q2", "Risk Factors"),

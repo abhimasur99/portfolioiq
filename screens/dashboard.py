@@ -603,8 +603,16 @@ def _render_time_selector() -> None:
 
 # ── Details page routing ───────────────────────────────────────────────────────
 
+def _scroll_to_top() -> None:
+    """Inject a zero-height component that scrolls the parent window to the top."""
+    import streamlit.components.v1 as components
+    components.html("<script>window.parent.scrollTo(0, 0);</script>", height=0)
+
+
 def _route_details(details_key: str) -> None:
     """Render the requested details page within the DASHBOARD nav context."""
+    _scroll_to_top()
+
     _ORDER  = ["q1", "q2", "q3", "q4"]
     _LABELS = {
         "q1": "Performance",
@@ -614,7 +622,8 @@ def _route_details(details_key: str) -> None:
     }
 
     def _nav_bar(suffix: str) -> None:
-        """Render back + prev/next buttons. suffix ensures unique widget keys."""
+        """Render divider + back/prev/next buttons + divider. suffix = unique keys."""
+        st.markdown("---")
         idx = _ORDER.index(details_key)
         back_col, _, nav_col = st.columns([2, 3, 3])
         with back_col:
@@ -635,6 +644,7 @@ def _route_details(details_key: str) -> None:
                     if st.button(f"{_LABELS[nxt]} →", key=f"_btn_next_{suffix}", use_container_width=True):
                         st.session_state[_SK_DETAILS] = nxt
                         st.rerun()
+        st.markdown("---")
 
     _nav_bar("top")
 
@@ -651,8 +661,6 @@ def _route_details(details_key: str) -> None:
         return
 
     render_details()
-
-    st.markdown("---")
     _nav_bar("bot")
 
 
@@ -679,7 +687,8 @@ def render() -> None:
     # Holdings strip
     st.markdown("#### Holdings")
     _render_holdings_strip()
-    st.markdown("")
+
+    st.markdown("---")
 
     # Context badge + time frame selector (before health bar)
     port_ret = st.session_state.get(SK_PORT_RETURNS)
@@ -695,12 +704,14 @@ def render() -> None:
 
     _render_time_selector()
 
+    st.markdown("---")
+
     # Health bar
     st.markdown("#### Portfolio Health")
     indicators = _health_indicators(analytics)
     _render_health_bar(indicators)
 
-    st.markdown("")
+    st.markdown("---")
 
     # 2x2 quadrant grid
     from components.dashboard_quad import render_quadrant
