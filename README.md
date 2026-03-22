@@ -175,10 +175,10 @@ Changing VaR/MC/GARCH settings triggers targeted recomputation of the risk outlo
 ## Navigation
 
 ```
-INPUT → DASHBOARD → [More Details Q1–Q4 via quadrant buttons] → GUIDE / SETTINGS
+INPUT → DASHBOARD → [More Details via quadrant buttons] → GUIDE / SETTINGS
 ```
 
-The nav bar has exactly four items: INPUT, DASHBOARD, GUIDE, SETTINGS. More Details screens are accessed only via the "More Details →" button on each quadrant — never from the nav bar directly.
+The nav bar has exactly four items: INPUT, DASHBOARD, GUIDE, SETTINGS. More Details screens (Performance, Risk Factors, Risk Outlook, Optimization) are accessed only via the "More Details →" button on each quadrant, or via the sidebar sub-nav shortcuts when a portfolio is loaded — never from the main nav bar directly.
 
 ---
 
