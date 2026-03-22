@@ -26,7 +26,7 @@ import streamlit as st
 
 from assets.config import (
     BENCHMARK_OPTIONS,
-    COLOR_BLUE, COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED,
+    COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED,
     DEFAULT_MC_HORIZON, DEFAULT_MC_PATHS, DEFAULT_VAR_CONFIDENCE,
     DEFAULT_WEIGHT_MIN, DEFAULT_WEIGHT_MAX,
     SK_ANALYSIS_END, SK_ANALYSIS_START,
@@ -281,26 +281,28 @@ def _health_indicators(analytics: dict) -> list:
 
 
 def _render_health_bar(indicators: list) -> None:
-    """Render 6 health indicators as a horizontal strip of colored tiles."""
-    cols = st.columns(len(indicators))
-    for col, ind in zip(cols, indicators):
-        color  = _status_color(ind["status"])
-        emoji  = {"green": "🟢", "amber": "🟡", "red": "🔴"}.get(ind["status"], "⚪")
-        with col:
-            st.markdown(
-                f'<div style="border:1px solid {color};border-radius:6px;padding:6px 8px;'
-                f'text-align:center;background:rgba(0,0,0,0.2);">'
-                f'<div style="font-size:0.72rem;color:{COLOR_TEXT_MUTED};">{ind["label"]}</div>'
-                f'<div style="font-size:0.85rem;color:{color};">{emoji} {ind["value"]}</div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+    """Render 6 health indicators as two rows of 3 colored tiles."""
+    top, bot = indicators[:3], indicators[3:]
+    for row in (top, bot):
+        cols = st.columns(3)
+        for col, ind in zip(cols, row):
+            color = _status_color(ind["status"])
+            emoji = {"green": "🟢", "amber": "🟡", "red": "🔴"}.get(ind["status"], "⚪")
+            with col:
+                st.markdown(
+                    f'<div style="border:1px solid {color};border-radius:6px;padding:6px 8px;'
+                    f'text-align:center;background:rgba(0,0,0,0.2);">'
+                    f'<div style="font-size:0.72rem;color:{COLOR_TEXT_MUTED};">{ind["label"]}</div>'
+                    f'<div style="font-size:0.85rem;color:{color};">{emoji} {ind["value"]}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
 
 
 # ── Quadrant builders ──────────────────────────────────────────────────────────
 
-def _build_q1(analytics: dict) -> tuple:
-    """Q1 — Performance (Descriptive). Returns (chart, kpis, flag)."""
+def _build_performance(analytics: dict) -> tuple:
+    """Performance quadrant (Descriptive). Returns (chart, kpis, flag)."""
     from components.charts import cumulative_return_chart
 
     port_ret  = st.session_state.get(SK_PORT_RETURNS, pd.Series(dtype=float))
@@ -312,18 +314,12 @@ def _build_q1(analytics: dict) -> tuple:
 
     cagr   = perf.get("cagr")
     sharpe = perf.get("sharpe")
-    mdd    = analytics.get(SK_RISK_FACTORS, {}).get("max_drawdown")
-    vol    = perf.get("volatility")
 
     kpis = [
-        {"label": "CAGR",     "value": _pct(cagr),
+        {"label": "CAGR",   "value": _pct(cagr),
          "help": "Compound Annual Growth Rate — the constant yearly return that matches total portfolio growth over the period. Accounts for compounding."},
-        {"label": "Sharpe",   "value": _fmt(sharpe),
+        {"label": "Sharpe", "value": _fmt(sharpe),
          "help": "Excess return per unit of total risk. Above 0.5 is acceptable; above 1.0 is strong; below 0 means underperforming cash on a risk-adjusted basis."},
-        {"label": "Max DD",   "value": _pct(mdd),
-         "help": "Largest peak-to-trough decline over the period. Worst loss a buy-and-hold investor would have experienced."},
-        {"label": "Ann. Vol", "value": _pct(vol, sign=False),
-         "help": "Annualised standard deviation of daily returns. Higher = wider daily swings in both directions."},
     ]
 
     if sharpe is not None and sharpe < 0:
@@ -336,8 +332,8 @@ def _build_q1(analytics: dict) -> tuple:
     return chart, kpis, flag
 
 
-def _build_q2(analytics: dict) -> tuple:
-    """Q2 — Risk Factors (Diagnostic). Returns (chart, kpis, flag)."""
+def _build_risk_factors(analytics: dict) -> tuple:
+    """Risk Factors quadrant (Diagnostic). Returns (chart, kpis, flag)."""
     from components.charts import correlation_heatmap
 
     rf   = analytics.get(SK_RISK_FACTORS, {})
@@ -351,18 +347,12 @@ def _build_q2(analytics: dict) -> tuple:
 
     eff_n = rf.get("effective_n")
     hhi   = rf.get("hhi")
-    dr    = rf.get("diversification_ratio")
-    beta  = analytics.get(SK_PERFORMANCE, {}).get("beta")
 
     kpis = [
-        {"label": "Beta",        "value": _fmt(beta),
-         "help": "Sensitivity to benchmark. β > 1 amplifies market moves; β < 1 dampens them."},
         {"label": "Effective N", "value": _fmt(eff_n, 1),
          "help": "Number of truly independent positions after accounting for correlations. Lower than your actual holding count means the portfolio is concentrated."},
         {"label": "HHI",         "value": _fmt(hhi, 3),
          "help": "Sum of squared weights — equals 1/N for equal weight, 1.0 for a single asset. Lower = more diversified."},
-        {"label": "Div. Ratio",  "value": _fmt(dr),
-         "help": "Weighted-average individual volatility divided by portfolio volatility. Above 1.0 confirms diversification is reducing risk."},
     ]
 
     tickers = st.session_state.get(SK_TICKERS, [])
@@ -377,8 +367,8 @@ def _build_q2(analytics: dict) -> tuple:
     return chart, kpis, flag
 
 
-def _build_q3(analytics: dict) -> tuple:
-    """Q3 — Risk Outlook (Predictive). Returns (chart, kpis, flag)."""
+def _build_risk_outlook(analytics: dict) -> tuple:
+    """Risk Outlook quadrant (Predictive). Returns (chart, kpis, flag)."""
     from components.charts import monte_carlo_fan_chart
 
     ro       = analytics.get(SK_RISK_OUTLOOK, {})
@@ -395,22 +385,16 @@ def _build_q3(analytics: dict) -> tuple:
         chart = go.Figure().update_layout(title="Monte Carlo (no data)")
 
     var_method = st.session_state.get(SK_VAR_METHOD, DEFAULT_VAR_METHOD)
-    if var_method == "garch" and ro.get("var_95_garch") is not None:
-        var95  = ro.get("var_95_garch")
-        cvar95 = ro.get("cvar_95_hist")   # no GARCH CVaR; use historical
-    else:
-        var95  = ro.get("var_95_hist")
-        cvar95 = ro.get("cvar_95_hist")
-    hvol   = ro.get("hist_vol")
-    gvol   = ro.get("garch_vol")
+    var95 = (
+        ro.get("var_95_garch")
+        if var_method == "garch" and ro.get("var_95_garch") is not None
+        else ro.get("var_95_hist")
+    )
+    gvol = ro.get("garch_vol")
 
     kpis = [
         {"label": "VaR 95%",   "value": _pct(var95),
          "help": "Worst daily loss in 95% of trading days (historical). On roughly 1 in 20 days, losses exceeded this threshold."},
-        {"label": "CVaR 95%",  "value": _pct(cvar95),
-         "help": "Average loss on the worst 5% of days (Expected Shortfall). More severe than VaR and better captures tail risk."},
-        {"label": "Hist. Vol", "value": _pct(hvol, sign=False),
-         "help": "Full-period annualised volatility from historical daily returns. Constant-weight estimate over the selected period."},
         {"label": "GARCH Vol", "value": _pct(gvol, sign=False),
          "help": "Forward-looking volatility estimate from a GARCH(1,1) model, which weights recent moves more heavily than older ones."},
     ]
@@ -425,8 +409,8 @@ def _build_q3(analytics: dict) -> tuple:
     return chart, kpis, flag
 
 
-def _build_q4(analytics: dict) -> tuple:
-    """Q4 — Optimization (Prescriptive). Returns (chart, kpis, flag)."""
+def _build_optimization(analytics: dict) -> tuple:
+    """Optimization quadrant (Prescriptive). Returns (chart, kpis, flag)."""
     from components.charts import efficient_frontier_chart
 
     opt  = analytics.get(SK_OPTIMIZATION, {})
@@ -458,17 +442,11 @@ def _build_q4(analytics: dict) -> tuple:
         chart = go.Figure().update_layout(title="Efficient Frontier (no data)")
 
     ms_ratio = opt.get("max_sharpe_ratio")
-    ms_ret   = opt.get("max_sharpe_return")
-    mv_vol   = opt.get("min_var_vol")
     cur_s    = perf.get("sharpe")
 
     kpis = [
         {"label": "Max Sharpe",     "value": _fmt(ms_ratio),
          "help": "Highest achievable Sharpe ratio along the efficient frontier under the weight constraints. Subject to estimation error in expected returns."},
-        {"label": "Max Shrp Ret",   "value": _pct(ms_ret),
-         "help": "Expected annualised return at the maximum Sharpe (tangency) portfolio, estimated from historical data."},
-        {"label": "Min Var Vol",    "value": _pct(mv_vol, sign=False),
-         "help": "Lowest achievable portfolio volatility along the efficient frontier under the weight constraints."},
         {"label": "Current Sharpe", "value": _fmt(cur_s),
          "help": "Your portfolio's Sharpe ratio at the current weights. Compare to Max Sharpe to see how far from optimal the allocation is."},
     ]
@@ -605,18 +583,18 @@ def _render_time_selector() -> None:
 
 def _route_details(details_key: str) -> None:
     """Render the requested details page within the DASHBOARD nav context."""
-    _ORDER  = ["q1", "q2", "q3", "q4"]
+    _ORDER  = ["performance", "risk_factors", "risk_outlook", "optimization"]
     _LABELS = {
-        "q1": "Performance",
-        "q2": "Risk Factors",
-        "q3": "Risk Outlook",
-        "q4": "Optimization",
+        "performance":  "Performance",
+        "risk_factors": "Risk Factors",
+        "risk_outlook": "Risk Outlook",
+        "optimization": "Optimization",
     }
 
     def _nav_bar(suffix: str) -> None:
         """Render back + prev/next buttons. suffix ensures unique widget keys."""
         idx = _ORDER.index(details_key)
-        back_col, _, nav_col = st.columns([2, 3, 3])
+        back_col, _, nav_col = st.columns([2, 1, 4])
         with back_col:
             if st.button("← Dashboard", key=f"_btn_back_{suffix}"):
                 del st.session_state[_SK_DETAILS]
@@ -638,13 +616,13 @@ def _route_details(details_key: str) -> None:
 
     _nav_bar("top")
 
-    if details_key == "q1":
+    if details_key == "performance":
         from screens.details_q1 import render as render_details
-    elif details_key == "q2":
+    elif details_key == "risk_factors":
         from screens.details_q2 import render as render_details
-    elif details_key == "q3":
+    elif details_key == "risk_outlook":
         from screens.details_q3 import render as render_details
-    elif details_key == "q4":
+    elif details_key == "optimization":
         from screens.details_q4 import render as render_details
     else:
         st.error(f"Unknown details page: {details_key}")
@@ -708,17 +686,17 @@ def render() -> None:
     bot_left, bot_right = st.columns(2, gap="medium")
 
     with top_left:
-        chart, kpis, flag = _build_q1(analytics)
-        render_quadrant("q1", "PERFORMANCE", chart, kpis, flag, "q1")
+        chart, kpis, flag = _build_performance(analytics)
+        render_quadrant("performance", "PERFORMANCE", chart, kpis, flag, "performance")
 
     with top_right:
-        chart, kpis, flag = _build_q2(analytics)
-        render_quadrant("q2", "RISK FACTORS", chart, kpis, flag, "q2")
+        chart, kpis, flag = _build_risk_factors(analytics)
+        render_quadrant("risk_factors", "RISK FACTORS", chart, kpis, flag, "risk_factors")
 
     with bot_left:
-        chart, kpis, flag = _build_q3(analytics)
-        render_quadrant("q3", "RISK OUTLOOK", chart, kpis, flag, "q3")
+        chart, kpis, flag = _build_risk_outlook(analytics)
+        render_quadrant("risk_outlook", "RISK OUTLOOK", chart, kpis, flag, "risk_outlook")
 
     with bot_right:
-        chart, kpis, flag = _build_q4(analytics)
-        render_quadrant("q4", "OPTIMIZATION", chart, kpis, flag, "q4")
+        chart, kpis, flag = _build_optimization(analytics)
+        render_quadrant("optimization", "OPTIMIZATION", chart, kpis, flag, "optimization")

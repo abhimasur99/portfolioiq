@@ -40,7 +40,6 @@ from assets.config import (
     SK_WEIGHT_MAX,
     SK_PORTFOLIO_LOADED,
     SK_ANALYTICS,
-    SK_COMPACT_MODE,
 )
 
 # ── Page config (must be first Streamlit call) ─────────────────────────────────
@@ -68,7 +67,6 @@ _defaults = {
     SK_WEIGHT_MAX:       DEFAULT_WEIGHT_MAX,
     SK_PORTFOLIO_LOADED: False,
     SK_ANALYTICS:        {},
-    SK_COMPACT_MODE:     False,
 }
 for key, value in _defaults.items():
     if key not in st.session_state:
@@ -92,10 +90,10 @@ selected_page = st.session_state["_nav_radio"]
 
 # ── Sidebar buttons (replaces radio for visual consistency) ────────────────────
 _DETAIL_ITEMS = [
-    ("q1", "Performance"),
-    ("q2", "Risk Factors"),
-    ("q3", "Risk Outlook"),
-    ("q4", "Optimization"),
+    ("performance",   "Performance"),
+    ("risk_factors",  "Risk Factors"),
+    ("risk_outlook",  "Risk Outlook"),
+    ("optimization",  "Optimization"),
 ]
 
 for _page in _NAV_ITEMS:

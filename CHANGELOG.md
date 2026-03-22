@@ -5,6 +5,37 @@ Format: [Semantic Version] — Date, with Added / Changed / Fixed / Removed sect
 
 ---
 
+## [0.31.0] — 2026-03-21
+
+### Added
+- `assets/style.css`: CSS aspect-ratio rule (`[data-testid="stPlotlyChart"] iframe { aspect-ratio: 16/9 }`) — chart height scales automatically with column width at all viewports.
+
+### Changed
+- `screens/dashboard.py`: Health bar layout hardcoded to two rows of 3 tiles — replaces previous single-row layout; consistent at all viewport widths.
+- `screens/dashboard.py`: Nav bar `← Dashboard` column ratio `[2,3,3]` → `[2,1,4]` to prevent label wrapping on the back button.
+- `screens/dashboard.py`: Dashboard KPI tiles fixed at 2 per quadrant (CAGR+Sharpe, Effective N+HHI, VaR 95%+GARCH Vol, Max Sharpe+Current Sharpe).
+
+### Removed
+- `assets/config.py`: `SK_KPI_MODE` session state constant.
+- `app.py`: Sidebar "Dashboard KPIs" radio widget and `SK_KPI_MODE` session state default.
+- `components/dashboard_quad.py`: KPI mode filtering logic; `SK_KPI_MODE` import; dead `msg` variable.
+- `screens/dashboard.py`: `"main"` flag from all KPI dicts; unused variable assignments (`mdd`, `vol`, `dr`, `beta`, `cvar95`, `hvol`, `ms_ret`, `mv_vol`); unused `COLOR_BLUE` import.
+
+---
+
+## [0.30.0] — 2026-03-21
+
+### Changed
+- `assets/style.css`: Responsive breakpoint `@media (max-width: 768px)` → `@media (max-width: 900px)`.
+- `components/dashboard_quad.py`: Flag badge now emoji-only at all widths — text removed from Python; fixes quadrant header height misalignment.
+
+### Removed
+- `assets/config.py`: `SK_COMPACT_MODE` session state constant.
+- `screens/settings.py`: "Display" section (compact layout checkbox) and `SK_COMPACT_MODE` session state write.
+- `components/dashboard_quad.py`: Dual-height chart constants (`_CHART_HEIGHT_NORMAL` / `_CHART_HEIGHT_COMPACT`); compact mode height logic.
+
+---
+
 ## [0.29.0] — 2026-03-21
 
 ### Added

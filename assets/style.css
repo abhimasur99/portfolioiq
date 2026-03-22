@@ -225,10 +225,18 @@ h4, h5, h6 {
 .signal-badge-red    { background-color: rgba(226, 75, 74, 0.15);   color: #e24b4a; border: 1px solid #e24b4a; }
 .signal-badge-blue   { background-color: rgba(0, 212, 255, 0.10);   color: #00d4ff; border: 1px solid #00d4ff; }
 
-/* ─── Responsive / Narrow-screen ─────────────────────────────────────────── */
-/* Targets Streamlit 1.32 DOM structure. Verify after any Streamlit upgrade.  */
+/* ─── Responsive chart sizing ───────────────────────────────────────────────── */
+/* Plotly charts: aspect-ratio scales height proportionally with column width.   */
+/* If aspect-ratio does not propagate into Plotly iframes, use the fallback      */
+/* fixed-height overrides inside the media query blocks below instead.           */
+[data-testid="stPlotlyChart"] iframe {
+    aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+}
 
-@media (max-width: 768px) {
+/* ─── Narrow screen — columns stack ─────────────────────────────────────────── */
+
+@media (max-width: 900px) {
 
     /* Stack all st.columns() groups vertically.
        Streamlit sets column widths via inline styles (e.g. style="flex: 0 0 50%").
@@ -268,4 +276,7 @@ h4, h5, h6 {
         padding: 4px 10px !important;
         font-size: 11px !important;
     }
+
+    /* Fallback chart height if aspect-ratio does not apply to iframes */
+    /* [data-testid="stPlotlyChart"] iframe { height: 160px !important; } */
 }

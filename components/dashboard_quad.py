@@ -6,8 +6,8 @@ Renders one of the four analytical quadrants on the main dashboard.
 Each quadrant has a consistent layout:
 - Quadrant header (title, subtitle).
 - Primary chart (compact height, use_container_width=True).
-- Row of 3-4 KPI metric tiles with inline ? tooltips (help= parameter).
-- Contextual flag (amber/red/green badge with one-line message).
+- Row of KPI metric tiles with inline ? tooltips (help= parameter).
+- Contextual flag (emoji badge).
 - One action button: "More Details".
 
 The More Details button sets a session state key to route to the correct
@@ -19,11 +19,10 @@ Implemented in: Session 10. Updated Stage B: ? tooltips, removed Explain Numbers
 import streamlit as st
 import plotly.graph_objects as go
 
-from assets.config import COLOR_GREEN, COLOR_AMBER, COLOR_RED, COLOR_TEXT_MUTED, SK_COMPACT_MODE
+from assets.config import COLOR_GREEN, COLOR_AMBER, COLOR_RED
 
 _SK_DETAILS = "_dashboard_details"
-_CHART_HEIGHT_NORMAL  = 260
-_CHART_HEIGHT_COMPACT = 180
+_CHART_HEIGHT = 260
 _FLAG_COLOR = {"green": COLOR_GREEN, "amber": COLOR_AMBER, "red": COLOR_RED}
 _FLAG_EMOJI = {"green": "🟢", "amber": "🟡", "red": "🔴"}
 
@@ -43,20 +42,14 @@ def render_quadrant(
         if flag:
             status = flag.get("status", "green")
             emoji = _FLAG_EMOJI.get(status, "⚪")
-            color = _FLAG_COLOR.get(status, COLOR_TEXT_MUTED)
-            msg = flag.get("message", "")
+            color = _FLAG_COLOR.get(status, COLOR_GREEN)
             st.markdown(
                 f'<div style="text-align:right;font-size:0.8rem;color:{color};">'
-                f'{emoji}&nbsp;{msg}</div>',
+                f'{emoji}</div>',
                 unsafe_allow_html=True,
             )
 
-    chart_h = (
-        _CHART_HEIGHT_COMPACT
-        if st.session_state.get(SK_COMPACT_MODE, False)
-        else _CHART_HEIGHT_NORMAL
-    )
-    chart_fig.update_layout(height=chart_h, margin=dict(l=40, r=20, t=30, b=30))
+    chart_fig.update_layout(height=_CHART_HEIGHT, margin=dict(l=40, r=20, t=30, b=30))
     st.plotly_chart(chart_fig, use_container_width=True, key=f"_chart_{quadrant_id}")
 
     if kpis:

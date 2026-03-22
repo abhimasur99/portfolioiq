@@ -142,7 +142,6 @@ SK_GARCH_REFIT     = "garch_refit"      # str, "each_load" | "daily"
 # UI state
 SK_PORTFOLIO_LOADED = "portfolio_loaded"  # bool
 SK_TOTAL_VALUE      = "total_value"       # float, total portfolio USD entered by user
-SK_COMPACT_MODE     = "compact_mode"      # bool, default False — compact chart heights
 
 # ─── Application Defaults ─────────────────────────────────────────────────────
 
