@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/abhimasur99/portfolioiq/actions/workflows/tests.yml/badge.svg)
 
-Institutional-grade equity portfolio analytics in a Streamlit web application.
+Rigorous quantitative portfolio analytics in a Streamlit web application.
 Enter your holdings, get a full four-layer quantitative analysis in plain language.
 
 **[Live Demo →](https://portfolioiq.streamlit.app)** _(link updated after deployment)_
@@ -20,7 +20,7 @@ PortfolioIQ analyses an equity portfolio across four analytical layers:
 | Predictive | Risk Outlook | What could happen? GARCH volatility, VaR, Monte Carlo, signal scenarios. |
 | Prescriptive | Optimization | What would a model-optimal allocation look like? |
 
-Everything is displayed in plain language with inline explanations — no finance background required to read the dashboard, but the methodology is rigorous enough to demonstrate FRM/CFA-level quantitative implementation.
+Everything is displayed in plain language with inline explanations — no finance background required to read the dashboard, but the methodology implements quantitative techniques consistent with professional risk management curricula: GARCH volatility modeling, Value at Risk, CVaR, and mean-variance optimization.
 
 ---
 
